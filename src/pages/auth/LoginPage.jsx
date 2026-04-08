@@ -9,33 +9,49 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import toast from 'react-hot-toast'
 
-const schema = z.object({
+const customerSchema = z.object({
+  phone:    z.string().min(9, 'Invalid phone number'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+})
+
+const adminSchema = z.object({
   email:    z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 })
 
 export default function LoginPage() {
   const [showPw, setShowPw] = useState(false)
+  const [loginType, setLoginType] = useState('customer') // 'customer' | 'admin'
   const { login } = useAuthStore()
   const navigate   = useNavigate()
   const location   = useLocation()
   const from = location.state?.from?.pathname || '/'
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+  const schema = loginType === 'admin' ? adminSchema : customerSchema
+  const defaults = loginType === 'admin'
+    ? { email: '', password: '' }
+    : { phone: '', password: '' }
+
+  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm({
     resolver: zodResolver(schema),
-    defaultValues: { email: 'admin@pharmachain.vn', password: 'password123' },
+    defaultValues: defaults,
   })
+
+  const switchType = (type) => {
+    setLoginType(type)
+    reset(type === 'admin' ? { email: '', password: '' } : { phone: '', password: '' })
+  }
 
   const onSubmit = async (data) => {
     try {
-      const result = await login(data)
-      toast.success(`Welcome back, ${result.user.name}!`)
-      const role = result.user.role
-      if (['admin', 'manager'].includes(role)) navigate('/admin', { replace: true })
-      else if (role === 'warehouse')           navigate('/warehouse', { replace: true })
-      else                                     navigate(from, { replace: true })
+      const credentials = loginType === 'admin'
+        ? { loginType: 'admin', email: data.email, password: data.password }
+        : { loginType: 'customer', phone: data.phone, password: data.password }
+      const result = await login(credentials)
+      toast.success(`Welcome back, ${result.user?.ho_ten || result.user?.name || 'User'}!`)
+      navigate(from, { replace: true })
     } catch (err) {
-      toast.error(err.message || 'Login failed')
+      toast.error(err.response?.data?.message || err.message || 'Login failed')
     }
   }
 
@@ -46,21 +62,48 @@ export default function LoginPage() {
         <p className="text-slate-500">Sign in to your PharmaChain account</p>
       </div>
 
-      {/* Demo credentials hint */}
-      <div className="mb-6 p-3 bg-brand-50 border border-brand-200 rounded-xl text-xs text-brand-700">
-        <strong>Demo accounts:</strong> admin@pharmachain.vn · warehouse@pharmachain.vn · customer@test.com<br />
-        Password for all: <strong>password123</strong>
+      {/* Login type toggle */}
+      <div className="mb-6 flex rounded-xl bg-slate-100 p-1">
+        <button
+          type="button"
+          onClick={() => switchType('customer')}
+          className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-all cursor-pointer ${
+            loginType === 'customer' ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          Customer
+        </button>
+        <button
+          type="button"
+          onClick={() => switchType('admin')}
+          className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-all cursor-pointer ${
+            loginType === 'admin' ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          Admin / Staff
+        </button>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <Input
-          label="Email Address"
-          type="email"
-          placeholder="you@example.com"
-          error={errors.email?.message}
-          required
-          {...register('email')}
-        />
+        {loginType === 'admin' ? (
+          <Input
+            label="Email Address"
+            type="email"
+            placeholder="admin@pharmachain.vn"
+            error={errors.email?.message}
+            required
+            {...register('email')}
+          />
+        ) : (
+          <Input
+            label="Phone Number"
+            type="tel"
+            placeholder="0909 123 456"
+            error={errors.phone?.message}
+            required
+            {...register('phone')}
+          />
+        )}
         <Input
           label="Password"
           type={showPw ? 'text' : 'password'}

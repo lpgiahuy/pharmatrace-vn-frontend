@@ -17,19 +17,31 @@ export const useAuthStore = create(
         set({ isLoading: true, error: null })
         try {
           const result = await authService.login(credentials)
-          localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, result.accessToken)
-          localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, result.refreshToken)
-          localStorage.setItem('pharma_token_expiry', result.expiresAt)
+
+          // Store tokens — backend may return `token` instead of `accessToken`
+          const accessToken = result.accessToken || result.token
+          const refreshToken = result.refreshToken || null
+          const expiresAt = result.expiresAt || (Date.now() + 3600000)
+
+          if (accessToken) {
+            localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken)
+          }
+          if (refreshToken) {
+            localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken)
+          }
+          localStorage.setItem('pharma_token_expiry', expiresAt)
+
           set({
             user: result.user,
-            accessToken: result.accessToken,
-            refreshToken: result.refreshToken,
+            accessToken,
+            refreshToken,
             isAuthenticated: true,
             isLoading: false,
           })
           return result
         } catch (err) {
-          set({ error: err.message || 'Login failed', isLoading: false })
+          const message = err.response?.data?.message || err.message || 'Login failed'
+          set({ error: message, isLoading: false })
           throw err
         }
       },
@@ -37,6 +49,10 @@ export const useAuthStore = create(
       logout: async () => {
         try { await authService.logout() } catch {}
         set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false })
+        localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
+        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
+        localStorage.removeItem('pharma_token_expiry')
+        window.location.reload()
       },
 
       updateUser: (updates) => set(state => ({ user: { ...state.user, ...updates } })),

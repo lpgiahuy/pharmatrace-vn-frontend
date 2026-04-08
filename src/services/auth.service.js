@@ -1,48 +1,57 @@
 import apiClient from './apiClient'
-import { env } from '@/config/env'
 import { STORAGE_KEYS } from '@/constants'
 
-const mockLogin = async (credentials) => {
-  await new Promise(r => setTimeout(r, 600))
-  const mockUsers = {
-    'admin@pharmachain.vn':     { role: 'admin',     name: 'Admin User' },
-    'warehouse@pharmachain.vn': { role: 'warehouse', name: 'Warehouse Staff' },
-    'customer@test.com':        { role: 'customer',  name: 'Test Customer' },
-  }
-  const user = mockUsers[credentials.email]
-  if (!user || credentials.password !== 'password123') {
-    throw new Error('Invalid email or password')
-  }
-  return {
-    accessToken:  'mock_access_token_' + user.role,
-    refreshToken: 'mock_refresh_token_' + user.role,
-    expiresAt:    Date.now() + 3600000,
-    user: { id: 1, email: credentials.email, ...user, avatar: null },
-  }
-}
-
 export const authService = {
+  /**
+   * Customer login — backend expects { so_dien_thoai, mat_khau }
+   * Admin login   — backend expects { email, password } at /admin/auth/login
+   */
   async login(credentials) {
-    if (env.USE_MOCK) return mockLogin(credentials)
-    const { data } = await apiClient.post('/auth/login', credentials)
-    return data
+    // Determine endpoint and payload based on login type
+    if (credentials.loginType === 'admin') {
+      const { data } = await apiClient.post('/admin/auth/login', {
+        email:    credentials.email,
+        password: credentials.password,
+      })
+      // Backend returns { success, data: { token, user } }
+      const result = data.data || data
+      return {
+        accessToken:  result.token,
+        refreshToken: result.refreshToken || null,
+        expiresAt:    result.expiresAt || (Date.now() + 3600000),
+        user:         { ...result.user, role: result.user?.role || 'admin' },
+      }
+    }
+
+    // Customer login
+    const { data } = await apiClient.post('/auth/login', {
+      so_dien_thoai: credentials.phone,
+      mat_khau:      credentials.password,
+    })
+    const result = data.data || data
+    return {
+      accessToken:  result.token,
+      refreshToken: result.refreshToken || null,
+      expiresAt:    result.expiresAt || (Date.now() + 3600000),
+      user:         { ...result.user, role: result.user?.role || 'customer' },
+    }
   },
 
   async register(payload) {
-    if (env.USE_MOCK) {
-      await new Promise(r => setTimeout(r, 600))
-      return { message: 'Registration successful. Please verify your email.' }
-    }
-    const { data } = await apiClient.post('/auth/register', payload)
-    return data
+    const { data } = await apiClient.post('/auth/register', {
+      ho_ten:        payload.name,
+      so_dien_thoai: payload.phone,
+      email:         payload.email || undefined,
+      mat_khau:      payload.password,
+      dia_chi:       payload.address || undefined,
+    })
+    return data.data || data
   },
 
   async logout() {
     try {
-      if (!env.USE_MOCK) {
-        const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
-        await apiClient.post('/auth/logout', { refreshToken })
-      }
+      const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
+      await apiClient.post('/auth/logout', { refreshToken })
     } finally {
       Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k))
       localStorage.removeItem('pharma_token_expiry')
@@ -50,34 +59,22 @@ export const authService = {
   },
 
   async getProfile() {
-    if (env.USE_MOCK) {
-      const stored = localStorage.getItem(STORAGE_KEYS.USER)
-      return stored ? JSON.parse(stored) : null
-    }
     const { data } = await apiClient.get('/auth/me')
-    return data
+    return data.data || data
   },
 
   async forgotPassword(email) {
-    if (env.USE_MOCK) {
-      await new Promise(r => setTimeout(r, 500))
-      return { message: 'Reset link sent to your email.' }
-    }
     const { data } = await apiClient.post('/auth/forgot-password', { email })
-    return data
+    return data.data || data
   },
 
   async resetPassword(payload) {
-    if (env.USE_MOCK) {
-      await new Promise(r => setTimeout(r, 500))
-      return { message: 'Password reset successfully.' }
-    }
     const { data } = await apiClient.post('/auth/reset-password', payload)
-    return data
+    return data.data || data
   },
 
   async changePassword(payload) {
     const { data } = await apiClient.put('/auth/change-password', payload)
-    return data
+    return data.data || data
   },
 }
