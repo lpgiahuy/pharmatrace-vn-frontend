@@ -18,12 +18,12 @@ export default function AdminProductsPage() {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await productService.getAll({ page, limit: 20, search })
-      setData(res.data); setTotal(res.total)
+      const res = await productService.getAll({ limit: 10000, search })
+      setData(res.data); setTotal(res.data.length)
     } finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchData() }, [page, search])
+  useEffect(() => { fetchData() }, [search])
 
   const handleDelete = async (id) => {
     try {

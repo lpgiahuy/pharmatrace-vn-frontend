@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { SlidersHorizontal, X } from 'lucide-react'
+import { SlidersHorizontal, X, AlertCircle, RefreshCcw } from 'lucide-react'
 import { productService } from '@/services/product.service'
 import { ProductCard, ProductCardSkeleton } from '@/components/ui/ProductCard'
 import { Pagination } from '@/components/ui/Pagination'
 import { SearchEmpty } from '@/components/ui/EmptyState'
 import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/Button'
 import { PRODUCT_CATEGORIES, SORT_OPTIONS } from '@/constants'
 import { useDebounce } from '@/hooks/useDebounce'
 
@@ -14,6 +15,7 @@ export default function ProductListPage() {
   const [products, setProducts]   = useState([])
   const [total, setTotal]         = useState(0)
   const [loading, setLoading]     = useState(true)
+  const [error, setError]         = useState(null)
   const [showFilters, setShowFilters] = useState(false)
 
   const page     = Number(searchParams.get('page'))     || 1
@@ -30,24 +32,33 @@ export default function ProductListPage() {
     setSearchParams(prev => {
       const next = new URLSearchParams(prev)
       if (val) next.set(key, val); else next.delete(key)
-      next.set('page', '1')
+      if (key !== 'page') next.set('page', '1')
       return next
     })
   }
 
   const fetchProducts = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
-      const res = await productService.getAll({ page, category, sort, search, minPrice, maxPrice, limit: 20 })
-      setProducts(res.data)
-      setTotal(res.total)
+      const res = await productService.getAll({ category, sort, search, minPrice, maxPrice, limit: 10000 })
+      const allData = Array.isArray(res?.data) ? res.data : []
+      setProducts(allData)
+      setTotal(allData.length)
+    } catch (err) {
+      console.error('[ProductListPage] Failed to fetch products:', err)
+      setError(err?.response?.data?.message || err?.message || 'Failed to load products')
+      setProducts([])
+      setTotal(0)
     } finally {
       setLoading(false)
     }
-  }, [page, category, sort, search, minPrice, maxPrice])
+  }, [category, sort, search, minPrice, maxPrice])
 
   useEffect(() => { fetchProducts() }, [fetchProducts])
   useEffect(() => { setParam('search', debouncedSearch) }, [debouncedSearch])
+
+  const displayedProducts = products.slice((page - 1) * 20, page * 20)
 
   const clearFilters = () => setSearchParams({})
 
@@ -126,9 +137,23 @@ export default function ProductListPage() {
             </div>
           </div>
 
+          {/* Error state */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-red-800">Failed to load products</p>
+                <p className="text-xs text-red-600 mt-0.5">{error}</p>
+              </div>
+              <Button size="xs" variant="secondary" onClick={fetchProducts} leftIcon={<RefreshCcw className="w-3.5 h-3.5" />}>
+                Retry
+              </Button>
+            </div>
+          )}
+
           {/* Results count */}
           <p className="text-sm text-slate-500 mb-4">
-            {loading ? 'Loading…' : `${total.toLocaleString()} products found`}
+            {loading ? 'Loading…' : `${(total ?? 0).toLocaleString()} products found`}
             {search && <span className="ml-1">for "<strong>{search}</strong>"</span>}
           </p>
 
@@ -139,7 +164,7 @@ export default function ProductListPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {loading
                 ? Array.from({ length: 12 }).map((_, i) => <ProductCardSkeleton key={i} />)
-                : products.map(p => <ProductCard key={p.id} product={p} />)
+                : displayedProducts.map(p => <ProductCard key={p?.id || p?._id} product={p} />)
               }
             </div>
           )}
