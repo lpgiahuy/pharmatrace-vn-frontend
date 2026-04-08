@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,7 +18,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight;
+    @apply font-display font-semibold tracking-tight;
   }
 
   a { @apply no-underline; }
@@ -80,6 +82,41 @@
 
   .divider {
     @apply border-t border-surface-border my-4;
+  }
+
+  /* Refined Prose styling for rich HTML content */
+  .prose {
+    @apply text-slate-600 leading-[1.7] text-[15px];
+  }
+  .prose h1, .prose h2, .prose h3 {
+    @apply font-display font-bold text-slate-900 mt-10 mb-5 first:mt-0 tracking-tight;
+  }
+  .prose h1 { @apply text-2xl; }
+  .prose h2 { @apply text-xl; }
+  .prose h3 { @apply text-lg; }
+  .prose p {
+    @apply mb-5;
+  }
+  .prose ul, .prose ol {
+    @apply pl-6 space-y-3 mb-6;
+  }
+  .prose ul {
+    @apply list-disc;
+  }
+  .prose ol {
+    @apply list-decimal;
+  }
+  .prose li {
+    @apply pl-2;
+  }
+  .prose strong {
+    @apply font-bold text-slate-800;
+  }
+  .prose em {
+    @apply text-slate-500 italic;
+  }
+  .prose div {
+    @apply mb-6;
   }
 }
 
