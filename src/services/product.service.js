@@ -1,85 +1,195 @@
 import apiClient from './apiClient'
-import { env } from '@/config/env'
-import { mockProducts } from './mockData'
 import { buildQueryString } from '@/utils'
+
+/**
+ * Normalize a product from the backend's Vietnamese field names
+ * to the English field names the UI components expect.
+ *
+ * Backend: { id, ten_thuoc, gia_ban, hinh_anh_url, mo_ta_ngan, la_thuoc_ke_don, don_vi_ban }
+ * UI:      { id, name, price, image, description, isPrescription, unit, brand, rating, ... }
+ */
+const normalizeProduct = (p) => {
+  if (!p) return p
+
+  let basePrice = Number(p.gia_ban) || p.price || 0
+  let baseUnit = p.don_vi_ban || p.unit || ''
+
+  if (p.quy_cach_dong_goi && Array.isArray(p.quy_cach_dong_goi) && p.quy_cach_dong_goi.length > 0) {
+    const baseVariant = p.quy_cach_dong_goi.find(q => q.la_don_vi_co_ban) || p.quy_cach_dong_goi[0]
+    basePrice = Number(baseVariant.gia_ban) || basePrice
+    baseUnit = baseVariant.ten_don_vi || baseUnit
+  }
+
+  let chi_tiet = p.chi_tiet_thuoc || {}
+  if (typeof chi_tiet === 'string') {
+    try { chi_tiet = JSON.parse(chi_tiet) } catch(e) {}
+  }
+
+  const specifications = { ...(p.specifications || {}) }
+  if (p.so_dang_ky) specifications['Registration'] = p.so_dang_ky
+  if (chi_tiet?.ingredients?.length) {
+    specifications['Ingredients'] = chi_tiet.ingredients.join(', ')
+  }
+
+  return {
+    // Keep all original fields so nothing breaks
+    ...p,
+    // Map Vietnamese → English for the UI
+    id:             p.id,
+    name:           p.ten_thuoc       || p.name        || 'Unknown Product',
+    price:          basePrice,
+    originalPrice:  p.gia_goc ? Number(p.gia_goc) : p.originalPrice || null,
+    image:          p.hinh_anh_url    || p.hinh_anh    || p.image || 'https://placehold.co/400x400/e6f2ff/0b7de8?text=No+Image',
+    description:    p.mo_ta_ngan      || p.mo_ta       || p.description || '',
+    isPrescription: p.la_thuoc_ke_don ?? p.isPrescription ?? false,
+    unit:           baseUnit,
+    brand:          p.thuong_hieu     || p.nha_san_xuat || p.brand || p.don_vi_ban || '',
+    category:       p.ten_danh_muc    || p.danh_muc    || p.category || '',
+    categoryId:     p.danh_muc_id     || p.categoryId  || null,
+    slug:           chi_tiet?.slug    || p.slug        || `product-${p.id}`,
+    inStock:        p.con_hang        ?? p.inStock     ?? true,
+    rating:         p.diem_danh_gia   ?? p.diemDanhGia ?? chi_tiet?.score ?? p.danh_gia_tb     ?? p.rating      ?? 0,
+    reviewCount:    p.so_danh_gia     ?? p.soDanhGia   ?? p.reviewCount  ?? 0,
+    soldCount:      p.so_luong_da_ban ?? p.soLuongDaBan ?? p.da_ban       ?? p.sold ?? 0,
+    batchNumber:    p.so_lo           || p.batchNumber  || 'N/A',
+    expiryDate:     p.ngay_het_han    || p.expiryDate   || null,
+    chi_tiet_thuoc: chi_tiet,
+    specifications,
+  }
+}
 
 export const productService = {
   async getAll(params = {}) {
-    if (env.USE_MOCK) {
-      await new Promise(r => setTimeout(r, 400))
-      let data = [...mockProducts]
-      if (params.category) data = data.filter(p => p.categoryId == params.category)
-      if (params.search)   data = data.filter(p => p.name.toLowerCase().includes(params.search.toLowerCase()))
-      if (params.sort === 'price_asc')  data.sort((a,b) => a.price - b.price)
-      if (params.sort === 'price_desc') data.sort((a,b) => b.price - a.price)
-      const page = params.page || 1, limit = params.limit || 20
-      return { data: data.slice((page-1)*limit, page*limit), total: data.length, page, limit }
+    try {
+      const page = Number(params.page) || 1
+      const limit = Number(params.limit) || 20
+
+      const { data } = await apiClient.get(`/products?${buildQueryString(params)}`)
+      const result = data.data || data
+
+      let items = []
+      let totalItemsCount = 0
+
+      // Extract array of items
+      if (result.items && Array.isArray(result.items)) {
+        items = result.items
+        totalItemsCount = result.total_items ?? result.total ?? undefined
+      } else if (Array.isArray(result)) {
+        items = result
+      } else {
+        const potentialItems = result.data || result.products || []
+        items = Array.isArray(potentialItems) ? potentialItems : []
+        totalItemsCount = result.total ?? result.count ?? undefined
+      }
+
+      // If backend doesn't return total_items, we use a fake total to allow next page
+      // e.g. if we get `limit` items back, there's likely a next page.
+      if (totalItemsCount === undefined) {
+        if (items.length === limit) {
+          totalItemsCount = page * limit + 1 // Add 1 to ensure Pagination shows "Next" button
+        } else {
+          totalItemsCount = (page - 1) * limit + items.length
+        }
+      }
+
+      return {
+        data: items.map(normalizeProduct),
+        total: totalItemsCount,
+        page: result.current_page || page,
+        limit: result.limit_per_page || limit,
+      }
+    } catch (error) {
+      console.error('[productService.getAll]', error.response?.data || error.message)
+      return { data: [], total: 0, page: params.page || 1, limit: params.limit || 20 }
     }
-    const { data } = await apiClient.get(`/products?${buildQueryString(params)}`)
-    return data
   },
 
   async getById(id) {
-    if (env.USE_MOCK) {
-      await new Promise(r => setTimeout(r, 300))
-      const product = mockProducts.find(p => p.id == id || p.slug == id)
-      if (!product) throw new Error('Product not found')
-      return product
-    }
     const { data } = await apiClient.get(`/products/${id}`)
-    return data
+    const result = data.data || data
+    return normalizeProduct(result)
   },
 
   async create(payload) {
-    const { data } = await apiClient.post('/products', payload)
-    return data
+    const { data } = await apiClient.post('/admin/products/add', payload)
+    return data.data || data
   },
 
   async update(id, payload) {
-    const { data } = await apiClient.put(`/products/${id}`, payload)
-    return data
+    const { data } = await apiClient.put(`/admin/products/${id}`, payload)
+    return data.data || data
   },
 
   async delete(id) {
-    const { data } = await apiClient.delete(`/products/${id}`)
-    return data
+    const { data } = await apiClient.delete(`/admin/products/${id}`)
+    return data.data || data
   },
 
   async uploadImage(id, formData) {
-    const { data } = await apiClient.post(`/products/${id}/images`, formData, {
+    const { data } = await apiClient.post(`/admin/products/${id}/images`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
-    return data
+    return data.data || data
   },
 
-  async getFeatured() {
-    if (env.USE_MOCK) {
-      await new Promise(r => setTimeout(r, 300))
-      return mockProducts.filter((_, i) => i < 8)
+  async getFeatured(limit = 8) {
+    try {
+      const { data } = await apiClient.get(`/products?${buildQueryString({ limit, sort: 'newest' })}`)
+      const result = data.data || data
+
+      // Backend returns { items: [...] }
+      if (result.items && Array.isArray(result.items)) {
+        return result.items.map(normalizeProduct)
+      }
+      if (Array.isArray(result)) {
+        return result.map(normalizeProduct)
+      }
+      const items = result.data || result.products || []
+      return (Array.isArray(items) ? items : []).map(normalizeProduct)
+    } catch (error) {
+      console.error('[productService.getFeatured]', error.response?.data || error.message)
+      return []
     }
-    const { data } = await apiClient.get('/products/featured')
-    return data
   },
 
   async getCategories() {
-    if (env.USE_MOCK) {
-      const { PRODUCT_CATEGORIES } = await import('@/constants')
-      return PRODUCT_CATEGORIES
+    try {
+      const { data } = await apiClient.get('/products/categories')
+      const result = data.data || data
+      return Array.isArray(result) ? result : (result.items || result.data || [])
+    } catch (error) {
+      console.error('[productService.getCategories]', error.response?.data || error.message)
+      return []
     }
-    const { data } = await apiClient.get('/categories')
-    return data
+  },
+
+  async createCategory(payload) {
+    const { data } = await apiClient.post('/admin/categories/add', payload)
+    return data.data || data
+  },
+
+  async updateCategory(id, payload) {
+    const { data } = await apiClient.put(`/admin/categories/${id}`, payload)
+    return data.data || data
+  },
+
+  async deleteCategory(id) {
+    const { data } = await apiClient.delete(`/admin/categories/${id}`)
+    return data.data || data
   },
 
   async getReviews(productId, params = {}) {
-    if (env.USE_MOCK) {
+    try {
+      const { data } = await apiClient.get(`/reviews/product/${productId}?${buildQueryString(params)}`)
+      return data.data || data
+    } catch (error) {
+      console.error('[productService.getReviews]', error.response?.data || error.message)
       return { data: [], total: 0 }
     }
-    const { data } = await apiClient.get(`/products/${productId}/reviews?${buildQueryString(params)}`)
-    return data
   },
 
   async addReview(productId, payload) {
-    const { data } = await apiClient.post(`/products/${productId}/reviews`, payload)
-    return data
+    const { data } = await apiClient.post('/reviews/add', { ...payload, productId })
+    return data.data || data
   },
 }

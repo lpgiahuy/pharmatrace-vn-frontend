@@ -15,7 +15,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState(null)
   const [qty, setQty]         = useState(1)
-  const [activeTab, setActiveTab] = useState('description')
+  const [activeTab, setActiveTab] = useState('mo_ta')
   const addItem = useCartStore(s => s.addItem)
 
   useEffect(() => {
@@ -66,7 +66,9 @@ export default function ProductDetailPage() {
                 <Star key={s} className={`w-4 h-4 ${s <= Math.round(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-slate-200'}`} />
               ))}
             </div>
-            <span className="text-sm text-slate-500">{product.rating} ({product.reviewCount} reviews)</span>
+            <span className="text-sm text-slate-500">{Number(product.rating).toFixed(1)} ({product.reviewCount} đánh giá)</span>
+            <span className="text-slate-300">|</span>
+            <span className="text-sm text-slate-500">Đã bán {product.soldCount}</span>
           </div>
 
           <div className="flex items-end gap-3 mb-6">
@@ -133,37 +135,62 @@ export default function ProductDetailPage() {
 
       {/* Tabs */}
       <div className="card overflow-hidden">
-        <div className="flex border-b border-surface-border">
-          {['description', 'specifications', 'reviews'].map(tab => (
+        <div className="flex border-b border-surface-border overflow-x-auto no-scrollbar">
+          {[
+            { id: 'mo_ta', label: 'Mô tả chung', keys: ['mo_ta'] },
+            { id: 'thanh_phan', label: 'Thành phần', keys: ['thanh_phan'] },
+            { id: 'chi_dinh', label: 'Công dụng & Chỉ định', keys: ['chi_dinh', 'cong_dung'] },
+            { id: 'cach_su_dung', label: 'Cách dùng', keys: ['cach_su_dung'] },
+            { id: 'than_trong', label: 'Lưu ý thận trọng', keys: ['than_trong', 'tac_dung_phu'] },
+            { id: 'thong_tin_san_xuat', label: 'Thông tin sản xuất', keys: ['thong_tin_san_xuat'] },
+            { id: 'reviews', label: 'Đánh giá', keys: [] },
+          ].filter(t => 
+            t.id === 'reviews' || 
+            (t.id === 'mo_ta' && (product.description || product.chi_tiet_thuoc?.mo_ta)) ||
+            (product.chi_tiet_thuoc && t.keys.some(k => product.chi_tiet_thuoc[k]))
+          ).map(tab => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-6 py-3 text-sm font-medium capitalize transition-colors ${activeTab === tab ? 'text-brand-600 border-b-2 border-brand-500' : 'text-slate-500 hover:text-slate-700'}`}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-6 py-3 text-sm font-medium whitespace-nowrap transition-colors ${activeTab === tab.id ? 'text-brand-600 border-b-2 border-brand-500' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              {tab}
+              {tab.label}
             </button>
           ))}
         </div>
         <div className="p-6">
-          {activeTab === 'description' && (
-            <div className="prose prose-sm max-w-none text-slate-600">
-              <p>{product.description}</p>
+          {activeTab === 'mo_ta' && (
+            <div className="prose prose-sm max-w-none">
+              {product.chi_tiet_thuoc?.mo_ta ? (
+                <div dangerouslySetInnerHTML={{ __html: product.chi_tiet_thuoc.mo_ta }} />
+              ) : (
+                <p>{product.description}</p>
+              )}
             </div>
           )}
-          {activeTab === 'specifications' && (
-            <table className="w-full text-sm">
-              <tbody className="divide-y divide-surface-border">
-                {Object.entries(product.specifications || {}).map(([k, v]) => (
-                  <tr key={k}>
-                    <td className="py-2 pr-4 font-medium text-slate-700 capitalize w-40">{k}</td>
-                    <td className="py-2 text-slate-600">{v}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          
+          {activeTab === 'thanh_phan' && product.chi_tiet_thuoc?.thanh_phan && (
+            <div className="prose prose-sm max-w-none text-slate-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: product.chi_tiet_thuoc.thanh_phan }} />
           )}
+
+          {activeTab === 'chi_dinh' && (product.chi_tiet_thuoc?.chi_dinh || product.chi_tiet_thuoc?.cong_dung) && (
+            <div className="prose prose-sm max-w-none text-slate-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: product.chi_tiet_thuoc.chi_dinh || product.chi_tiet_thuoc.cong_dung }} />
+          )}
+
+          {activeTab === 'cach_su_dung' && product.chi_tiet_thuoc?.cach_su_dung && (
+            <div className="prose prose-sm max-w-none text-slate-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: product.chi_tiet_thuoc.cach_su_dung }} />
+          )}
+
+          {activeTab === 'than_trong' && (product.chi_tiet_thuoc?.than_trong || product.chi_tiet_thuoc?.tac_dung_phu) && (
+            <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: product.chi_tiet_thuoc.than_trong || product.chi_tiet_thuoc.tac_dung_phu }} />
+          )}
+
+          {activeTab === 'thong_tin_san_xuat' && product.chi_tiet_thuoc?.thong_tin_san_xuat && (
+            <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: product.chi_tiet_thuoc.thong_tin_san_xuat }} />
+          )}
+
           {activeTab === 'reviews' && (
-            <div className="text-slate-500 text-sm">No reviews yet. Be the first to review this product.</div>
+            <div className="text-slate-500 text-sm">Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này.</div>
           )}
         </div>
       </div>

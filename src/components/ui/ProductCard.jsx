@@ -40,10 +40,13 @@ export const ProductCard = ({ product, className }) => {
           </h3>
         </Link>
 
-        <div className="flex items-center gap-1 mt-auto">
-          <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-          <span className="text-xs text-slate-600">{product.rating}</span>
-          <span className="text-xs text-slate-400">({product.reviewCount})</span>
+        <div className="flex items-center gap-2 mt-auto">
+          <div className="flex items-center gap-1">
+            <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+            <span className="text-xs text-slate-600">{Number(product.rating).toFixed(1)}</span>
+          </div>
+          <span className="text-slate-300 text-[10px]">|</span>
+          <span className="text-[10px] text-slate-500">Đã bán {product.soldCount}</span>
         </div>
 
         <div className="flex items-end justify-between gap-2 mt-1">
