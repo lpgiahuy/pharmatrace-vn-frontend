@@ -33,10 +33,12 @@ apiClient.interceptors.request.use(
       isRefreshing = true
       try {
         const { data } = await axios.post(`${env.API_BASE_URL}/auth/refresh`, { refreshToken })
-        localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, data.accessToken)
-        localStorage.setItem('pharma_token_expiry', data.expiresAt)
-        config.headers.Authorization = `Bearer ${data.accessToken}`
-        processQueue(null, data.accessToken)
+        const newToken = data.data?.token || data.accessToken || data.token
+        const newExpiry = data.data?.expiresAt || data.expiresAt || (Date.now() + 3600000)
+        localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, newToken)
+        localStorage.setItem('pharma_token_expiry', newExpiry)
+        config.headers.Authorization = `Bearer ${newToken}`
+        processQueue(null, newToken)
       } catch (err) {
         processQueue(err, null)
         _logout()
@@ -57,6 +59,14 @@ apiClient.interceptors.response.use(
   async (error) => {
     const original = error.config
 
+    // ── Debug logging for all API errors ──────────────────────────────────
+    if (error.response) {
+      console.error(
+        `[API ${error.response.status}] ${original?.method?.toUpperCase()} ${original?.url}`,
+        error.response.data
+      )
+    }
+
     if (error.response?.status === 401 && !original._retry) {
       const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
       if (!refreshToken) { _logout(); return Promise.reject(error) }
@@ -75,10 +85,12 @@ apiClient.interceptors.response.use(
 
       try {
         const { data } = await axios.post(`${env.API_BASE_URL}/auth/refresh`, { refreshToken })
-        localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, data.accessToken)
-        localStorage.setItem('pharma_token_expiry', data.expiresAt)
-        processQueue(null, data.accessToken)
-        original.headers.Authorization = `Bearer ${data.accessToken}`
+        const newToken = data.data?.token || data.accessToken || data.token
+        const newExpiry = data.data?.expiresAt || data.expiresAt || (Date.now() + 3600000)
+        localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, newToken)
+        localStorage.setItem('pharma_token_expiry', newExpiry)
+        processQueue(null, newToken)
+        original.headers.Authorization = `Bearer ${newToken}`
         return apiClient(original)
       } catch (err) {
         processQueue(err, null)

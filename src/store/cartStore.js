@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import toast from 'react-hot-toast'
-import { formatCurrency } from '@/utils'
+import apiClient from '@/services/apiClient'
+import { STORAGE_KEYS } from '@/constants'
 
 export const useCartStore = create(
   persist(
@@ -10,7 +11,14 @@ export const useCartStore = create(
       voucher: null,
       shippingFee: 30000,
 
+      // ── Local cart mutations ──────────────────────────────────────────────
       addItem: (product, quantity = 1) => {
+        const accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+        if (!accessToken) {
+          toast.error('Vui lòng đăng nhập để thêm vào giỏ hàng')
+          return
+        }
+
         const { items } = get()
         const existing = items.find(i => i.id === product.id)
         if (existing) {
@@ -18,16 +26,27 @@ export const useCartStore = create(
         } else {
           set({ items: [...items, { ...product, quantity }] })
         }
-        toast.success(`${product.name} added to cart`)
+        toast.success(`${product.name} đã được thêm vào giỏ hàng`)
+
+        // Sync to server for authenticated users (fire-and-forget)
+        if (accessToken) {
+          apiClient.post('/cart/add', { 
+            duoc_pham_id: product.id, 
+            so_luong: quantity,
+            quy_cach_id: product.unitId || 1 // Fallback since frontend doesn't strictly track packaging variants yet
+          }).catch(() => {})
+        }
       },
 
       removeItem: (productId) => {
         set(state => ({ items: state.items.filter(i => i.id !== productId) }))
+        // NOTE: /cart/remove endpoint does not exist on Backend currently.
       },
 
       updateQuantity: (productId, quantity) => {
         if (quantity < 1) { get().removeItem(productId); return }
         set(state => ({ items: state.items.map(i => i.id === productId ? { ...i, quantity } : i) }))
+        // NOTE: /cart/update endpoint does not exist on Backend currently.
       },
 
       clearCart: () => set({ items: [], voucher: null }),
@@ -39,6 +58,22 @@ export const useCartStore = create(
 
       removeVoucher: () => set({ voucher: null }),
 
+      // ── Server cart sync ──────────────────────────────────────────────────
+      fetchCart: async () => {
+        const accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+        if (!accessToken) return
+        try {
+          const { data } = await apiClient.get('/cart')
+          const serverItems = data.data || data
+          if (Array.isArray(serverItems)) {
+            set({ items: serverItems })
+          }
+        } catch {
+          // Silently fall back to local cart
+        }
+      },
+
+      // ── Computed getters ──────────────────────────────────────────────────
       getSubtotal: () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
 
       getDiscount: () => {
