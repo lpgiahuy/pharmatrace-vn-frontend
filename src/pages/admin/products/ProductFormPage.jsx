@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Form, Input, InputNumber, Select, Switch, Button as AButton, Card, Upload } from 'antd'
 import { UploadOutlined, SaveOutlined } from '@ant-design/icons'
 import { productService } from '@/services/product.service'
-import { PRODUCT_CATEGORIES } from '@/constants'
+import { useCategoryStore } from '@/store/categoryStore'
 import toast from 'react-hot-toast'
 
 const { TextArea } = Input
@@ -15,13 +15,15 @@ export default function ProductFormPage() {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [initLoading, setInitLoading] = useState(isEdit)
+  const { categories, fetchCategories } = useCategoryStore()
 
   useEffect(() => {
+    fetchCategories()
     if (!isEdit) return
     productService.getById(id)
       .then(p => form.setFieldsValue(p))
       .finally(() => setInitLoading(false))
-  }, [id])
+  }, [id, fetchCategories])
 
   const onFinish = async (values) => {
     setLoading(true)
@@ -54,7 +56,7 @@ export default function ProductFormPage() {
             </Form.Item>
             <Form.Item label="Category" name="categoryId" rules={[{ required: true }]}>
               <Select placeholder="Select category">
-                {PRODUCT_CATEGORIES.map(c => <Select.Option key={c.id} value={c.id}>{c.icon} {c.name}</Select.Option>)}
+                {categories.map(c => <Select.Option key={c.id} value={c.id}>{c.icon} {c.name}</Select.Option>)}
               </Select>
             </Form.Item>
             <Form.Item label="Price (VND)" name="price" rules={[{ required: true }]}>

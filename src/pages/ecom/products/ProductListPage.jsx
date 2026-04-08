@@ -7,7 +7,8 @@ import { Pagination } from '@/components/ui/Pagination'
 import { SearchEmpty } from '@/components/ui/EmptyState'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
-import { PRODUCT_CATEGORIES, SORT_OPTIONS } from '@/constants'
+import { SORT_OPTIONS } from '@/constants'
+import { useCategoryStore } from '@/store/categoryStore'
 import { useDebounce } from '@/hooks/useDebounce'
 
 export default function ProductListPage() {
@@ -17,6 +18,8 @@ export default function ProductListPage() {
   const [loading, setLoading]     = useState(true)
   const [error, setError]         = useState(null)
   const [showFilters, setShowFilters] = useState(false)
+  const [showAllCategories, setShowAllCategories] = useState(false)
+  const categories = useCategoryStore(s => s.categories)
 
   const page     = Number(searchParams.get('page'))     || 1
   const category = searchParams.get('category')         || ''
@@ -87,7 +90,7 @@ export default function ProductListPage() {
                 >
                   All Categories
                 </button>
-                {PRODUCT_CATEGORIES.map(cat => (
+                {categories.slice(0, showAllCategories ? undefined : 6).map(cat => (
                   <button
                     key={cat.id}
                     onClick={() => setParam('category', cat.id)}
@@ -96,6 +99,15 @@ export default function ProductListPage() {
                     {cat.icon} {cat.name}
                   </button>
                 ))}
+                {categories.length > 6 && (
+                  <button
+                    onClick={() => setShowAllCategories(!showAllCategories)}
+                    className="w-full text-left px-3 py-1.5 rounded-lg text-sm transition-colors text-brand-600 hover:bg-brand-50 font-medium mt-1 flex items-center justify-between"
+                  >
+                    {showAllCategories ? 'Thu gọn' : `Xem thêm (${categories.length - 6})`}
+                    <span className="text-[10px]">{showAllCategories ? '▲' : '▼'}</span>
+                  </button>
+                )}
               </div>
             </div>
 

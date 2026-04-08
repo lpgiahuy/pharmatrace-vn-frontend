@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Shield, Truck, HeartPulse, Award, ShieldCheck } from 'lucide-react'
 import { productService } from '@/services/product.service'
 import { ProductCard, ProductCardSkeleton } from '@/components/ui/ProductCard'
-import { PRODUCT_CATEGORIES } from '@/constants'
+import { useCategoryStore } from '@/store/categoryStore'
 
 const BANNERS = [
   { id: 1, title: 'Trusted Medicines, Delivered Fast', subtitle: 'Shop 10,000+ certified pharmaceutical products', cta: 'Shop Now', to: '/products', bg: 'from-brand-600 to-brand-800', img: '💊' },
@@ -22,10 +22,15 @@ export default function HomePage() {
   const [featured, setFeatured] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeBanner, setActiveBanner] = useState(0)
+  const categories = useCategoryStore(s => s.categories)
 
   useEffect(() => {
     productService.getFeatured()
-      .then(setFeatured)
+      .then(res => setFeatured(Array.isArray(res) ? res : []))
+      .catch(err => {
+        console.error('[HomePage] Failed to load featured products:', err)
+        setFeatured([])
+      })
       .finally(() => setLoading(false))
   }, [])
 
@@ -88,7 +93,7 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-          {PRODUCT_CATEGORIES.map(cat => (
+          {categories.slice(0, 8).map(cat => (
             <Link
               key={cat.id}
               to={`/products?category=${cat.id}`}
@@ -112,7 +117,7 @@ export default function HomePage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
           {loading
             ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
-            : featured.slice(0, 8).map(p => <ProductCard key={p.id} product={p} />)
+            : featured.slice(0, 8).map(p => <ProductCard key={p?.id || p?._id} product={p} />)
           }
         </div>
       </section>

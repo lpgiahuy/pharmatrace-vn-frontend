@@ -1,11 +1,11 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Search, ShoppingCart, User, Menu, X, Pill, Heart, Bell } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { useAuthStore } from '@/store/authStore'
 import { useUIStore } from '@/store/uiStore'
 import { Avatar } from '@/components/ui/Avatar'
-import { PRODUCT_CATEGORIES } from '@/constants'
+import { useCategoryStore } from '@/store/categoryStore'
 
 export const Header = () => {
   const [searchVal, setSearchVal] = useState('')
@@ -13,6 +13,10 @@ export const Header = () => {
   const itemCount = useCartStore(s => s.getItemCount())
   const { user, isAuthenticated, logout } = useAuthStore()
   const navigate = useNavigate()
+  const location = useLocation()
+  const { categories, fetchCategories } = useCategoryStore()
+
+  useEffect(() => { fetchCategories() }, [fetchCategories])
 
   const handleSearch = (e) => {
     e.preventDefault()
@@ -95,7 +99,7 @@ export const Header = () => {
                 </div>
               </div>
             ) : (
-              <Link to="/login" className="btn-secondary text-sm px-3 py-1.5">Sign In</Link>
+              <Link to="/login" state={{ from: location }} className="btn-secondary text-sm px-3 py-1.5">Sign In</Link>
             )}
 
             <button
@@ -118,7 +122,7 @@ export const Header = () => {
 
         {/* Category nav */}
         <nav className="hidden md:flex items-center gap-1 pb-2 overflow-x-auto no-scrollbar">
-          {PRODUCT_CATEGORIES.slice(0, 7).map(cat => (
+              {categories.slice(0, 7).map(cat => (
             <Link
               key={cat.id}
               to={`/products?category=${cat.id}`}
@@ -152,7 +156,7 @@ export const Header = () => {
               </div>
             </form>
             <div className="grid grid-cols-2 gap-1">
-              {PRODUCT_CATEGORIES.map(cat => (
+              {categories.map(cat => (
                 <Link
                   key={cat.id}
                   to={`/products?category=${cat.id}`}
