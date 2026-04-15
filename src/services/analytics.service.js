@@ -16,12 +16,21 @@ const normalizeVoucher = (v) => {
 
 const normalizeBlog = (b) => {
   if (!b) return b
+  const idValue = b.id || b.ma_bai_viet
   return {
     ...b,
-    id: b.ma_bai_viet || b.id,
+    id: idValue,
+    slug: idValue?.toString(), // Use ID as slug if no slug field exists
     title: b.tieu_de || b.title || '',
-    views: b.luot_xem || b.views || 0,
+    image: b.anh_bia || b.image || '',
+    coverImage: b.anh_bia || b.image || '',
+    content: b.noi_dung || b.content || '',
+    date: b.ngay_dang || b.date || '',
+    publishedAt: b.ngay_dang || b.date || '',
+    author: b.nguoi_dang || b.author || '',
     category: b.chuyen_muc || b.category || '',
+    views: Number(b.luot_xem) || 0,
+    excerpt: b.excerpt || (b.noi_dung ? b.noi_dung.substring(0, 150).replace(/<[^>]*>/g, '') + '...' : '')
   }
 }
 
@@ -85,12 +94,22 @@ export const blogService = {
   },
 
   async create(payload) {
-    const { data } = await apiClient.post('/admin/blogs/add', payload)
+    const { data } = await apiClient.post('/admin/blogs/add', {
+      tieu_de: payload.title,
+      anh_bia: payload.coverImage || payload.image,
+      noi_dung: payload.content || payload.excerpt || '',
+      chuyen_muc: payload.category
+    })
     return data.data || data
   },
 
   async update(id, payload) {
-    const { data } = await apiClient.put(`/admin/blogs/${id}`, payload)
+    const { data } = await apiClient.put(`/admin/blogs/${id}`, {
+      tieu_de: payload.title,
+      anh_bia: payload.coverImage || payload.image,
+      noi_dung: payload.content || payload.excerpt || '',
+      chuyen_muc: payload.category
+    })
     return data.data || data
   },
 
@@ -103,7 +122,7 @@ export const blogService = {
 // ─── Analytics Service ─────────────────────────────────────────────────────────
 export const analyticsService = {
   async getDashboardStats() {
-    const { data } = await apiClient.get('/dashboard/')
+    const { data } = await apiClient.get('/dashboard/stats')
     return data.data || data
   },
 

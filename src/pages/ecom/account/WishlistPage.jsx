@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { userService } from '@/services/user.service'
+import { wishlistService } from '@/services/wishlist.service'
 import { ProductCard, ProductCardSkeleton } from '@/components/ui/ProductCard'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Heart } from 'lucide-react'
@@ -7,7 +7,9 @@ import { Heart } from 'lucide-react'
 export default function WishlistPage() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
-  useEffect(() => { userService.getWishlist().then(setProducts).finally(() => setLoading(false)) }, [])
+  useEffect(() => { 
+    wishlistService.getMine().then(setProducts).finally(() => setLoading(false)) 
+  }, [])
   return (
     <div className="page-container py-8 animate-fade-in">
       <h1 className="section-title mb-6">My Wishlist</h1>

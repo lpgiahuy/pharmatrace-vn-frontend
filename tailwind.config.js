@@ -30,8 +30,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Outfit', 'system-ui', 'sans-serif'],
+        sans: ['Be Vietnam Pro', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['Be Vietnam Pro', 'Outfit', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       boxShadow: {

@@ -19,7 +19,7 @@ export default function BlogListPage() {
       {loading ? <InlineLoader /> : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {blogs.map(blog => (
-            <Link key={blog.id} to={`/blog/${blog.slug}`} className="card overflow-hidden hover:shadow-elevated transition-shadow group">
+            <Link key={blog.id} to={`/blog/${blog.id}`} className="card overflow-hidden hover:shadow-elevated transition-shadow group">
               <div className="aspect-video bg-brand-50 overflow-hidden">
                 <img src={blog.coverImage} alt={blog.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               </div>

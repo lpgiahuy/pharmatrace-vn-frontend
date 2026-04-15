@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useCartStore } from '@/store/cartStore'
@@ -19,27 +19,32 @@ const PAYMENT_OPTIONS = [
 
 export default function CheckoutPage() {
   const navigate = useNavigate()
-  const { items, getTotal, getSubtotal, getDiscount, shippingFee, voucher, clearCart } = useCartStore()
+  const { items, getTotal, getSubtotal, getDiscount, shippingFee, voucher, clearCart, fetchCart } = useCartStore()
   const { user } = useAuthStore()
   const [payMethod, setPayMethod] = useState('cod')
+
+  useEffect(() => {
+    fetchCart()
+  }, [])
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     defaultValues: { name: user?.name || '', phone: user?.phone || '', address: '', district: '', city: 'Ho Chi Minh City', note: '' },
   })
 
   const onSubmit = async (formData) => {
     try {
+      const fullAddress = `${formData.address}, ${formData.district}, ${formData.city}`
       const order = await orderService.create({
-        items: items.map(i => ({ productId: i.id, quantity: i.quantity, price: i.price })),
-        shippingAddress: formData,
-        paymentMethod: payMethod,
+        dia_chi_giao_hang: fullAddress,
+        paymentMethod: payMethod.toUpperCase(),
+        note: formData.note,
         voucherId: voucher?.id,
-        total: getTotal(),
       })
       clearCart()
-      toast.success('Order placed successfully!')
+      toast.success('Đặt hàng thành công!')
       navigate(`/order-success/${order.id}`)
-    } catch {
-      toast.error('Failed to place order. Please try again.')
+    } catch (err) {
+      console.error(err)
+      toast.error('Đặt hàng thất bại. Vui lòng thử lại.')
     }
   }
 

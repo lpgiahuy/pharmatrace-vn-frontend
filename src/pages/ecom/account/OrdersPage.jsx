@@ -23,7 +23,7 @@ export default function OrdersPage() {
               <Link key={order.id} to={`/account/orders/${order.id}`} className="card p-4 flex items-center justify-between hover:shadow-elevated transition-shadow gap-4">
                 <div>
                   <p className="font-semibold text-slate-800 font-mono">{order.id}</p>
-                  <p className="text-sm text-slate-500">{formatDate(order.date)} · {order.items} item(s)</p>
+                  <p className="text-sm text-slate-500">{formatDate(order.date)} · {order.itemsCount} item(s)</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <OrderStatusBadge status={order.status} />

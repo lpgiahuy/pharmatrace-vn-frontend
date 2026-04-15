@@ -40,7 +40,7 @@ export const Footer = () => (
         <div>
           <h4 className="text-white font-semibold mb-4">Customer Support</h4>
           <ul className="space-y-2 text-sm">
-            {['My Orders', 'Returns & RMA', 'Prescription Upload', 'Health Blog', 'FAQ', '🛡️ Verify Product'].map(item => (
+            {['My Orders', 'Returns & RMA', 'Prescription Upload', 'Health Blog', 'FAQ', ' Verify Product'].map(item => (
               <li key={item}><Link to={item.includes('Verify') ? '/trace' : '#'} className="hover:text-white transition-colors">{item}</Link></li>
             ))}
           </ul>
@@ -52,11 +52,11 @@ export const Footer = () => (
           <ul className="space-y-3 text-sm">
             <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-brand-400 shrink-0" /> 1800-6001 (Free)</li>
             <li className="flex items-center gap-2"><Mail className="w-4 h-4 text-brand-400 shrink-0" /> support@pharmachain.vn</li>
-            <li className="flex items-start gap-2"><MapPin className="w-4 h-4 text-brand-400 shrink-0 mt-0.5" /> 123 Nguyen Hue, District 1, HCMC</li>
+            <li className="flex items-start gap-2"><MapPin className="w-4 h-4 text-brand-400 shrink-0 mt-0.5" /> My address, HCMC</li>
           </ul>
           <div className="mt-4">
-            <p className="text-xs text-slate-500">Licensed by Ministry of Health Vietnam</p>
-            <p className="text-xs text-slate-500">GMP & GDP Certified</p>
+            {/* <p className="text-xs text-slate-500">Licensed by Ministry of Health Vietnam</p>
+            <p className="text-xs text-slate-500">GMP & GDP Certified</p> */}
           </div>
         </div>
       </div>

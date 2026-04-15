@@ -8,33 +8,30 @@ export const ROLES = {
 }
 
 export const ORDER_STATUS = {
-  PENDING:    'pending',
-  CONFIRMED:  'confirmed',
-  PROCESSING: 'processing',
-  SHIPPED:    'shipped',
-  DELIVERED:  'delivered',
-  CANCELLED:  'cancelled',
-  REFUNDED:   'refunded',
+  ChoXacNhan: 'ChoXacNhan',
+  DaĐongGoi:  'DaĐongGoi',
+  DangGiao:   'DangGiao',
+  HoanThanh:  'HoanThanh',
+  DaHuy:      'DaHuy',
+  TraHang:    'TraHang',
 }
 
 export const ORDER_STATUS_LABELS = {
-  pending:    'Pending',
-  confirmed:  'Confirmed',
-  processing: 'Processing',
-  shipped:    'Shipped',
-  delivered:  'Delivered',
-  cancelled:  'Cancelled',
-  refunded:   'Refunded',
+  ChoXacNhan: 'Chờ xác nhận',
+  DaĐongGoi:  'Đã đóng gói',
+  DangGiao:   'Đang giao',
+  HoanThanh:  'Hoàn thành',
+  DaHuy:      'Đã hủy',
+  TraHang:    'Trả hàng',
 }
 
 export const ORDER_STATUS_COLORS = {
-  pending:    'orange',
-  confirmed:  'blue',
-  processing: 'purple',
-  shipped:    'cyan',
-  delivered:  'green',
-  cancelled:  'red',
-  refunded:   'gray',
+  ChoXacNhan: 'orange',
+  DaĐongGoi:  'purple',
+  DangGiao:   'blue',
+  HoanThanh:  'green',
+  DaHuy:      'red',
+  TraHang:    'gray',
 }
 
 export const PAYMENT_METHODS = {

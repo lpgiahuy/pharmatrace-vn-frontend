@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -130,3 +130,39 @@
 .ant-layout { background: transparent !important; }
 .ant-menu-item-selected { background-color: #e6f2ff !important; }
 .ant-table-thead > tr > th { background: #f8fafc !important; font-weight: 600; }
+
+/* Responsive images for Rich Text Editor and Blog Content */
+.ql-editor img, .prose img {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 8px;
+  display: block;
+  margin: 1.5rem auto;
+}
+
+.ql-container {
+  font-size: 16px !important;
+  font-family: inherit !important;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.ql-toolbar {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  background: #f8fafc;
+}
+
+.ql-editor {
+  min-height: 250px;
+  height: auto !important;
+  overflow-y: visible !important;
+}
+
+.blog-editor-item .ant-form-item-control-input-content {
+  overflow: visible !important;
+}
+
+.blog-editor-item {
+  margin-bottom: 2rem !important;
+}

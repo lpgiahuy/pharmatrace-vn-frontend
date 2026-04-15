@@ -28,7 +28,13 @@ export default function OrderDetailPage() {
         <div className="space-y-3">
           {(order.items || []).map((item, i) => (
             <div key={i} className="flex items-center gap-3 text-sm">
-              <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-lg shrink-0">💊</div>
+              <div className="w-12 h-12 rounded-lg bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 border border-slate-100">
+                {item.image ? (
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-lg">💊</span>
+                )}
+              </div>
               <div className="flex-1"><p className="font-medium text-slate-800">{item.name}</p><p className="text-slate-500">x{item.quantity}</p></div>
               <span className="font-semibold text-slate-700">{formatCurrency(item.price * item.quantity)}</span>
             </div>

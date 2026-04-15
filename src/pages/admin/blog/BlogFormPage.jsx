@@ -4,8 +4,21 @@ import { Form, Input, Button as AButton, Card, Select } from 'antd'
 import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import { blogService } from '@/services/analytics.service'
 import toast from 'react-hot-toast'
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
 
 const { TextArea } = Input
+
+const quillModules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, 4, false] }],
+    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+    ['link', 'image', 'video'],
+    ['clean']
+  ]
+}
 
 export default function BlogFormPage() {
   const { id } = useParams()
@@ -63,8 +76,12 @@ export default function BlogFormPage() {
           <Form.Item label="Excerpt" name="excerpt">
             <TextArea rows={2} placeholder="Short summary…" />
           </Form.Item>
-          <Form.Item label="Content (HTML)" name="content">
-            <TextArea rows={10} placeholder="<p>Full article content…</p>" />
+          <Form.Item label="Content" name="content" rules={[{ required: true }]} className="blog-editor-item">
+            <ReactQuill 
+              theme="snow" 
+              modules={quillModules} 
+              placeholder="Write your medical article here..." 
+            />
           </Form.Item>
         </Card>
         <div className="flex gap-3">

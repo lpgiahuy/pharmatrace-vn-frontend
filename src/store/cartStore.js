@@ -38,15 +38,32 @@ export const useCartStore = create(
         }
       },
 
-      removeItem: (productId) => {
-        set(state => ({ items: state.items.filter(i => i.id !== productId) }))
-        // NOTE: /cart/remove endpoint does not exist on Backend currently.
+      removeItem: (productId, unitId) => {
+        set(state => ({ items: state.items.filter(i => i.id !== productId || (unitId && i.unitId !== unitId)) }))
+        
+        const accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+        if (accessToken) {
+          apiClient.delete(`/cart/remove/${productId}`, { params: { quy_cach_id: unitId } }).catch(() => {})
+        }
       },
 
-      updateQuantity: (productId, quantity) => {
-        if (quantity < 1) { get().removeItem(productId); return }
-        set(state => ({ items: state.items.map(i => i.id === productId ? { ...i, quantity } : i) }))
-        // NOTE: /cart/update endpoint does not exist on Backend currently.
+      updateQuantity: (productId, quantity, unitId) => {
+        if (quantity < 1) { get().removeItem(productId, unitId); return }
+        
+        set(state => ({ 
+          items: state.items.map(i => 
+            (i.id === productId && (!unitId || i.unitId === unitId)) ? { ...i, quantity } : i
+          ) 
+        }))
+
+        const accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+        if (accessToken) {
+          apiClient.put('/cart/update', { 
+            duoc_pham_id: productId, 
+            so_luong: quantity,
+            quy_cach_id: unitId || 1 
+          }).catch(() => {})
+        }
       },
 
       clearCart: () => set({ items: [], voucher: null }),

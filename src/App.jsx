@@ -13,7 +13,13 @@ export default function App() {
     if (!isAuthenticated) return
     authService.getProfile()
       .then(user => { if (user) updateUser(user) })
-      .catch(() => logout())
+      .catch((err) => {
+        // Only force logout if the token is definitely invalid (401)
+        // If the endpoint is missing (404), keep using the state from localStorage
+        if (err.response?.status === 401) {
+          logout()
+        }
+      })
   }, [])
 
   return (

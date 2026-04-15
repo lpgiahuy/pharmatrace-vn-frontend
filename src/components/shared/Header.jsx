@@ -74,13 +74,13 @@ export const Header = () => {
                 </button>
                 <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-modal border border-surface-border py-1 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-150 z-50">
                   <Link to="/account" className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                    <User className="w-4 h-4" /> My Account
+                    <User className="w-4 h-4" /> Tài khoản của tôi
                   </Link>
                   <Link to="/account/orders" className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                    📦 My Orders
+                    📦 Đơn hàng của tôi
                   </Link>
                   <Link to="/account/wishlist" className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                    <Heart className="w-4 h-4" /> Wishlist
+                    <Heart className="w-4 h-4" /> Danh sách yêu thích
                   </Link>
                   {(user?.role === 'admin' || user?.role === 'manager') && (
                     <Link to="/admin" className="flex items-center gap-2 px-4 py-2 text-sm text-brand-600 hover:bg-brand-50">

@@ -1,14 +1,50 @@
+import { useState } from 'react'
 import { Heart, ShoppingCart, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { cn, formatCurrency } from '@/utils'
 import { useCartStore } from '@/store/cartStore'
+import { useAuthStore } from '@/store/authStore'
+import { wishlistService } from '@/services/wishlist.service'
 import { Button } from './Button'
 
 export const ProductCard = ({ product, className }) => {
   const addItem = useCartStore(s => s.addItem)
+  const user = useAuthStore(s => s.user)
+  
+  const [isFavorite, setIsFavorite] = useState(product.isFavorited)
+  const [isToggling, setIsToggling] = useState(false)
+
   const discount = product.originalPrice
     ? Math.round((1 - product.price / product.originalPrice) * 100)
     : 0
+
+  const handleToggleFavorite = async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!user) {
+      // Could show a login modal here, but for now just console log
+      console.warn('Please login to add to favorites')
+      return
+    }
+
+    if (isToggling) return
+    
+    setIsToggling(true)
+    // Optimistic UI update
+    const previousState = isFavorite
+    setIsFavorite(!previousState)
+    
+    try {
+      const result = await wishlistService.toggle(product.id)
+      setIsFavorite(result.isFavorited)
+    } catch (error) {
+      console.error('Failed to toggle favorite', error)
+      setIsFavorite(previousState) // revert on error
+    } finally {
+      setIsToggling(false)
+    }
+  }
 
   return (
     <div className={cn('card group flex flex-col overflow-hidden hover:shadow-elevated transition-shadow duration-200', className)}>
@@ -20,15 +56,27 @@ export const ProductCard = ({ product, className }) => {
           loading="lazy"
         />
         {discount > 0 && (
-          <span className="absolute top-2 left-2 badge-red text-xs font-bold px-2 py-0.5 rounded-full bg-red-500 text-white">
+          <span className="absolute top-2 left-2 badge-red text-xs font-bold px-2 py-0.5 rounded-full bg-red-500 text-white z-10">
             -{discount}%
           </span>
+        )}
+        {!product.inStock && (
+          <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-20">
+            <span className="bg-slate-800 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Hết hàng</span>
+          </div>
         )}
         {product.isPrescription && (
           <span className="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded bg-orange-500 text-white">Rx</span>
         )}
-        <button className="absolute bottom-2 right-2 p-1.5 rounded-full bg-white shadow-card text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all duration-200">
-          <Heart className="w-4 h-4" />
+        <button 
+          onClick={handleToggleFavorite}
+          disabled={isToggling}
+          className={cn(
+            "absolute bottom-2 right-2 p-1.5 rounded-full bg-white shadow-card transition-all duration-200 hover:scale-110 active:scale-95 disabled:opacity-50",
+            isFavorite ? "text-red-500 opacity-100" : "text-slate-400 group-hover:opacity-100 opacity-0"
+          )}
+        >
+          <Heart className={cn("w-4 h-4 transition-colors", isFavorite && "fill-current")} />
         </button>
       </Link>
 

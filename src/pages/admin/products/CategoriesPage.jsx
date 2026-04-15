@@ -53,9 +53,8 @@ export default function CategoriesPage() {
   }
 
   const cols = [
-    { title: 'Icon',  dataIndex: 'icon', key: 'icon', width: 60 },
+    { title: 'ID',    dataIndex: 'id',   key: 'id', width: 60, render: v => <span className="font-mono text-xs">{v}</span> },
     { title: 'Name',  dataIndex: 'name', key: 'name' },
-    { title: 'Slug',  dataIndex: 'slug', key: 'slug', render: v => <span className="font-mono text-xs">{v}</span> },
     { title: 'Actions', key: 'actions', width: 120, render: (_, row) => (
       <Space>
         <AButton size="small" icon={<EditOutlined />} onClick={() => openModal(row)} />
@@ -77,9 +76,7 @@ export default function CategoriesPage() {
       </div>
       <Modal title={editing ? 'Edit Category' : 'New Category'} open={open} onCancel={() => setOpen(false)} onOk={() => form.submit()} okText="Save" confirmLoading={saving}>
         <Form form={form} layout="vertical" onFinish={handleSave} className="mt-4">
-          <Form.Item label="Icon (emoji or URL)" name="icon" rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item label="Name" name="name" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item label="Slug" name="slug" rules={[{ required: true }]}><Input /></Form.Item>
         </Form>
       </Modal>
     </div>

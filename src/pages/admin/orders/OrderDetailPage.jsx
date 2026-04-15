@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Select, Button as AButton, Descriptions, Timeline, Tag } from 'antd'
-import { ArrowLeftOutlined } from '@ant-design/icons'
+import { Select, Button as AButton, Descriptions, Timeline, Tag, Modal, Form, Typography } from 'antd'
+import { ArrowLeftOutlined, ScanOutlined, FullscreenExitOutlined } from '@ant-design/icons'
 import { orderService } from '@/services/order.service'
 import { OrderStatusBadge } from '@/components/ui/Badge'
 import { PageLoader } from '@/components/ui/Spinner'
@@ -15,9 +15,12 @@ export default function AdminOrderDetailPage() {
   const [order, setOrder] = useState(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
+  const [fulfillOpen, setFulfillOpen] = useState(false)
+  const [fulfilling, setFulfilling] = useState(false)
+  const [fulfillForm] = Form.useForm()
 
   useEffect(() => {
-    orderService.getById(id).then(setOrder).finally(() => setLoading(false))
+    orderService.getAdminById(id).then(setOrder).finally(() => setLoading(false))
   }, [id])
 
   const handleStatusUpdate = async (newStatus) => {
@@ -30,14 +33,34 @@ export default function AdminOrderDetailPage() {
     finally { setUpdating(false) }
   }
 
+  const handleFulfill = async (vals) => {
+    if (!vals.uids || vals.uids.length === 0) return toast.error('Please scan at least one UID')
+    setFulfilling(true)
+    try {
+      await orderService.fulfillOrder(id, vals.uids)
+      toast.success('Order fulfilled successfully!')
+      setFulfillOpen(false)
+      // Refetch or update status locally
+      setOrder(o => ({ ...o, status: ORDER_STATUS.DangGiao || 'DangGiao' }))
+    } catch (e) { toast.error(e.response?.data?.message || 'Failed to fulfill order') }
+    finally { setFulfilling(false) }
+  }
+
   if (loading) return <PageLoader />
   if (!order)  return <div className="text-slate-500 py-16 text-center">Order not found.</div>
 
   return (
     <div className="max-w-3xl space-y-5 animate-fade-in">
-      <div className="flex items-center gap-3">
-        <AButton icon={<ArrowLeftOutlined />} onClick={() => navigate('/admin/orders')}>Back</AButton>
-        <h1 className="text-xl font-display font-bold text-slate-900">Order <span className="font-mono">{order.id}</span></h1>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <AButton icon={<ArrowLeftOutlined />} onClick={() => navigate('/admin/orders')}>Back</AButton>
+          <h1 className="text-xl font-display font-bold text-slate-900">Order <span className="font-mono">{order.id}</span></h1>
+        </div>
+        {(order.status === 'ChoXacNhan' || order.status === 'DaĐongGoi') && (
+          <AButton type="primary" icon={<ScanOutlined />} onClick={() => setFulfillOpen(true)}>
+            Fulfill & Pack Order
+          </AButton>
+        )}
       </div>
 
       <div className="card p-5">
@@ -73,13 +96,39 @@ export default function AdminOrderDetailPage() {
               <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-xl shrink-0">💊</div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm text-slate-800">{item.name}</p>
-                <p className="text-xs text-slate-400">Qty: {item.quantity}</p>
+                <p className="text-xs text-slate-400">Quantity: {item.quantity}</p>
               </div>
               <span className="font-semibold text-sm">{formatCurrency(item.price * item.quantity)}</span>
             </div>
           ))}
         </div>
       </div>
+
+      <Modal 
+        title={<><ScanOutlined className="mr-2 text-brand-600"/> Fulfill Order #{order.id}</>}
+        open={fulfillOpen} 
+        onCancel={() => setFulfillOpen(false)}
+        onOk={() => fulfillForm.submit()}
+        confirmLoading={fulfilling}
+        okText="Confirm & Pack"
+        destroyOnClose
+      >
+        <div className="mb-4 p-3 bg-blue-50 text-blue-800 rounded-lg text-sm">
+          Scan the QR/Barcodes of the medicine boxes being packed for this order. 
+          Use a barcode scanner or type and press Enter for each UID.
+        </div>
+        <Form form={fulfillForm} layout="vertical" onFinish={handleFulfill}>
+          <Form.Item label="Scanned Product UIDs" name="uids" rules={[{ required: true, message: 'Please provide at least one UID' }]}>
+            <Select 
+              mode="tags" 
+              style={{ width: '100%' }} 
+              placeholder="Scan barcodes here..." 
+              open={false} // Prevents dropdown from opening
+              tokenSeparators={[',', ' ']} // Allows pasting multiple
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   )
 }

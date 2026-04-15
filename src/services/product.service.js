@@ -47,10 +47,12 @@ const normalizeProduct = (p) => {
     category:       p.ten_danh_muc    || p.danh_muc    || p.category || '',
     categoryId:     p.danh_muc_id     || p.categoryId  || null,
     slug:           chi_tiet?.slug    || p.slug        || `product-${p.id}`,
-    inStock:        p.con_hang        ?? p.inStock     ?? true,
+    inStock:        (p.total_stock !== undefined) ? Number(p.total_stock) > 0 : (p.con_hang ?? p.inStock ?? true),
+    totalStock:     p.total_stock !== undefined ? Number(p.total_stock) : null,
     rating:         p.diem_danh_gia   ?? p.diemDanhGia ?? chi_tiet?.score ?? p.danh_gia_tb     ?? p.rating      ?? 0,
     reviewCount:    p.so_danh_gia     ?? p.soDanhGia   ?? p.reviewCount  ?? 0,
     soldCount:      p.so_luong_da_ban ?? p.soLuongDaBan ?? p.da_ban       ?? p.sold ?? 0,
+    isFavorited:    p.is_favorited    ?? false,
     batchNumber:    p.so_lo           || p.batchNumber  || 'N/A',
     expiryDate:     p.ngay_het_han    || p.expiryDate   || null,
     chi_tiet_thuoc: chi_tiet,
@@ -156,7 +158,12 @@ export const productService = {
     try {
       const { data } = await apiClient.get('/products/categories')
       const result = data.data || data
-      return Array.isArray(result) ? result : (result.items || result.data || [])
+      const cats = Array.isArray(result) ? result : (result.items || result.data || [])
+      return cats.map(c => ({
+        ...c,
+        id: c.id,
+        name: c.ten_danh_muc || c.name,
+      }))
     } catch (error) {
       console.error('[productService.getCategories]', error.response?.data || error.message)
       return []
@@ -192,4 +199,5 @@ export const productService = {
     const { data } = await apiClient.post('/reviews/add', { ...payload, productId })
     return data.data || data
   },
+  normalizeProduct
 }

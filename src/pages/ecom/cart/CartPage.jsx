@@ -55,13 +55,13 @@ export default function CartPage() {
                 <p className="text-xs text-slate-400 mt-0.5">{item.brand}</p>
                 <div className="flex items-center justify-between mt-3 flex-wrap gap-2">
                   <div className="flex items-center gap-2 border border-surface-border rounded-lg overflow-hidden">
-                    <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="p-2 hover:bg-slate-100"><Minus className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => updateQuantity(item.id, item.quantity - 1, item.unitId)} className="p-2 hover:bg-slate-100"><Minus className="w-3.5 h-3.5" /></button>
                     <span className="w-10 text-center text-sm font-semibold">{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="p-2 hover:bg-slate-100"><Plus className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => updateQuantity(item.id, item.quantity + 1, item.unitId)} className="p-2 hover:bg-slate-100"><Plus className="w-3.5 h-3.5" /></button>
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="font-bold text-brand-600">{formatCurrency(item.price * item.quantity)}</span>
-                    <button onClick={() => removeItem(item.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                    <button onClick={() => removeItem(item.id, item.unitId)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>

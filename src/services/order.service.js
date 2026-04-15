@@ -3,14 +3,26 @@ import { buildQueryString } from '@/utils'
 
 const normalizeOrder = (o) => {
   if (!o) return o
+  const sourceItems = o.items || o.chi_tiet_thuoc || o.chi_tiet_don_hang || []
+  const items = Array.isArray(sourceItems) ? sourceItems.map(i => ({
+    ...i,
+    name: i.ten_thuoc || i.name,
+    price: Number(i.don_gia) || Number(i.price),
+    quantity: i.so_luong || i.quantity,
+    image: i.hinh_anh_url || i.image,
+    unit: i.ten_don_vi || i.unit
+  })) : []
+
   return {
     ...o,
     id: o.ma_don_hang || o.id,
-    date: o.ngay_dat || o.createdAt || o.date,
-    status: o.trang_thai || o.status,
-    total: o.tong_tien || o.total || 0,
-    items: o.tong_so_luong || o.items?.length || o.items || 0,
+    date: o.ngay_dat || o.ngay_dat_hang || o.createdAt || o.date,
+    status: o.trang_thai_don || o.trang_thai || o.status,
+    total: Number(o.tong_tien) || o.total || 0,
+    itemsCount: o.items_count || items.length || 0,
+    items: items,
     address: o.dia_chi_giao_hang || o.dia_chi || o.address || '',
+    paymentMethod: o.phuong_thuc_thanh_toan || o.paymentMethod || 'COD'
   }
 }
 
@@ -18,11 +30,11 @@ const normalizeRma = (r) => {
   if (!r) return r
   return {
     ...r,
-    id: r.ma_phieu || r.id,
-    orderId: r.ma_don_hang || r.orderId,
-    reason: r.ly_do || r.reason || '',
-    date: r.ngay_tao || r.createdAt || r.date,
-    status: r.trang_thai || r.status,
+    id: r.id || r.ma_phieu,
+    orderId: r.don_hang_id || r.ma_don_hang || r.orderId,
+    reason: r.ly_do_tra || r.ly_do || r.reason || '',
+    date: r.ngay_yeu_cau || r.ngay_tao || r.createdAt || r.date,
+    status: r.trang_thai_duyet || r.trang_thai || r.status,
   }
 }
 
@@ -47,24 +59,35 @@ export const orderService = {
     return normalizeList(data, normalizeOrder)
   },
 
-  async getById(id) {
+  async getAdminById(id) {
     const { data } = await apiClient.get(`/admin/orders/${id}`)
+    const result = data.data || data
+    return normalizeOrder(result)
+  },
+
+  async getById(id) {
+    const { data } = await apiClient.get(`/orders/${id}`)
     const result = data.data || data
     return normalizeOrder(result)
   },
 
   async create(payload) {
     const { data } = await apiClient.post('/orders/checkout', {
-      dia_chi_giao_hang:      payload.address || payload.dia_chi_giao_hang,
-      phuong_thuc_thanh_toan: payload.paymentMethod || payload.phuong_thuc_thanh_toan,
-      ghi_chu:                payload.note || payload.ghi_chu || '',
-      voucher_id:             payload.voucherId || payload.voucher_id || undefined,
+      dia_chi_giao_hang:      payload.dia_chi_giao_hang || payload.address,
+      phuong_thuc_thanh_toan: payload.phuong_thuc_thanh_toan || payload.paymentMethod,
+      ghi_chu:                payload.ghi_chu || payload.note || '',
+      voucher_id:             payload.voucher_id || payload.voucherId || undefined,
     })
     return data.data || data
   },
 
   async updateStatus(id, status) {
     const { data } = await apiClient.patch(`/admin/orders/${id}/status`, { status })
+    return data.data || data
+  },
+
+  async fulfillOrder(id, uids) {
+    const { data } = await apiClient.post(`/admin/orders/${id}/fulfill`, { mang_uid: uids })
     return data.data || data
   },
 
@@ -97,7 +120,7 @@ export const rmaService = {
   },
 
   async updateStatus(id, status) {
-    const { data } = await apiClient.put(`/admin/rma/${id}/status`, { status })
+    const { data } = await apiClient.put(`/admin/rma/${id}/status`, { trang_thai_duyet: status })
     return data.data || data
   },
 }
