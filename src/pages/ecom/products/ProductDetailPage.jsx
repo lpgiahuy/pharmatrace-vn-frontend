@@ -75,6 +75,7 @@ export default function ProductDetailPage() {
   const [error, setError]     = useState(null)
   const [qty, setQty]         = useState(1)
   const [activeTab, setActiveTab] = useState('thanh_phan')
+  const [selectedVariant, setSelectedVariant] = useState(null)   // { id, label, price }
   
   const addItem = useCartStore(s => s.addItem)
   const user = useAuthStore(s => s.user)
@@ -87,6 +88,11 @@ export default function ProductDetailPage() {
       .then(res => {
         setProduct(res)
         setIsFavorite(res.isFavorited)
+        // Auto-select the base variant or the first one
+        if (res.packagingVariants?.length > 0) {
+          const base = res.packagingVariants.find(v => v.isBase) || res.packagingVariants[0]
+          setSelectedVariant(base)
+        }
       })
       .catch(setError)
       .finally(() => setLoading(false))
@@ -117,7 +123,14 @@ export default function ProductDetailPage() {
   if (loading) return <PageLoader />
   if (error || !product) return <div className="page-container py-16"><ErrorState error={error} /></div>
 
-  const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : 0
+  // Active price: use selected variant price if available, otherwise product base price
+  const activePrice = selectedVariant?.price ?? product.price
+  const discount = product.originalPrice ? Math.round((1 - activePrice / product.originalPrice) * 100) : 0
+
+  // Build cart item using the active variant
+  const cartItem = selectedVariant
+    ? { ...product, price: selectedVariant.price, unit: selectedVariant.label, variantId: selectedVariant.id }
+    : product
 
   return (
     <div className="page-container py-8 animate-fade-in">
@@ -159,10 +172,45 @@ export default function ProductDetailPage() {
             <span className="text-sm text-slate-500">Đã bán {product.soldCount}</span>
           </div>
 
+          {/* Unit / Packaging Switcher */}
+          {product.packagingVariants?.length > 1 && (
+            <div className="mb-6">
+              <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Quy cách đóng gói</p>
+              <div className="flex flex-wrap gap-2">
+                {product.packagingVariants.map(v => (
+                  <button
+                    key={v.id ?? v.label}
+                    onClick={() => setSelectedVariant(v)}
+                    className={cn(
+                      'flex flex-col items-start px-4 py-2.5 rounded-xl border-2 transition-all duration-200 text-left min-w-[90px]',
+                      selectedVariant?.label === v.label
+                        ? 'border-brand-500 bg-brand-50 shadow-md shadow-brand-100'
+                        : 'border-slate-200 bg-white hover:border-brand-200 hover:bg-slate-50'
+                    )}
+                  >
+                    <span className={cn(
+                      'text-xs font-black uppercase tracking-tight leading-none',
+                      selectedVariant?.label === v.label ? 'text-brand-600' : 'text-slate-500'
+                    )}>{v.label}</span>
+                    <span className={cn(
+                      'text-sm font-black mt-1 leading-none',
+                      selectedVariant?.label === v.label ? 'text-brand-700' : 'text-slate-700'
+                    )}>{formatCurrency(v.price)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex items-end gap-3 mb-6">
-            <span className="text-3xl font-display font-bold text-brand-600">{formatCurrency(product.price)}</span>
-            {product.originalPrice && (
+            <span className="text-3xl font-display font-bold text-brand-600">{formatCurrency(activePrice)}</span>
+            {product.originalPrice && activePrice < product.originalPrice && (
               <span className="text-lg text-slate-400 line-through">{formatCurrency(product.originalPrice)}</span>
+            )}
+            {selectedVariant && (
+              <span className="ml-1 px-2.5 py-1 bg-brand-50 text-brand-600 text-xs font-black rounded-lg uppercase tracking-wide">
+                / {selectedVariant.label}
+              </span>
             )}
           </div>
 
@@ -191,11 +239,11 @@ export default function ProductDetailPage() {
             <Button
               size="lg"
               disabled={!product.inStock}
-              onClick={() => addItem(product, qty)}
+              onClick={() => addItem(cartItem, qty)}
               leftIcon={<ShoppingCart className="w-5 h-5" />}
               className="flex-1"
             >
-              {product.inStock ? 'Add to Cart' : 'Hết hàng'}
+              {product.inStock ? 'Thêm vào giỏ' : 'Hết hàng'}
             </Button>
             <button 
               onClick={handleToggleFavorite}

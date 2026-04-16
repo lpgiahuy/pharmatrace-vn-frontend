@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Shield, Truck, HeartPulse, Award, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Shield, Truck, HeartPulse, Award, ShieldCheck, Eye } from 'lucide-react'
 import { productService } from '@/services/product.service'
+import { blogService } from '@/services/analytics.service'
 import { ProductCard, ProductCardSkeleton } from '@/components/ui/ProductCard'
 import { useCategoryStore } from '@/store/categoryStore'
 
 const BANNERS = [
-  { id: 1, title: 'Trusted Medicines, Delivered Fast', subtitle: 'Shop 10,000+ certified pharmaceutical products', cta: 'Shop Now', to: '/products', bg: 'from-brand-600 to-brand-800', img: '💊' },
-  { id: 2, title: 'Vitamins & Supplements Sale', subtitle: 'Up to 30% off premium health supplements', cta: 'View Deals', to: '/products?category=1', bg: 'from-teal-500 to-teal-700', img: '🌿' },
-  { id: 3, title: 'Free Delivery Over 500K', subtitle: 'Fast, secure pharmaceutical delivery', cta: 'Start Shopping', to: '/products', bg: 'from-purple-600 to-purple-800', img: '🚚' },
+  { id: 1, title: 'Trusted Medicines, Delivered Fast', subtitle: 'Shop 10,000+ certified pharmaceutical products', cta: 'Shop Now', to: '/products', bg: 'from-brand-600 to-brand-800', img: '💊', image: 'https://wallpapercave.com/wp/wp15262378.jpg' },
+  { id: 2, title: 'Vitamins & Supplements Sale', subtitle: 'Up to 30% off premium health supplements', cta: 'View Deals', to: '/products?category=1', bg: 'from-teal-500 to-teal-700', img: '🌿', image: 'https://wallpapercave.com/wp/wp14241262.jpg' },
+  { id: 3, title: 'Free Delivery Over 500K', subtitle: 'Fast, secure pharmaceutical delivery', cta: 'Start Shopping', to: '/products', bg: 'from-purple-600 to-purple-800', img: '🚚', image: 'https://wallpapercave.com/wp/wp13751014.jpg' },
 ]
 
 const TRUST_ITEMS = [
@@ -20,18 +21,35 @@ const TRUST_ITEMS = [
 
 export default function HomePage() {
   const [featured, setFeatured] = useState([])
+  const [blogs, setBlogs] = useState([])
   const [loading, setLoading] = useState(true)
+  const [blogLoading, setBlogLoading] = useState(true)
   const [activeBanner, setActiveBanner] = useState(0)
   const categories = useCategoryStore(s => s.categories)
 
   useEffect(() => {
-    productService.getFeatured()
-      .then(res => setFeatured(Array.isArray(res) ? res : []))
+    productService.getFeatured(20)
+      .then(res => {
+        const all = Array.isArray(res) ? res : []
+        // Deduplicate by product ID - keep the cheapest variant for each drug
+        const seen = new Map()
+        all.forEach(p => {
+          const existing = seen.get(p.id)
+          if (!existing || p.price < existing.price) seen.set(p.id, p)
+        })
+        setFeatured(Array.from(seen.values()))
+      })
       .catch(err => {
         console.error('[HomePage] Failed to load featured products:', err)
         setFeatured([])
       })
       .finally(() => setLoading(false))
+
+    setBlogLoading(true)
+    blogService.getAll({ limit: 3 })
+      .then(res => setBlogs(res.data || []))
+      .catch(err => console.error('[HomePage] Failed to load blogs:', err))
+      .finally(() => setBlogLoading(false))
   }, [])
 
   useEffect(() => {
@@ -42,41 +60,63 @@ export default function HomePage() {
   const banner = BANNERS[activeBanner]
 
   return (
-    <div className="animate-fade-in">
-      {/* Hero Banner */}
-      <section className={`bg-gradient-to-r ${banner.bg} text-white transition-all duration-500`}>
-        <div className="page-container py-14 flex items-center justify-between gap-8">
-          <div className="max-w-lg">
-            <h1 className="text-4xl md:text-5xl font-display font-bold mb-4 leading-tight">{banner.title}</h1>
-            <p className="text-lg text-white/80 mb-8">{banner.subtitle}</p>
-            <Link to={banner.to} className="inline-flex items-center gap-2 bg-white text-brand-700 font-semibold px-6 py-3 rounded-xl hover:bg-brand-50 transition-colors shadow-lg">
-              {banner.cta} <ArrowRight className="w-4 h-4" />
-            </Link>
+    <div className="animate-fade-in bg-surface pb-12">
+      {/* Hero Section */}
+      <section className="bg-white pb-6 pt-4">
+        <div className="page-container">
+          <div>
+            {/* Main Slider */}
+            <div className="relative group overflow-hidden rounded-2xl shadow-sm h-[200px] md:h-[320px] lg:h-[380px]">
+              <div 
+                className={`w-full h-full ${!BANNERS[activeBanner].image ? `bg-gradient-to-br ${BANNERS[activeBanner].bg}` : 'bg-cover bg-center'} transition-all duration-700 flex items-center px-12 text-white relative`}
+                style={BANNERS[activeBanner].image ? { backgroundImage: `url(${BANNERS[activeBanner].image})` } : {}}
+              >
+                {/* Overlay for image clarity */}
+                {BANNERS[activeBanner].image && <div className="absolute inset-0 bg-brand-900/40 backdrop-blur-[2px]" />}
+                
+                <div className="max-w-md relative z-10">
+                  <span className="inline-block bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest mb-4">Ưu đãi độc quyền</span>
+                  <h2 className="text-3xl md:text-5xl font-black mb-4 leading-tight">{BANNERS[activeBanner].title}</h2>
+                  <p className="text-lg text-white/90 mb-8 hidden md:block line-clamp-2">{BANNERS[activeBanner].subtitle}</p>
+                  <Link to={BANNERS[activeBanner].to} className="inline-flex items-center gap-2 bg-white text-brand-600 font-black px-8 py-3.5 rounded-xl hover:bg-brand-50 transition-all shadow-xl shadow-brand-900/10">
+                    MUA NGAY <ArrowRight className="w-5 h-5" />
+                  </Link>
+                </div>
+                {!BANNERS[activeBanner].image && (
+                  <div className="hidden md:flex flex-1 justify-center text-[180px] opacity-20 transform translate-x-12 rotate-12">
+                    {BANNERS[activeBanner].img}
+                  </div>
+                )}
+              </div>
+              
+              {/* Slider Dots */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5">
+                {BANNERS.map((_, i) => (
+                  <button 
+                    key={i} 
+                    onClick={() => setActiveBanner(i)}
+                    className={`h-2 rounded-full transition-all duration-300 ${i === activeBanner ? 'bg-white w-8' : 'bg-white/40 w-2 hover:bg-white/60'}`}
+                  />
+                ))}
+              </div>
+            </div>
+
           </div>
-          <div className="hidden md:block text-[120px] opacity-20 select-none">{banner.img}</div>
-        </div>
-        {/* Dots */}
-        <div className="flex justify-center gap-2 pb-4">
-          {BANNERS.map((_, i) => (
-            <button key={i} onClick={() => setActiveBanner(i)}
-              className={`w-2 h-2 rounded-full transition-all ${i === activeBanner ? 'bg-white w-6' : 'bg-white/40'}`}
-            />
-          ))}
         </div>
       </section>
 
-      {/* Trust bar */}
+      {/* Support Bar */}
       <section className="bg-white border-b border-surface-border">
-        <div className="page-container py-4">
+        <div className="page-container py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {TRUST_ITEMS.map(({ icon: Icon, label, desc }) => (
-              <div key={label} className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center shrink-0">
-                  <Icon className="w-5 h-5 text-brand-500" />
+            {TRUST_ITEMS.map(({ icon: Icon, label, desc }, i) => (
+              <div key={label} className="flex items-center gap-4 px-4">
+                <div className="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center shrink-0">
+                  <Icon className="w-6 h-6 text-brand-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-800">{label}</p>
-                  <p className="text-xs text-slate-500 hidden sm:block">{desc}</p>
+                  <p className="text-[13px] font-black text-slate-800 uppercase tracking-tight">{label}</p>
+                  <p className="text-xs text-slate-500 leading-tight mt-0.5">{desc}</p>
                 </div>
               </div>
             ))}
@@ -84,80 +124,183 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="page-container py-10">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="section-title">Shop by Category</h2>
-          <Link to="/products" className="text-sm text-brand-600 hover:underline font-medium flex items-center gap-1">
-            View all <ArrowRight className="w-4 h-4" />
-          </Link>
+      {/* Categories Grid */}
+      <section className="page-container py-12">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="section-title">Danh mục nổi bật</h2>
+          <Link to="/products" className="text-sm text-brand-500 font-black hover:underline">XEM TẤT CẢ</Link>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-y-8 gap-x-4">
           {categories.slice(0, 8).map(cat => (
             <Link
               key={cat.id}
               to={`/products?category=${cat.id}`}
-              className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white border border-surface-border hover:border-brand-300 hover:shadow-elevated transition-all duration-200 group"
+              className="flex flex-col items-center gap-3 transition-transform duration-200 hover:-translate-y-1 group"
             >
-              <span className="text-3xl group-hover:scale-110 transition-transform duration-200">{cat.icon}</span>
-              <span className="text-xs font-medium text-slate-700 text-center leading-snug">{cat.name}</span>
+              <div className="w-20 h-20 rounded-full bg-white border border-slate-100 shadow-sm flex items-center justify-center text-3xl group-hover:border-brand-200 group-hover:shadow-md transition-all">
+                {cat.icon}
+              </div>
+              <span className="text-[13px] font-bold text-slate-700 text-center leading-tight">{cat.name}</span>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="page-container pb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="section-title">Featured Products</h2>
-          <Link to="/products" className="text-sm text-brand-600 hover:underline font-medium flex items-center gap-1">
-            See all <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
-          {loading
-            ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
-            : featured.slice(0, 8).map(p => <ProductCard key={p?.id || p?._id} product={p} />)
-          }
+      {/* Flash Sale Section */}
+      <section className="page-container mb-12">
+        <div className="bg-medical-red rounded-2xl overflow-hidden shadow-xl shadow-medical-red/10">
+          <div className="bg-medical-red px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase italic">FLASH SALE</h2>
+              <div className="flex items-center gap-2 text-white">
+                <span className="bg-black/20 px-2 py-1 rounded-md font-bold tabular-nums">04</span> :
+                <span className="bg-black/20 px-2 py-1 rounded-md font-bold tabular-nums">24</span> :
+                <span className="bg-black/20 px-2 py-1 rounded-md font-bold tabular-nums">59</span>
+              </div>
+            </div>
+            <Link to="/products" className="text-white text-xs font-black uppercase hover:underline"> Sắp hết hàng →</Link>
+          </div>
+          <div className="bg-white p-4">
+            <div className="flex overflow-x-auto gap-4 no-scrollbar pb-2">
+              {featured.slice(0, 6).map(p => (
+                <div key={p.id} className="min-w-[180px] max-w-[200px]">
+                  <ProductCard product={p} className="border-none shadow-none hover:shadow-none translate-y-0" />
+                  <div className="mt-2 px-3">
+                    <div className="h-4 bg-red-100 rounded-full relative overflow-hidden">
+                        <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-medical-red to-orange-400 w-[60%] rounded-full" />
+                        <span className="absolute inset-0 text-[10px] font-black text-white flex items-center justify-center">SẮP CHÁY HÀNG</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Promo Banner */}
+      {/* Featured Products Sections */}
+      <section className="page-container mb-12">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+                <h2 className="section-title">Gợi ý cho bạn</h2>
+                <div className="flex items-center gap-6">
+                    {['Sức khỏe', 'Làm đẹp', 'Vitamin'].map(tab => (
+                        <button key={tab} className="text-sm font-bold text-slate-400 hover:text-brand-500 transition-colors uppercase tracking-widest">{tab}</button>
+                    ))}
+                </div>
+            </div>
+            <div className="p-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                    {loading
+                        ? Array.from({ length: 10 }).map((_, i) => <ProductCardSkeleton key={i} />)
+                        : featured.slice(0, 10).map(p => <ProductCard key={p?.id || p?._id} product={p} />)
+                    }
+                </div>
+                {!loading && featured.length > 0 && (
+                    <div className="mt-12 flex justify-center">
+                        <Link to="/products" className="px-12 py-3.5 bg-white border-2 border-brand-500 text-brand-600 font-black rounded-xl hover:bg-brand-50 transition-all uppercase tracking-widest text-sm shadow-xl shadow-brand-100/50">
+                            XEM TẤT CẢ SẢN PHẨM
+                        </Link>
+                    </div>
+                )}
+            </div>
+        </div>
+      </section>
+
+      {/* Health Blog Section */}
       <section className="page-container pb-12">
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className="rounded-2xl bg-gradient-to-r from-green-500 to-teal-600 p-8 text-white flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-display font-bold mb-2">Upload Prescription</h3>
-              <p className="text-green-100 text-sm mb-4">Get your Rx medications delivered safely</p>
-              <Link to="/account/prescriptions" className="inline-flex items-center gap-2 bg-white text-green-700 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-green-50">
-                Upload Now <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="section-title">Cẩm nang sức khỏe</h2>
+          <Link to="/blog" className="text-sm text-brand-500 font-black hover:underline">XEM TẤT CẢ BÀI VIẾT</Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {blogs.slice(0, 3).map(blog => (
+            <Link key={blog.id} to={`/blog/${blog.id}`} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 card-hover group">
+              <div className="aspect-[16/9] rounded-xl overflow-hidden mb-4">
+                <img src={blog.coverImage} alt={blog.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+              </div>
+              <span className="text-[10px] font-black text-brand-500 uppercase tracking-widest mb-2 block">{blog.category || 'Sức khỏe'}</span>
+              <h3 className="text-[15px] font-black text-slate-900 group-hover:text-brand-600 transition-colors line-clamp-2 mb-2 leading-tight">
+                {blog.title}
+              </h3>
+              <p className="text-xs text-slate-500 line-clamp-2 mb-4">
+                {blog.excerpt}
+              </p>
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                <span className="text-[10px] font-bold text-slate-400">{blog.author} · {new Date(blog.publishedAt).toLocaleDateString('vi-VN')}</span>
+                <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                   <Eye className="w-3 h-3" /> {blog.views?.toLocaleString()}
+                </span>
+              </div>
+            </Link>
+          ))}
+          {blogs.length === 0 && !blogLoading && Array.from({length: 3}).map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 animate-pulse">
+               <div className="aspect-[16/9] bg-slate-100 rounded-xl mb-4" />
+               <div className="h-3 bg-slate-100 rounded w-1/4 mb-2" />
+               <div className="h-4 bg-slate-100 rounded w-full mb-1" />
+               <div className="h-4 bg-slate-100 rounded w-3/4" />
             </div>
-            <span className="text-6xl opacity-20">📋</span>
-          </div>
-          <div className="rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 p-8 text-white flex items-center justify-between border border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
-            <div>
-              <h3 className="text-xl font-display font-bold mb-2">Verify Your Medicine</h3>
-              <p className="text-slate-400 text-sm mb-4">Scan QR code to trace from factory to shelf</p>
-              <Link to="/trace" className="inline-flex items-center gap-2 bg-emerald-500 text-white font-semibold px-4 py-2 rounded-lg text-sm hover:bg-emerald-400">
-                {/* 🛡️ Verify Now <ArrowRight className="w-3.5 h-3.5" /> */}
-                <ShieldCheck className="w-4 h-4" /> Verify Now
-              </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Secure Traceability Section - Dedicated at Bottom */}
+      <section className="page-container pb-12">
+        <div className="bg-gradient-to-r from-brand-600 to-brand-800 rounded-3xl overflow-hidden shadow-2xl shadow-brand-900/20 relative group">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-400/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+          
+          <div className="relative z-10 flex flex-col lg:flex-row items-center gap-12 p-8 md:p-12">
+            <div className="flex-1 text-white">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/20 text-brand-100 text-[10px] font-bold uppercase tracking-widest mb-6">
+                <ShieldCheck className="w-4 h-4 text-medical-green" /> Đảm bảo 100% chính hãng
+              </div>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-6 leading-tight">
+                Truy xuất nguồn gốc<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200">Minh bạch tuyệt đối</span>
+              </h2>
+              <p className="text-lg text-brand-100/90 mb-8 max-w-lg">
+                Sử dụng hệ thống thông minh của PharmaChain để minh bạch hóa hành trình của viên thuốc từ nhà máy đến tay người tiêu dùng.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1 relative group/input">
+                    <input 
+                        placeholder="Nhập mã Batch / UID (VD: QR-BATCH-0001)"
+                        className="w-full h-14 pl-12 pr-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-brand-300 transition-all font-mono"
+                    />
+                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50 group-focus-within/input:text-brand-300 transition-colors" />
+                </div>
+                <Link to="/trace" className="h-14 px-8 bg-medical-green hover:bg-green-600 text-white font-black rounded-2xl flex items-center justify-center gap-2 transition-all shadow-xl shadow-green-900/20 whitespace-nowrap">
+                  KIỂM TRA NGAY <ArrowRight className="w-5 h-5" />
+                </Link>
+              </div>
+              <div className="mt-6 flex items-center gap-6 text-[11px] font-bold text-brand-200 uppercase tracking-widest">
+                  <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> Minh bạch</span>
+                  <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> Bảo mật</span>
+                  <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> Không thể giả mạo</span>
+              </div>
             </div>
-            <span className="text-6xl opacity-20">🔍</span>
-          </div>
-          <div className="rounded-2xl bg-gradient-to-r from-orange-400 to-red-500 p-8 text-white flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-display font-bold mb-2">Health Blog</h3>
-              <p className="text-orange-100 text-sm mb-4">Expert health tips and medication guides</p>
-              <Link to="/blog" className="inline-flex items-center gap-2 bg-white text-orange-700 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-orange-50">
-                Read Articles <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+            
+            <div className="relative shrink-0 w-full sm:w-72 lg:w-80 h-72 lg:h-80 flex items-center justify-center">
+                <div className="absolute inset-0 bg-white/5 rounded-3xl rotate-6 group-hover:rotate-12 transition-transform duration-500 border border-white/10" />
+                <div className="absolute inset-0 bg-white/10 rounded-3xl -rotate-6 group-hover:-rotate-12 transition-transform duration-500 border border-white/10" />
+                <div className="relative z-10 w-full h-full bg-white rounded-3xl p-6 shadow-2xl flex flex-col items-center justify-center">
+                    <div className="w-full aspect-square border-4 border-slate-50 flex items-center justify-center rounded-2xl mb-4 relative overflow-hidden group/qr">
+                        <div className="text-[120px] filter grayscale group-hover:grayscale-0 transition-all duration-500">📱</div>
+                        <div className="absolute inset-0 bg-brand-500/10 flex items-center justify-center opacity-0 group-hover/qr:opacity-100 transition-opacity">
+                            <span className="bg-brand-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase">Quét QR</span>
+                        </div>
+                    </div>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">Quét mã QR trên bao bì để xem hành trình thuốc</p>
+                </div>
             </div>
-            <span className="text-6xl opacity-20">📰</span>
           </div>
         </div>
       </section>
+
     </div>
   )
 }

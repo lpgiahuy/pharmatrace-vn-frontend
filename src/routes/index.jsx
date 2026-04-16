@@ -20,6 +20,7 @@ const CartPage         = lazy(() => import('@/pages/ecom/cart/CartPage'))
 const CheckoutPage     = lazy(() => import('@/pages/ecom/cart/CheckoutPage'))
 const OrderSuccessPage = lazy(() => import('@/pages/ecom/cart/OrderSuccessPage'))
 const AccountPage      = lazy(() => import('@/pages/ecom/account/AccountPage'))
+const ProfilePage      = lazy(() => import('@/pages/ecom/account/ProfilePage'))
 const OrdersPage       = lazy(() => import('@/pages/ecom/account/OrdersPage'))
 const OrderDetailPage  = lazy(() => import('@/pages/ecom/account/OrderDetailPage'))
 const WishlistPage     = lazy(() => import('@/pages/ecom/account/WishlistPage'))
@@ -91,6 +92,7 @@ export const AppRoutes = () => (
         <Route path="/checkout"           element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
         <Route path="/order-success/:id"  element={<ProtectedRoute><OrderSuccessPage /></ProtectedRoute>} />
         <Route path="/account"            element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+        <Route path="/account/profile"    element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/account/orders"     element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
         <Route path="/account/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
         <Route path="/account/wishlist"   element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />

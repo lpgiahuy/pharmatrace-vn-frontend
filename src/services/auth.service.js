@@ -63,6 +63,16 @@ export const authService = {
     return data.data || data
   },
 
+  async updateProfile(payload) {
+    const { data } = await apiClient.patch('/auth/me', payload)
+    return data.data || data
+  },
+
+  async getLoyaltyProgress() {
+    const { data } = await apiClient.get('/auth/loyalty-progress')
+    return data.data || data
+  },
+
   async forgotPassword(email) {
     const { data } = await apiClient.post('/auth/forgot-password', { email })
     return data.data || data

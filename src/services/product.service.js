@@ -57,6 +57,15 @@ const normalizeProduct = (p) => {
     expiryDate:     p.ngay_het_han    || p.expiryDate   || null,
     chi_tiet_thuoc: chi_tiet,
     specifications,
+    // Packaging variants for unit switcher on detail page
+    packagingVariants: (p.quy_cach_dong_goi && Array.isArray(p.quy_cach_dong_goi) && p.quy_cach_dong_goi.length > 0)
+      ? p.quy_cach_dong_goi.map(q => ({
+          id:    q.quy_cach_id || q.id,
+          label: q.ten_don_vi  || q.label,
+          price: Number(q.gia_ban) || 0,
+          isBase: q.la_don_vi_co_ban ?? false,
+        }))
+      : null,
   }
 }
 

@@ -69,11 +69,11 @@
   .badge-gray   { @apply badge bg-slate-100 text-slate-600; }
 
   .section-title {
-    @apply text-2xl font-display font-bold text-slate-900;
+    @apply text-xl md:text-2xl font-display font-bold text-slate-900 flex items-center gap-2;
   }
 
   .page-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply max-w-[1240px] mx-auto px-4;
   }
 
   .skeleton {
@@ -82,6 +82,15 @@
 
   .divider {
     @apply border-t border-surface-border my-4;
+  }
+
+  /* Pharmacity specific components */
+  .section-header-blue {
+    @apply bg-brand-500 text-white px-4 py-2.5 rounded-t-xl font-bold flex items-center justify-between;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-[0_4px_20px_0_rgba(0,0,0,0.08)] hover:-translate-y-0.5;
   }
 
   /* Refined Prose styling for rich HTML content */

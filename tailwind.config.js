@@ -5,28 +5,28 @@ export default {
     extend: {
       colors: {
         brand: {
-          50:  '#e6f2ff',
-          100: '#bddeff',
-          200: '#90c9ff',
-          300: '#5fb3ff',
-          400: '#38a3f7',
-          500: '#0b7de8',
-          600: '#0062c6',
-          700: '#004a9e',
-          800: '#003376',
-          900: '#001e50',
+          50:  '#f0f7ff',
+          100: '#e0effe',
+          200: '#bae0fd',
+          300: '#7cc9fb',
+          400: '#38aaf7',
+          500: '#004996', // Pharmacity Blue
+          600: '#004084',
+          700: '#003772',
+          800: '#002e5f',
+          900: '#001e3e',
         },
         medical: {
-          blue: '#0b7de8',
+          blue: '#004996',
           teal: '#00b4a6',
-          green: '#22c55e',
-          red:   '#ef4444',
-          orange:'#f97316',
+          green: '#00A551', // Pharmacity Green
+          red:   '#ed1c24', // Pharma Red
+          orange:'#f7941d',
         },
         surface: {
-          DEFAULT: '#f8fafc',
+          DEFAULT: '#f2f4f7', // Light grey bg
           card:    '#ffffff',
-          border:  '#e2e8f0',
+          border:  '#e5e7eb',
         },
       },
       fontFamily: {

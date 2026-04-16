@@ -2,72 +2,113 @@ import { Link } from 'react-router-dom'
 import { Pill, Facebook, Youtube, Phone, Mail, MapPin } from 'lucide-react'
 
 export const Footer = () => (
-  <footer className="bg-slate-900 text-slate-300 mt-auto">
-    <div className="page-container py-12">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {/* Brand */}
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
-              <Pill className="w-4 h-4 text-white" />
+  <footer className="bg-brand-500 text-white mt-auto overflow-hidden">
+    <div className="page-container py-12 md:py-16">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+        {/* About */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center shadow-lg">
+              <Pill className="w-6 h-6 text-brand-500" />
             </div>
-            <span className="text-white font-display font-bold text-lg">PharmaChain</span>
+            <div>
+              <span className="text-white font-display font-black text-2xl block leading-none">PharmaChain</span>
+              <span className="text-[10px] text-white font-black tracking-widest uppercase">Health & Care</span>
+            </div>
           </div>
-          <p className="text-sm leading-relaxed mb-4">
-            Vietnam's trusted pharmaceutical supply chain platform. Certified, traceable, and safe.
+          <p className="text-sm leading-relaxed text-white font-medium max-w-xs">
+            Hệ thống cung ứng dược phẩm tin cậy tại Việt Nam. Cam kết 100% sản phẩm chính hãng, truy xuất nguồn gốc minh bạch và an toàn.
           </p>
-          <div className="flex gap-3">
-            <a href="#" className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center hover:bg-brand-500 transition-colors">
-              <Facebook className="w-4 h-4" />
+          <div className="flex gap-4">
+            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white hover:text-brand-500 transition-all">
+              <Facebook className="w-5 h-5 text-white" />
             </a>
-            <a href="#" className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center hover:bg-red-500 transition-colors">
-              <Youtube className="w-4 h-4" />
+            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-medical-red hover:text-white transition-all">
+              <Youtube className="w-5 h-5 text-white" />
             </a>
           </div>
         </div>
 
-        {/* Products */}
+        {/* Links Column 1 */}
         <div>
-          <h4 className="text-white font-semibold mb-4">Products</h4>
-          <ul className="space-y-2 text-sm">
-            {['Vitamins & Supplements', 'Pain Relief', 'Cold & Flu', 'Skincare', 'Medical Devices', 'Baby & Children'].map(item => (
-              <li key={item}><Link to="/products" className="hover:text-white transition-colors">{item}</Link></li>
+          <h4 className="text-white font-black text-sm uppercase tracking-widest mb-8 relative inline-block">
+            Sản phẩm
+            <span className="absolute -bottom-2 left-0 w-8 h-1 bg-medical-green rounded-full"></span>
+          </h4>
+          <ul className="space-y-4 text-[13px] font-bold text-white">
+            {['Thực phẩm chức năng', 'Thuốc không kê đơn', 'Chăm sóc cá nhân', 'Dược mỹ phẩm', 'Thiết bị y tế', 'Sản phẩm cho bé'].map(item => (
+              <li key={item}>
+                <Link to="/products" className="hover:text-green-300 transition-all flex items-center gap-2 group">
+                  <span className="w-1.5 h-1.5 bg-white/50 rounded-full group-hover:bg-medical-green group-hover:scale-125 transition-all" /> {item}
+                </Link>
+              </li>
             ))}
           </ul>
         </div>
 
-        {/* Support */}
+        {/* Links Column 2 */}
         <div>
-          <h4 className="text-white font-semibold mb-4">Customer Support</h4>
-          <ul className="space-y-2 text-sm">
-            {['My Orders', 'Returns & RMA', 'Prescription Upload', 'Health Blog', 'FAQ', ' Verify Product'].map(item => (
-              <li key={item}><Link to={item.includes('Verify') ? '/trace' : '#'} className="hover:text-white transition-colors">{item}</Link></li>
+          <h4 className="text-white font-black text-sm uppercase tracking-widest mb-8 relative inline-block">
+            Hỗ trợ khách hàng
+            <span className="absolute -bottom-2 left-0 w-8 h-1 bg-medical-green rounded-full"></span>
+          </h4>
+          <ul className="space-y-4 text-[13px] font-bold text-white">
+            {['Đơn hàng của tôi', 'Chính sách đổi trả', 'Giao hàng - Thanh toán', 'Blog sức khỏe', 'Câu hỏi thường gặp', 'Tra cứu nguồn gốc'].map(item => (
+              <li key={item}>
+                <Link to={item.includes('Tra cứu') ? '/trace' : '#'} className="hover:text-green-300 transition-all flex items-center gap-2 group">
+                  <span className="w-1.5 h-1.5 bg-white/50 rounded-full group-hover:bg-medical-green group-hover:scale-125 transition-all" /> {item}
+                </Link>
+              </li>
             ))}
           </ul>
         </div>
 
         {/* Contact */}
         <div>
-          <h4 className="text-white font-semibold mb-4">Contact</h4>
-          <ul className="space-y-3 text-sm">
-            <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-brand-400 shrink-0" /> 1800-6001 (Free)</li>
-            <li className="flex items-center gap-2"><Mail className="w-4 h-4 text-brand-400 shrink-0" /> support@pharmachain.vn</li>
-            <li className="flex items-start gap-2"><MapPin className="w-4 h-4 text-brand-400 shrink-0 mt-0.5" /> My address, HCMC</li>
+          <h4 className="text-white font-black text-sm uppercase tracking-widest mb-8 relative inline-block">
+            Liên hệ
+            <span className="absolute -bottom-2 left-0 w-8 h-1 bg-medical-green rounded-full"></span>
+          </h4>
+          <ul className="space-y-5">
+            <li className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-md">
+                <Phone className="w-5 h-5 text-brand-500" />
+              </div>
+              <div>
+                <p className="text-white/70 text-[10px] uppercase font-black tracking-tighter">Hotline miễn phí 24/7</p>
+                <p className="text-white font-black text-lg leading-none">1800 6821</p>
+              </div>
+            </li>
+            <li className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-md">
+                    <Mail className="w-5 h-5 text-brand-500" />
+                </div>
+                <div>
+                    <p className="text-white/70 text-[10px] uppercase font-black tracking-tighter">Email hỗ trợ</p>
+                    <p className="text-white font-black text-sm">support@pharmachain.vn</p>
+                </div>
+            </li>
+            <li className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-md">
+                    <MapPin className="w-5 h-5 text-brand-500" />
+                </div>
+                <div>
+                    <p className="text-white/70 text-[10px] uppercase font-black tracking-tighter">Văn phòng chính</p>
+                    <p className="text-white font-black text-sm">Quận 1, TP. Hồ Chí Minh</p>
+                </div>
+            </li>
           </ul>
-          <div className="mt-4">
-            {/* <p className="text-xs text-slate-500">Licensed by Ministry of Health Vietnam</p>
-            <p className="text-xs text-slate-500">GMP & GDP Certified</p> */}
-          </div>
         </div>
       </div>
     </div>
-    <div className="border-t border-slate-800 py-4">
-      <div className="page-container flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-        <p>© 2024 PharmaChain. All rights reserved.</p>
-        <div className="flex gap-4">
-          <Link to="#" className="hover:text-slate-300">Privacy Policy</Link>
-          <Link to="#" className="hover:text-slate-300">Terms of Service</Link>
-          <Link to="#" className="hover:text-slate-300">Cookie Policy</Link>
+    
+    <div className="bg-brand-600 py-6 border-t border-white/10">
+      <div className="page-container flex flex-col md:flex-row items-center justify-between gap-6 text-[11px] font-black text-white uppercase tracking-[0.2em]">
+        <p>© 2026 PharmaChain. Thiết kế bởi Le Pham Gia Huy.</p>
+        <div className="flex gap-8">
+          <Link to="#" className="hover:text-green-300 transition-colors">Bảo mật</Link>
+          <Link to="#" className="hover:text-green-300 transition-colors">Điều khoản</Link>
+          <Link to="#" className="hover:text-green-300 transition-colors">Giấy phép</Link>
         </div>
       </div>
     </div>

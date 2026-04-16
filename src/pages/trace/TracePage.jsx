@@ -324,7 +324,7 @@ export default function TracePage() {
             <div className="h-48 bg-white/5 rounded-2xl" />
             <div className="text-center text-slate-500 text-sm mt-4 flex items-center justify-center gap-2">
               <Spinner size="sm" className="text-brand-400" />
-              Querying blockchain registry…
+              Đang truy vấn hệ thống dữ liệu xác thực...
             </div>
           </div>
         )}
@@ -615,7 +615,7 @@ function VerificationSection({ result, cfg }) {
         </Descriptions>
         {verification?.blockchainHash && (
           <div className="mt-3 p-3 bg-slate-50 rounded-xl">
-            <p className="text-xs text-slate-500 mb-1 font-semibold">Blockchain Hash</p>
+            <p className="text-xs text-slate-500 mb-1 font-semibold">Mã băm bảo mật (Secure Hash)</p>
             <p className="text-xs font-mono text-slate-700 break-all">{verification.blockchainHash}</p>
           </div>
         )}

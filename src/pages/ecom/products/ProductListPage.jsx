@@ -46,8 +46,26 @@ export default function ProductListPage() {
     try {
       const res = await productService.getAll({ category, sort, search, minPrice, maxPrice, limit: 10000 })
       const allData = Array.isArray(res?.data) ? res.data : []
-      setProducts(allData)
-      setTotal(allData.length)
+
+      // Deduplicate: same drug ID may appear once per packaging variant (quy_cach_dong_goi).
+      // Keep only one card per product ID — prefer the base unit or the cheapest variant.
+      const seen = new Map()
+      allData.forEach(p => {
+        const existing = seen.get(p.id)
+        if (!existing) {
+          seen.set(p.id, p)
+        } else {
+          // Prefer the base unit if available, otherwise keep the cheaper one
+          const isBase = p.la_don_vi_co_ban || p.quy_cach_dong_goi?.find(q => q.la_don_vi_co_ban && q.ten_don_vi === p.unit)
+          if (isBase || p.price < existing.price) {
+            seen.set(p.id, p)
+          }
+        }
+      })
+
+      const deduped = Array.from(seen.values())
+      setProducts(deduped)
+      setTotal(deduped.length)
     } catch (err) {
       console.error('[ProductListPage] Failed to fetch products:', err)
       setError(err?.response?.data?.message || err?.message || 'Failed to load products')
