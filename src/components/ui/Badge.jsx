@@ -1,5 +1,6 @@
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/utils'
-import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/constants'
+import { ORDER_STATUS_COLORS } from '@/constants'
 
 const colorMap = {
   blue:   'bg-brand-50 text-brand-700 border-brand-200',
@@ -29,16 +30,20 @@ export const Badge = ({ color = 'gray', children, className, dot = false }) => (
   </span>
 )
 
-export const OrderStatusBadge = ({ status }) => (
-  <Badge color={ORDER_STATUS_COLORS[status] || 'gray'} dot>
-    {ORDER_STATUS_LABELS[status] || status}
-  </Badge>
-)
+export const OrderStatusBadge = ({ status }) => {
+  const { t } = useTranslation()
+  return (
+    <Badge color={ORDER_STATUS_COLORS[status] || 'gray'} dot>
+      {t(`order_status.${status}`, { defaultValue: status })}
+    </Badge>
+  )
+}
 
 export const StockBadge = ({ quantity, threshold = 20 }) => {
-  if (quantity === 0)           return <Badge color="red">Out of Stock</Badge>
-  if (quantity <= threshold)    return <Badge color="orange">Low Stock</Badge>
-  return <Badge color="green">In Stock</Badge>
+  const { t } = useTranslation()
+  if (quantity === 0)           return <Badge color="red">{t('stock_status.out_of_stock')}</Badge>
+  if (quantity <= threshold)    return <Badge color="orange">{t('stock_status.low_stock')}</Badge>
+  return <Badge color="green">{t('stock_status.in_stock')}</Badge>
 }
 
 export const RoleBadge = ({ role }) => {

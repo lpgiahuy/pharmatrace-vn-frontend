@@ -7,25 +7,27 @@ import { Eye, EyeOff, LogIn } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 
-const customerSchema = z.object({
-  phone:    z.string().min(9, 'Invalid phone number'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-})
-
-const adminSchema = z.object({
-  email:    z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-})
-
 export default function LoginPage() {
+  const { t } = useTranslation()
   const [showPw, setShowPw] = useState(false)
   const [loginType, setLoginType] = useState('customer') // 'customer' | 'admin'
   const { login } = useAuthStore()
   const navigate   = useNavigate()
   const location   = useLocation()
   const from = location.state?.from?.pathname || '/'
+
+  const customerSchema = z.object({
+    phone:    z.string().min(9, t('auth.validation.invalid_phone')),
+    password: z.string().min(6, t('auth.validation.pw_min')),
+  })
+
+  const adminSchema = z.object({
+    email:    z.string().email(t('auth.validation.invalid_email')),
+    password: z.string().min(6, t('auth.validation.pw_min')),
+  })
 
   const schema = loginType === 'admin' ? adminSchema : customerSchema
   const defaults = loginType === 'admin'
@@ -48,18 +50,18 @@ export default function LoginPage() {
         ? { loginType: 'admin', email: data.email, password: data.password }
         : { loginType: 'customer', phone: data.phone, password: data.password }
       const result = await login(credentials)
-      toast.success(`Welcome back, ${result.user?.ho_ten || result.user?.name || 'User'}!`)
+      toast.success(`${t('auth.welcome_back')}, ${(result.user?.ho_ten || result.user?.name || '').split(' ').pop()}!`)
       navigate(from, { replace: true })
     } catch (err) {
-      toast.error(err.response?.data?.message || err.message || 'Login failed')
+      toast.error(err.response?.data?.message || err.message || t('auth.signin_failed'))
     }
   }
 
   return (
     <div className="animate-fade-in">
       <div className="mb-8">
-        <h1 className="text-3xl font-display font-bold text-slate-900 mb-2">Welcome back</h1>
-        <p className="text-slate-500">Sign in to your PharmaChain account</p>
+        <h1 className="text-3xl font-display font-bold text-slate-900 mb-2">{t('auth.welcome_back')}</h1>
+        <p className="text-slate-500">{t('auth.signin_desc')}</p>
       </div>
 
       {/* Login type toggle */}
@@ -71,7 +73,7 @@ export default function LoginPage() {
             loginType === 'customer' ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          Customer
+          {t('auth.customer')}
         </button>
         <button
           type="button"
@@ -80,14 +82,14 @@ export default function LoginPage() {
             loginType === 'admin' ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          Admin / Staff
+          {t('auth.admin_staff')}
         </button>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {loginType === 'admin' ? (
           <Input
-            label="Email Address"
+            label={t('auth.email')}
             type="email"
             placeholder="admin@pharmachain.vn"
             error={errors.email?.message}
@@ -96,7 +98,7 @@ export default function LoginPage() {
           />
         ) : (
           <Input
-            label="Phone Number"
+            label={t('auth.phone')}
             type="tel"
             placeholder="0909 123 456"
             error={errors.phone?.message}
@@ -105,9 +107,9 @@ export default function LoginPage() {
           />
         )}
         <Input
-          label="Password"
+          label={t('auth.password')}
           type={showPw ? 'text' : 'password'}
-          placeholder="Enter your password"
+          placeholder="••••••••"
           error={errors.password?.message}
           required
           rightIcon={
@@ -119,17 +121,17 @@ export default function LoginPage() {
         />
 
         <div className="flex justify-end">
-          <Link to="/forgot-password" className="text-sm text-brand-600 hover:underline">Forgot password?</Link>
+          <Link to="/forgot-password" className="text-sm text-brand-600 hover:underline">{t('auth.forgot_password')}</Link>
         </div>
 
         <Button type="submit" fullWidth size="lg" loading={isSubmitting} leftIcon={<LogIn className="w-4 h-4" />}>
-          Sign In
+          {t('auth.signin')}
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-slate-500">
-        Don't have an account?{' '}
-        <Link to="/register" className="text-brand-600 font-medium hover:underline">Create one</Link>
+        {t('auth.no_account')}{' '}
+        <Link to="/register" className="text-brand-600 font-medium hover:underline">{t('auth.create_one')}</Link>
       </p>
     </div>
   )

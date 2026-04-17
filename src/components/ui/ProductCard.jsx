@@ -5,9 +5,11 @@ import { cn, formatCurrency } from '@/utils'
 import { useCartStore } from '@/store/cartStore'
 import { useAuthStore } from '@/store/authStore'
 import { wishlistService } from '@/services/wishlist.service'
+import { useTranslation } from 'react-i18next'
 import { Button } from './Button'
 
 export const ProductCard = ({ product, className }) => {
+  const { t } = useTranslation()
   const addItem = useCartStore(s => s.addItem)
   const user = useAuthStore(s => s.user)
   
@@ -70,18 +72,15 @@ export const ProductCard = ({ product, className }) => {
 
         {/* Brand Badge (Pharmacity Style) */}
         <div className="absolute top-2 right-2 z-10">
-            <div className="bg-brand-500 text-white flex items-center gap-1 pl-1 pr-2 py-0.5 rounded-full shadow-sm">
-                <div className="w-5 h-5 rounded-full bg-medical-green flex items-center justify-center font-black text-[10px] text-white">P</div>
-                <div className="flex flex-col leading-none">
-                    <span className="text-[6px] font-bold uppercase tracking-tighter opacity-80">NHÃN HÀNG</span>
-                    <span className="text-[10px] font-black leading-none">PharmaChain</span>
-                </div>
+            <div className="bg-brand-500 text-white flex items-center gap-1.5 pl-1 pr-3 py-1 rounded-full shadow-sm">
+                <div className="w-5 h-5 rounded-full bg-medical-green flex items-center justify-center font-black text-[10px] text-white shrink-0">P</div>
+                <span className="text-[11px] font-black leading-none">PharmaChain</span>
             </div>
         </div>
 
         {!product.inStock && (
           <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-20">
-            <span className="bg-slate-800/90 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">Hết hàng</span>
+            <span className="bg-slate-800/90 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">{t('product.out_of_stock')}</span>
           </div>
         )}
 
@@ -102,7 +101,7 @@ export const ProductCard = ({ product, className }) => {
         <div className="mb-2">
             <div className="inline-flex items-center gap-1 bg-medical-orange text-white text-[10px] font-black px-2.5 py-1 rounded-lg shadow-sm">
                 <Truck className="w-3.5 h-3.5" />
-                <span>MIỄN PHÍ GIAO NHANH</span>
+                <span>{t('product.free_fast_delivery')}</span>
             </div>
         </div>
 
@@ -117,7 +116,7 @@ export const ProductCard = ({ product, className }) => {
             <span className="text-lg font-black text-slate-900 leading-none">
               {formatCurrency(product.price).replace(' ₫', '')}
               <span className="text-base font-black border-b-2 border-slate-900 mx-0.5">đ</span>
-              <span className="text-slate-900 text-lg font-black">/{product.unit || 'Sản phẩm'}</span>
+              <span className="text-slate-900 text-lg font-black">/{t(`product.unit.${product.unit?.toLowerCase()}`, { defaultValue: product.unit || t('product.unit.product') })}</span>
             </span>
           </div>
           {product.originalPrice && product.originalPrice > product.price && (
@@ -142,7 +141,7 @@ export const ProductCard = ({ product, className }) => {
           )}
         >
           <Plus className="w-5 h-5" />
-          <span>Chọn mua</span>
+          <span>{t('product.select_buy')}</span>
         </button>
       </div>
     </div>
