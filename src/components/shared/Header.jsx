@@ -7,6 +7,7 @@ import { useUIStore } from '@/store/uiStore'
 import { Avatar } from '@/components/ui/Avatar'
 import { useCategoryStore } from '@/store/categoryStore'
 import { useTranslation } from 'react-i18next'
+import { CategoryIcon } from '@/components/ui/CategoryIcon'
 
 export const Header = () => {
   const { t, i18n } = useTranslation()
@@ -263,17 +264,54 @@ export const Header = () => {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               </div>
             </form>
-            <div className="grid grid-cols-2 gap-1">
-              {categories.map(cat => (
-                <Link
-                  key={cat.id}
-                  to={`/products?category=${cat.id}`}
-                  onClick={closeMobileMenu}
-                  className="flex items-center gap-2 p-2.5 rounded-lg text-sm text-slate-700 hover:bg-brand-50 hover:text-brand-700"
-                >
-                  <span>{cat.icon}</span> {cat.name}
-                </Link>
-              ))}
+            <div className="flex flex-col gap-1">
+              {categories.map(cat => {
+                const hasChildren = cat.children && cat.children.length > 0;
+                const [expanded, setExpanded] = useState(false);
+
+                return (
+                  <div key={cat.id} className="flex flex-col">
+                    <div className="flex items-center gap-1">
+                      <Link
+                        to={`/products?category=${cat.id}`}
+                        onClick={closeMobileMenu}
+                        className="flex-1 flex items-center gap-3 p-3 rounded-xl text-sm font-bold text-slate-700 hover:bg-brand-50 hover:text-brand-700 transition-all border border-transparent hover:border-brand-100"
+                      >
+                        <CategoryIcon name={cat.iconName} className="w-10 h-10 lg:w-9 lg:h-9" size={20} />
+                        <span>{cat.name}</span>
+                      </Link>
+                      
+                      {hasChildren && (
+                        <button 
+                          onClick={() => setExpanded(!expanded)}
+                          className={cn(
+                            "w-12 h-12 flex items-center justify-center rounded-xl text-slate-400 hover:bg-brand-50 hover:text-brand-600 transition-all",
+                            expanded && "bg-brand-50 text-brand-600"
+                          )}
+                        >
+                          {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                        </button>
+                      )}
+                    </div>
+
+                    {hasChildren && expanded && (
+                      <div className="pl-12 flex flex-col gap-1 pb-2">
+                        {cat.children.map(child => (
+                          <Link
+                            key={child.id}
+                            to={`/products?category=${child.id}`}
+                            onClick={closeMobileMenu}
+                            className="flex items-center gap-3 py-2 px-3 rounded-lg text-sm font-medium text-slate-500 hover:text-brand-600 hover:bg-brand-50/50 transition-all"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-brand-400" />
+                            {child.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

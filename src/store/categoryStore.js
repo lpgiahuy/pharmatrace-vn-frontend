@@ -1,7 +1,53 @@
 import { create } from 'zustand'
 import { productService } from '@/services/product.service'
 
-const ICONS = ['💊', '🌿', '🍼', '💖', '🧴', '🦴', '🩹', '🛡️', '🤧', '💉', '🫁', '👶', '🩺']
+const ICON_MAPPING = {
+  // Tủ thuốc gia đình
+  'tủ thuốc': 'Pill',
+  'giảm đau': 'Thermometer',
+  'hạ sốt': 'Thermometer',
+  'kháng dị ứng': 'Wind',
+  'ho & cảm lạnh': 'Waves',
+  'hệ hô hấp': 'Lungs',
+  'tiêu hóa': 'Apple',
+  'kháng viêm': 'ShieldCheck',
+  'mắt/tai/mũi': 'Eye',
+  'dầu, cao': 'Zap',
+  
+  // Thuốc đặc trị
+  'đặc trị': 'Stethoscope',
+  'tim mạch': 'HeartPulse',
+  'huyết áp': 'Activity',
+  'tiểu đường': 'Droplet',
+  'da liễu': 'Sparkles',
+  'cơ xương khớp': 'Bone',
+  'thần kinh': 'Brain',
+  'ung thư': 'Radiation',
+  'kháng sinh': 'Bacteriophage',
+
+  // Vitamin & TPCN
+  'vitamin': 'Leaf',
+  'thực phẩm chức năng': 'Milk',
+  'giảm cân': 'Scale',
+
+  // Sức khỏe giới tính
+  'nam': 'UserPlus',
+  'nữ': 'User',
+  'giới tính': 'Heart',
+  'ngừa thai': 'ShieldAlert',
+  
+  // Default keywords
+  'y tế': 'PlusCircle',
+  'khác': 'Grid'
+};
+
+const getIconForCategory = (name) => {
+  const lowerName = name.toLowerCase();
+  for (const [keyword, icon] of Object.entries(ICON_MAPPING)) {
+    if (lowerName.includes(keyword)) return icon;
+  }
+  return 'Package'; // Default
+};
 
 export const useCategoryStore = create((set, get) => ({
   categories: [],
@@ -12,12 +58,16 @@ export const useCategoryStore = create((set, get) => ({
     set({ loading: true })
     try {
       const data = await productService.getCategories()
-      const mapped = data.map((c, i) => ({
+      const mapCategory = (c, i) => ({
         id: c.id,
         name: c.ten_danh_muc || c.name,
         slug: c.slug || `cat-${c.id}`,
-        icon: c.hinh_anh_icon || ICONS[i % ICONS.length]
-      }))
+        iconName: getIconForCategory(c.ten_danh_muc || c.name),
+        parentId: c.danh_muc_cha_id,
+        children: c.children ? c.children.map((child, j) => mapCategory(child, j)) : []
+      })
+
+      const mapped = data.map((c, i) => mapCategory(c, i))
       set({ categories: mapped, fetched: true })
     } catch (e) {
       console.error('[categoryStore]', e)

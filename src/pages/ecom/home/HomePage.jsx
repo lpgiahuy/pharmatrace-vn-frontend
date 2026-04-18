@@ -6,6 +6,7 @@ import { blogService } from '@/services/analytics.service'
 import { ProductCard, ProductCardSkeleton } from '@/components/ui/ProductCard'
 import { useCategoryStore } from '@/store/categoryStore'
 import { useTranslation } from 'react-i18next'
+import { CategoryIcon } from '@/components/ui/CategoryIcon'
 
 const FlashSaleCountdown = () => {
   const [timeLeft, setTimeLeft] = useState({ hours: '00', minutes: '00', seconds: '00' });
@@ -53,7 +54,22 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [blogLoading, setBlogLoading] = useState(true)
   const [activeBanner, setActiveBanner] = useState(0)
+  const [activeParentId, setActiveParentId] = useState(null)
   const categories = useCategoryStore(s => s.categories)
+
+  const activeParent = categories.find(c => c.id === activeParentId)
+  const displayedCategories = activeParent ? activeParent.children : categories
+  const sectionTitle = activeParent 
+    ? `${t('home.category_title_prefix', { defaultValue: 'Danh mục' })} ${activeParent.name}` 
+    : t('home.featured_categories')
+
+  const handleCategoryClick = (cat) => {
+    if (!activeParentId && cat.children && cat.children.length > 0) {
+      setActiveParentId(cat.id)
+      return false // Prevent navigation to drill down
+    }
+    return true // Navigate to product list
+  }
 
   const BANNERS = [
     { id: 1, title: t('home.banner1_title', { defaultValue: 'Trusted Medicines, Delivered Fast' }), subtitle: t('home.banner1_desc', { defaultValue: 'Shop 10,000+ certified pharmaceutical products' }), cta: t('home.shop_now'), to: '/products', bg: 'from-brand-600 to-brand-800', img: '💊', image: 'https://wallpapercave.com/wp/wp15262378.jpg' },
@@ -172,20 +188,37 @@ export default function HomePage() {
       {/* Categories Grid */}
       <section className="page-container py-12">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="section-title">{t('home.featured_categories')}</h2>
+          <div className="flex items-center gap-4">
+            {activeParentId && (
+              <button 
+                onClick={() => setActiveParentId(null)}
+                className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-brand-50 hover:text-brand-500 transition-all border border-slate-100"
+                title={t('common.back')}
+              >
+                <ArrowRight className="w-5 h-5 rotate-180" />
+              </button>
+            )}
+            <h2 className="section-title">{sectionTitle}</h2>
+          </div>
           <Link to="/products" className="text-sm text-brand-500 font-black hover:underline uppercase">{t('home.view_all')}</Link>
         </div>
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-y-8 gap-x-4">
-          {categories.slice(0, 8).map(cat => (
+          {displayedCategories.slice(0, 16).map(cat => (
             <Link
               key={cat.id}
               to={`/products?category=${cat.id}`}
+              onClick={(e) => {
+                const shouldNavigate = handleCategoryClick(cat)
+                if (!shouldNavigate) e.preventDefault()
+              }}
               className="flex flex-col items-center gap-3 transition-transform duration-200 hover:-translate-y-1 group"
             >
-              <div className="w-20 h-20 rounded-full bg-white border border-slate-100 shadow-sm flex items-center justify-center text-3xl group-hover:border-brand-200 group-hover:shadow-md transition-all">
-                {cat.icon}
-              </div>
-              <span className="text-[13px] font-bold text-slate-700 text-center leading-tight">{cat.name}</span>
+              <CategoryIcon 
+                name={cat.iconName} 
+                className="w-20 h-20 bg-white border border-slate-100 shadow-sm group-hover:border-brand-200 group-hover:shadow-md"
+                size={32}
+              />
+              <span className="text-[13px] font-bold text-slate-700 text-center leading-tight line-clamp-2">{cat.name}</span>
             </Link>
           ))}
         </div>
