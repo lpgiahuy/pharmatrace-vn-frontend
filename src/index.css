@@ -13,7 +13,7 @@
   }
 
   body {
-    @apply bg-surface text-slate-800 font-sans antialiased;
+    @apply bg-white text-slate-800 font-sans antialiased;
     min-height: 100dvh;
   }
 
@@ -69,11 +69,11 @@
   .badge-gray   { @apply badge bg-slate-100 text-slate-600; }
 
   .section-title {
-    @apply text-xl md:text-2xl font-display font-bold text-slate-900 flex items-center gap-2;
+    @apply text-lg md:text-2xl font-display font-bold text-slate-900 flex items-center gap-2;
   }
 
   .page-container {
-    @apply max-w-[1240px] mx-auto px-4;
+    @apply max-w-[1440px] mx-auto px-4;
   }
 
   .skeleton {
@@ -133,6 +133,22 @@
   .text-balance { text-wrap: balance; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  @keyframes slide-up-nav {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .animate-slide-up-nav {
+    animation: slide-up-nav 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes slide-down-header {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+  }
+  .animate-slide-down-header {
+    animation: slide-down-header 0.3s ease-out;
+  }
 }
 
 /* Ant Design overrides */

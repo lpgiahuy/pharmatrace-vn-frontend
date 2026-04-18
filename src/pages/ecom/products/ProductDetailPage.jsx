@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ShoppingCart, Heart, Star, Shield, Truck, RotateCcw, Plus, Minus, ChevronRight } from 'lucide-react'
 import { productService } from '@/services/product.service'
@@ -10,18 +10,22 @@ import { ErrorState } from '@/components/ui/EmptyState'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { formatCurrency, formatDate, cn } from '@/utils'
+import { sanitizeHtml } from '@/utils/security'
+import { useTranslation } from 'react-i18next'
+import toast from 'react-hot-toast'
 
 /**
  * Helper component to safely render content that might be a string (HTMl), 
  * an array, or a nested object. Avoids "Objects are not valid as a React child" crash.
  */
 function RenderSafeContent({ content, className = "text-base text-slate-700 leading-relaxed font-medium" }) {
+  const { t } = useTranslation()
   if (!content) return null
 
   if (typeof content === 'string') {
     // If it looks like HTML, use dangerouslySetInnerHTML, otherwise plain text with line breaks
     if (content.includes('<') && content.includes('>')) {
-      return <div className={`prose prose-sm max-w-none font-medium ${className}`} dangerouslySetInnerHTML={{ __html: content }} />
+      return <div className={`prose prose-sm max-w-none font-medium ${className}`} dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }} />
     }
     return <p className={`${className} whitespace-pre-line`}>{content}</p>
   }
@@ -43,16 +47,10 @@ function RenderSafeContent({ content, className = "text-base text-slate-700 lead
       <div className={`space-y-4 ${className}`}>
         {Object.entries(content).map(([key, val]) => {
           if (!val || (typeof val === 'string' && val.trim() === '')) return null
-          const labelMapping = {
-            'lieu_dung': 'Liều dùng & Cách dùng',
-            'cach_dung': 'Cách dùng',
-            'qua_lieu_va_xu_tri': 'Quá liều và cách xử lí',
-            'xu_tri': 'Cách xử lí',
-            'trieu_chung': 'Triệu chứng',
-            'quen_lieu': 'Quên liều',
-            'huong_dan_su_dung': 'Hướng dẫn sử dụng',
-          }
-          const label = labelMapping[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+          
+          const label = t(`product.detail_labels.${key}`, { 
+            defaultValue: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) 
+          })
 
           return (
             <div key={key} className="bg-slate-50/50 p-5 rounded-2xl border border-slate-100 shadow-sm">
@@ -69,6 +67,7 @@ function RenderSafeContent({ content, className = "text-base text-slate-700 lead
 }
 
 export default function ProductDetailPage() {
+  const { t } = useTranslation()
   const { id } = useParams()
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -100,7 +99,7 @@ export default function ProductDetailPage() {
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      alert('Vui lòng đăng nhập để thêm vào yêu thích!')
+      toast.error(t('auth.login_required_favorite', { defaultValue: 'Please login to add to wishlist!' }))
       return
     }
     if (isToggling) return
@@ -135,12 +134,12 @@ export default function ProductDetailPage() {
   return (
     <div className="page-container py-8 animate-fade-in">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-slate-500 mb-6">
-        <Link to="/" className="hover:text-brand-600">Home</Link>
-        <ChevronRight className="w-4 h-4" />
-        <Link to="/products" className="hover:text-brand-600">Products</Link>
-        <ChevronRight className="w-4 h-4" />
-        <span className="text-slate-800 font-medium truncate">{product.name}</span>
+      <nav className="flex items-center gap-2 text-sm text-slate-500 mb-6" aria-label="Breadcrumb">
+        <Link to="/" className="hover:text-brand-600">{t('nav.home', { defaultValue: 'Home' })}</Link>
+        <ChevronRight className="w-4 h-4" aria-hidden="true" />
+        <Link to="/products" className="hover:text-brand-600">{t('nav.products', { defaultValue: 'Products' })}</Link>
+        <ChevronRight className="w-4 h-4" aria-hidden="true" />
+        <span className="text-slate-800 font-medium truncate" aria-current="page">{product.name}</span>
       </nav>
 
       <div className="grid md:grid-cols-2 gap-10 mb-12">
@@ -151,7 +150,7 @@ export default function ProductDetailPage() {
           </div>
           {discount > 0 && (
             <div className="flex gap-2">
-              <span className="badge-red px-3 py-1 rounded-full bg-red-500 text-white text-xs font-bold">-{discount}% OFF</span>
+              <span className="badge-red px-3 py-1 rounded-full bg-red-500 text-white text-xs font-bold">-{discount}% {t('product.off', { defaultValue: 'OFF' })}</span>
             </div>
           )}
         </div>
@@ -162,25 +161,33 @@ export default function ProductDetailPage() {
           <h1 className="text-2xl md:text-3xl font-display font-bold text-slate-900 mb-3">{product.name}</h1>
 
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1" aria-label={`Rating: ${product.rating} stars`}>
               {[1,2,3,4,5].map(s => (
-                <Star key={s} className={`w-4 h-4 ${s <= Math.round(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-slate-200'}`} />
+                <Star key={s} className={`w-4 h-4 ${s <= Math.round(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-slate-200'}`} aria-hidden="true" />
               ))}
             </div>
-            <span className="text-sm text-slate-500">{Number(product.rating).toFixed(1)} ({product.reviewCount} đánh giá)</span>
-            <span className="text-slate-300">|</span>
-            <span className="text-sm text-slate-500">Đã bán {product.soldCount}</span>
+            <span className="text-sm text-slate-500">
+              {Number(product.rating).toFixed(1)} ({t('product.reviews_count', { count: product.reviewCount, defaultValue: `${product.reviewCount} reviews` })})
+            </span>
+            <span className="text-slate-300" aria-hidden="true">|</span>
+            <span className="text-sm text-slate-500">
+              {t('product.sold_count', { count: product.soldCount, defaultValue: `Sold ${product.soldCount}` })}
+            </span>
           </div>
 
           {/* Unit / Packaging Switcher */}
           {product.packagingVariants?.length > 1 && (
             <div className="mb-6">
-              <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Quy cách đóng gói</p>
-              <div className="flex flex-wrap gap-2">
+              <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
+                {t('product.packaging_variants', { defaultValue: 'Packaging Options' })}
+              </p>
+              <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Select packaging variant">
                 {product.packagingVariants.map(v => (
                   <button
                     key={v.id ?? v.label}
                     onClick={() => setSelectedVariant(v)}
+                    aria-checked={selectedVariant?.label === v.label}
+                    role="radio"
                     className={cn(
                       'flex flex-col items-start px-4 py-2.5 rounded-xl border-2 transition-all duration-200 text-left min-w-[90px]',
                       selectedVariant?.label === v.label
@@ -202,10 +209,10 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          <div className="flex items-end gap-3 mb-6">
+          <div className="flex items-end gap-3 mb-6" aria-label="Pricing">
             <span className="text-3xl font-display font-bold text-brand-600">{formatCurrency(activePrice)}</span>
             {product.originalPrice && activePrice < product.originalPrice && (
-              <span className="text-lg text-slate-400 line-through">{formatCurrency(product.originalPrice)}</span>
+              <span className="text-lg text-slate-400 line-through" aria-label="Original price">{formatCurrency(product.originalPrice)}</span>
             )}
             {selectedVariant && (
               <span className="ml-1 px-2.5 py-1 bg-brand-50 text-brand-600 text-xs font-black rounded-lg uppercase tracking-wide">
@@ -217,22 +224,30 @@ export default function ProductDetailPage() {
           {/* Tags */}
           <div className="flex gap-2 mb-6 flex-wrap">
             {product.inStock ? (
-              <Badge color="green">Còn hàng {product.totalStock !== null && `(${product.totalStock})`}</Badge>
+              <Badge color="green">{t('product.in_stock_with_count', { count: product.totalStock, defaultValue: 'In Stock' })}</Badge>
             ) : (
-              <Badge color="red">Hết hàng</Badge>
+              <Badge color="red">{t('product.out_of_stock', { defaultValue: 'Out of Stock' })}</Badge>
             )}
-            {product.isPrescription && <Badge color="orange">Thuốc kê đơn</Badge>}
+            {product.isPrescription && <Badge color="orange">{t('product.rx_required', { defaultValue: 'Prescription Required' })}</Badge>}
             {product.tags?.map(tag => <Badge key={tag} color="blue">{tag}</Badge>)}
           </div>
 
           {/* Qty + Add to Cart */}
           <div className="flex items-center gap-4 mb-6">
             <div className="flex items-center gap-2 border border-surface-border rounded-xl overflow-hidden">
-              <button onClick={() => setQty(q => Math.max(1, q - 1))} className="p-3 hover:bg-slate-100 transition-colors">
+              <button 
+                onClick={() => setQty(q => Math.max(1, q - 1))} 
+                className="p-3 hover:bg-slate-100 transition-colors"
+                aria-label="Decrease quantity"
+              >
                 <Minus className="w-4 h-4" />
               </button>
-              <span className="w-12 text-center font-semibold">{qty}</span>
-              <button onClick={() => setQty(q => q + 1)} className="p-3 hover:bg-slate-100 transition-colors">
+              <span className="w-12 text-center font-semibold" aria-label="Current quantity">{qty}</span>
+              <button 
+                onClick={() => setQty(q => q + 1)} 
+                className="p-3 hover:bg-slate-100 transition-colors"
+                aria-label="Increase quantity"
+              >
                 <Plus className="w-4 h-4" />
               </button>
             </div>
@@ -243,11 +258,13 @@ export default function ProductDetailPage() {
               leftIcon={<ShoppingCart className="w-5 h-5" />}
               className="flex-1"
             >
-              {product.inStock ? 'Thêm vào giỏ' : 'Hết hàng'}
+              {product.inStock ? t('product.add_to_cart', { defaultValue: 'Add to Cart' }) : t('product.out_of_stock')}
             </Button>
             <button 
               onClick={handleToggleFavorite}
               disabled={isToggling}
+              aria-label={isFavorite ? t('product.remove_wishlist') : t('product.add_wishlist')}
+              aria-pressed={isFavorite}
               className={cn(
                 "p-3 rounded-xl border transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50",
                 isFavorite 
@@ -262,39 +279,39 @@ export default function ProductDetailPage() {
           {/* Trust */}
           <div className="grid grid-cols-3 gap-3 p-4 bg-slate-50 rounded-xl">
             {[
-              { icon: Shield, label: 'Authentic',    sub: 'MOH certified' },
-              { icon: Truck,  label: 'Fast Delivery', sub: 'Same-day option' },
-              { icon: RotateCcw, label: 'Easy Returns', sub: '7-day policy' },
-            ].map(({ icon: Icon, label, sub }) => (
-              <div key={label} className="flex flex-col items-center text-center gap-1">
-                <Icon className="w-5 h-5 text-brand-500" />
-                <p className="text-xs font-semibold text-slate-700">{label}</p>
-                <p className="text-[10px] text-slate-400">{sub}</p>
+              { icon: Shield, labelKey: 'product.trust.authentic',    subKey: 'product.trust.authentic_sub' },
+              { icon: Truck,  labelKey: 'product.trust.fast_delivery', subKey: 'product.trust.fast_delivery_sub' },
+              { icon: RotateCcw, labelKey: 'product.trust.easy_returns', subKey: 'product.trust.easy_returns_sub' },
+            ].map(({ icon: Icon, labelKey, subKey }) => (
+              <div key={labelKey} className="flex flex-col items-center text-center gap-1">
+                <Icon className="w-5 h-5 text-brand-500" aria-hidden="true" />
+                <p className="text-xs font-semibold text-slate-700">{t(labelKey)}</p>
+                <p className="text-[10px] text-slate-400">{t(subKey)}</p>
               </div>
             ))}
           </div>
 
           {/* Batch info */}
-          <div className="mt-4 text-xs text-slate-400 space-y-0.5">
-            <p>Batch: <span className="font-mono text-slate-600">{product.batchNumber}</span></p>
-            <p>Expires: <span className="text-slate-600">{formatDate(product.expiryDate)}</span></p>
+          <div className="mt-4 text-xs text-slate-400 space-y-0.5" aria-label="Batch information">
+            <p>{t('product.batch', { defaultValue: 'Batch' })}: <span className="font-mono text-slate-600">{product.batchNumber}</span></p>
+            <p>{t('product.expires', { defaultValue: 'Expires' })}: <span className="text-slate-600">{formatDate(product.expiryDate)}</span></p>
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs Section */}
       <div className="card overflow-hidden">
-        <div className="p-6 border-b border-surface-border bg-slate-50/50">
-          <h2 className="text-xl font-display font-bold text-slate-900">Mô tả sản phẩm</h2>
+        <div className="p-4 sm:p-6 border-b border-surface-border bg-slate-50/50">
+          <h2 className="text-lg sm:text-xl font-display font-bold text-slate-900">{t('product.description_title', { defaultValue: 'Product Description' })}</h2>
         </div>
-        <div className="flex border-b border-surface-border overflow-x-auto no-scrollbar scroll-smooth">
+        <div className="flex border-b border-surface-border overflow-x-auto no-scrollbar scroll-smooth snap-x" role="tablist">
           {[
-            { id: 'thanh_phan', label: 'Thành phần', keys: ['thanh_phan_chi_tiet', 'ingredients', 'thanh_phan'] },
-            { id: 'chi_dinh', label: 'Chỉ định', keys: ['mo_ta_chung', 'chi_dinh', 'cong_dung'] },
-            { id: 'cach_su_dung', label: 'Cách Sử Dụng', keys: ['huong_dan_su_dung', 'cach_su_dung'] },
-            { id: 'than_trong', label: 'Thận trọng', keys: ['than_trong', 'tac_dung_phu', 'canh_bao_than_trong', 'chong_chi_dinh', 'nhom_benh_nhan_dac_biet'] },
-            { id: 'thong_tin_san_xuat', label: 'Thông tin sản xuất', keys: ['thong_tin_san_xuat'] },
-            { id: 'reviews', label: 'Đánh giá', keys: [] },
+            { id: 'thanh_phan', label: t('product.tabs.ingredients', { defaultValue: 'Ingredients' }), keys: ['thanh_phan_chi_tiet', 'ingredients', 'thanh_phan'] },
+            { id: 'chi_dinh', label: t('product.tabs.usage', { defaultValue: 'Usage & Indications' }), keys: ['mo_ta_chung', 'chi_dinh', 'cong_dung'] },
+            { id: 'cach_su_dung', label: t('product.tabs.how_to_use', { defaultValue: 'How to Use' }), keys: ['huong_dan_su_dung', 'cach_su_dung'] },
+            { id: 'than_trong', label: t('product.tabs.precautions', { defaultValue: 'Precautions' }), keys: ['than_trong', 'tac_dung_phu', 'canh_bao_than_trong', 'chong_chi_dinh', 'nhom_benh_nhan_dac_biet'] },
+            { id: 'thong_tin_san_xuat', label: t('product.tabs.manufacturing', { defaultValue: 'Manufacturing' }), keys: ['thong_tin_san_xuat'] },
+            { id: 'reviews', label: t('product.tabs.reviews', { defaultValue: 'Reviews' }), keys: [] },
           ].filter(t => 
             t.id === 'reviews' || 
             (product.chi_tiet_thuoc && t.keys.some(k => product.chi_tiet_thuoc[k])) ||
@@ -302,10 +319,13 @@ export default function ProductDetailPage() {
           ).map(tab => (
             <button
               key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              aria-controls={`panel-${tab.id}`}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-5 text-base font-bold whitespace-nowrap transition-all relative ${
+              className={`px-4 sm:px-6 py-3 sm:py-5 text-sm sm:text-base font-bold whitespace-nowrap transition-all relative snap-start ${
                 activeTab === tab.id 
-                  ? 'text-brand-600 underline-offset-8' 
+                  ? 'text-brand-600' 
                   : 'text-slate-500 hover:text-slate-800'
               }`}
             >
@@ -316,14 +336,14 @@ export default function ProductDetailPage() {
             </button>
           ))}
         </div>
-        <div className="p-10">
+        <div className="p-4 sm:p-6 md:p-10" id={`panel-${activeTab}`} role="tabpanel">
           {activeTab === 'thanh_phan' && (
-            <div className="space-y-8">
+            <div className="space-y-8 animate-fade-in">
               {product.chi_tiet_thuoc?.thanh_phan_chi_tiet?.hoat_chat && (
                 <section>
                   <h3 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-500" />
-                    Hoạt chất
+                    {t('product.active_ingredient', { defaultValue: 'Active Ingredient' })}
                   </h3>
                   <RenderSafeContent content={product.chi_tiet_thuoc.thanh_phan_chi_tiet.hoat_chat} className="text-base text-slate-700 leading-relaxed font-medium pl-3.5" />
                 </section>
@@ -332,7 +352,7 @@ export default function ProductDetailPage() {
                 <section>
                   <h3 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                    Tá dược
+                    {t('product.excipients', { defaultValue: 'Excipients' })}
                   </h3>
                   <RenderSafeContent content={product.chi_tiet_thuoc.thanh_phan_chi_tiet.ta_duoc} className="text-base text-slate-700 leading-relaxed pl-3.5" />
                 </section>
@@ -341,7 +361,7 @@ export default function ProductDetailPage() {
                 <section>
                   <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-500" />
-                    Chi tiết thành phần
+                    {t('product.ingredient_details', { defaultValue: 'Ingredient Details' })}
                   </h3>
                   <div className="pl-3.5">
                     <RenderSafeContent content={product.chi_tiet_thuoc?.ingredients || product.chi_tiet_thuoc?.thanh_phan} className="text-base text-slate-700 leading-relaxed font-medium" />
@@ -352,13 +372,13 @@ export default function ProductDetailPage() {
           )}
 
           {activeTab === 'chi_dinh' && (
-            <div className="text-base text-slate-700 leading-relaxed font-medium">
+            <div className="text-base text-slate-700 leading-relaxed font-medium animate-fade-in">
               <RenderSafeContent content={product.chi_tiet_thuoc?.mo_ta_chung || product.chi_tiet_thuoc?.chi_dinh || product.chi_tiet_thuoc?.cong_dung || product.description} />
             </div>
           )}
 
           {activeTab === 'cach_su_dung' && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-fade-in">
               {product.chi_tiet_thuoc?.huong_dan_su_dung ? (
                 <RenderSafeContent content={product.chi_tiet_thuoc.huong_dan_su_dung} />
               ) : (
@@ -368,11 +388,11 @@ export default function ProductDetailPage() {
           )}
 
           {activeTab === 'than_trong' && (
-            <div className="space-y-8">
+            <div className="space-y-8 animate-fade-in">
               {product.chi_tiet_thuoc?.chong_chi_dinh && (
-                <section className="p-5 bg-red-50/50 rounded-2xl border border-red-100 shadow-sm">
+                <section className="p-5 bg-red-50/50 rounded-2xl border border-red-100 shadow-sm" role="alert">
                   <h3 className="text-base font-bold text-red-900 mb-2.5 flex items-center gap-2">
-                    🚫 Chống chỉ định
+                    🚫 {t('product.contraindications', { defaultValue: 'Contraindications' })}
                   </h3>
                   <div className="text-red-800 font-medium">
                     <RenderSafeContent content={product.chi_tiet_thuoc.chong_chi_dinh} className="text-base leading-relaxed" />
@@ -381,7 +401,7 @@ export default function ProductDetailPage() {
               )}
               {(product.chi_tiet_thuoc?.canh_bao_than_trong || product.chi_tiet_thuoc?.than_trong) && (
                 <section>
-                  <h3 className="text-lg font-bold text-slate-900 mb-3">Cảnh báo & Thận trọng</h3>
+                  <h3 className="text-lg font-bold text-slate-900 mb-3">{t('product.warnings_precautions', { defaultValue: 'Warnings & Precautions' })}</h3>
                   <div className="pl-3.5">
                     <RenderSafeContent content={product.chi_tiet_thuoc?.canh_bao_than_trong || product.chi_tiet_thuoc?.than_trong} />
                   </div>
@@ -389,7 +409,7 @@ export default function ProductDetailPage() {
               )}
               {product.chi_tiet_thuoc?.tac_dung_phu && (
                 <section>
-                  <h3 className="text-lg font-bold text-slate-900 mb-3">Tác dụng phụ</h3>
+                  <h3 className="text-lg font-bold text-slate-900 mb-3">{t('product.side_effects', { defaultValue: 'Side Effects' })}</h3>
                   <div className="pl-3.5">
                     <RenderSafeContent content={product.chi_tiet_thuoc.tac_dung_phu} className="text-base text-slate-700 leading-relaxed font-medium" />
                   </div>
@@ -397,14 +417,14 @@ export default function ProductDetailPage() {
               )}
               {product.chi_tiet_thuoc?.tuong_tac_thuoc && (
                 <section>
-                  <h3 className="text-base font-bold text-slate-900 mb-3">Tương tác thuốc</h3>
+                  <h3 className="text-base font-bold text-slate-900 mb-3">{t('product.drug_interactions', { defaultValue: 'Drug Interactions' })}</h3>
                   {Array.isArray(product.chi_tiet_thuoc.tuong_tac_thuoc) ? (
                     <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
                       <table className="w-full text-base text-left">
                         <thead className="bg-slate-50 text-slate-900 font-bold">
                           <tr>
-                            <th className="px-5 py-3 border-b">Thuốc/Thực phẩm</th>
-                            <th className="px-5 py-3 border-b">Hậu quả</th>
+                            <th className="px-5 py-3 border-b">{t('product.interaction_item', { defaultValue: 'Item' })}</th>
+                            <th className="px-5 py-3 border-b">{t('product.interaction_effect', { defaultValue: 'Effect' })}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 italic">
@@ -428,22 +448,16 @@ export default function ProductDetailPage() {
                 <section>
                   <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
                     <span className="w-1 h-5 bg-brand-500 rounded-full" />
-                    Nhóm bệnh nhân đặc biệt
+                    {t('product.special_patient_groups', { defaultValue: 'Special Patient Groups' })}
                   </h3>
                   <div className="grid gap-4 sm:grid-cols-2">
                     {typeof product.chi_tiet_thuoc.nhom_benh_nhan_dac_biet === 'object' && !Array.isArray(product.chi_tiet_thuoc.nhom_benh_nhan_dac_biet) ? (
                       Object.entries(product.chi_tiet_thuoc.nhom_benh_nhan_dac_biet)
                         .filter(([_, val]) => val && String(val).trim() !== '')
                         .map(([key, val]) => {
-                          const labels = {
-                            phu_nu_mang_thai: 'Phụ nữ mang thai',
-                            phu_nu_cho_con_bu: 'Phụ nữ cho con bú',
-                            tre_em: 'Trẻ em',
-                            nguoi_cao_tuoi: 'Người cao tuổi',
-                            suy_than: 'Suy thận',
-                            suy_gan: 'Suy gan',
-                          }
-                          const label = labels[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                          const label = t(`product.special_groups.${key}`, { 
+                            defaultValue: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) 
+                          })
 
                           return (
                             <div key={key} className="p-5 bg-gradient-to-br from-slate-50 to-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
@@ -468,13 +482,13 @@ export default function ProductDetailPage() {
           )}
 
           {activeTab === 'thong_tin_san_xuat' && product.chi_tiet_thuoc?.thong_tin_san_xuat && (
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-5 sm:grid-cols-2 animate-fade-in">
               {[
-                { label: 'Thương hiệu', value: product.chi_tiet_thuoc.thong_tin_san_xuat.thuong_hieu, icon: '🏷️' },
-                { label: 'Nhà sản xuất', value: product.chi_tiet_thuoc.thong_tin_san_xuat.nha_san_xuat, icon: '🏭' },
-                { label: 'Xuất xứ', value: product.chi_tiet_thuoc.thong_tin_san_xuat.xuat_xu, icon: '📍' },
-                { label: 'Quy cách đóng gói', value: product.chi_tiet_thuoc.thong_tin_san_xuat.quy_cach, icon: '📦' },
-                { label: 'Bảo quản', value: product.chi_tiet_thuoc.thong_tin_san_xuat.bao_quan, icon: '🌡️' },
+                { label: t('product.manufacturing.brand'), value: product.chi_tiet_thuoc.thong_tin_san_xuat.thuong_hieu, icon: '🏷️' },
+                { label: t('product.manufacturing.manufacturer'), value: product.chi_tiet_thuoc.thong_tin_san_xuat.nha_san_xuat, icon: '🏭' },
+                { label: t('product.manufacturing.origin'), value: product.chi_tiet_thuoc.thong_tin_san_xuat.xuat_xu, icon: '📍' },
+                { label: t('product.manufacturing.packaging'), value: product.chi_tiet_thuoc.thong_tin_san_xuat.quy_cach, icon: '📦' },
+                { label: t('product.manufacturing.storage'), value: product.chi_tiet_thuoc.thong_tin_san_xuat.bao_quan, icon: '🌡️' },
               ].filter(i => i.value).map(item => (
                 <div key={item.label} className="flex items-start gap-4 p-5 bg-white rounded-3xl border border-slate-100 shadow-sm hover:border-brand-200 hover:shadow-md transition-all group">
                   <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-xl group-hover:bg-brand-50 transition-colors">
@@ -490,8 +504,8 @@ export default function ProductDetailPage() {
           )}
 
           {activeTab === 'reviews' && (
-            <div className="text-slate-500 text-base py-12 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 font-medium">
-              Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này.
+            <div className="text-slate-500 text-base py-12 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 font-medium animate-fade-in shadow-inner">
+              {t('product.no_reviews', { defaultValue: 'No reviews yet. Be the first to review this product.' })}
             </div>
           )}
         </div>

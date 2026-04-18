@@ -7,6 +7,45 @@ import { ProductCard, ProductCardSkeleton } from '@/components/ui/ProductCard'
 import { useCategoryStore } from '@/store/categoryStore'
 import { useTranslation } from 'react-i18next'
 
+const FlashSaleCountdown = () => {
+  const [timeLeft, setTimeLeft] = useState({ hours: '00', minutes: '00', seconds: '00' });
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date();
+      const target = new Date();
+      target.setHours(23, 59, 59, 0);
+      
+      const difference = target.getTime() - now.getTime();
+      
+      if (difference > 0) {
+        const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((difference / 1000 / 60) % 60);
+        const seconds = Math.floor((difference / 1000) % 60);
+        
+        setTimeLeft({
+          hours: hours.toString().padStart(2, '0'),
+          minutes: minutes.toString().padStart(2, '0'),
+          seconds: seconds.toString().padStart(2, '0')
+        });
+      }
+    };
+
+    const timer = setInterval(calculateTimeLeft, 1000);
+    calculateTimeLeft();
+    
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-2 text-white">
+      <span className="bg-black/20 px-2 py-1 rounded-md font-bold tabular-nums w-10 text-center">{timeLeft.hours}</span> :
+      <span className="bg-black/20 px-2 py-1 rounded-md font-bold tabular-nums w-10 text-center">{timeLeft.minutes}</span> :
+      <span className="bg-black/20 px-2 py-1 rounded-md font-bold tabular-nums w-10 text-center">{timeLeft.seconds}</span>
+    </div>
+  );
+};
+
 export default function HomePage() {
   const { t, i18n } = useTranslation()
   const [featured, setFeatured] = useState([])
@@ -18,7 +57,7 @@ export default function HomePage() {
 
   const BANNERS = [
     { id: 1, title: t('home.banner1_title', { defaultValue: 'Trusted Medicines, Delivered Fast' }), subtitle: t('home.banner1_desc', { defaultValue: 'Shop 10,000+ certified pharmaceutical products' }), cta: t('home.shop_now'), to: '/products', bg: 'from-brand-600 to-brand-800', img: '💊', image: 'https://wallpapercave.com/wp/wp15262378.jpg' },
-    { id: 2, title: t('home.banner2_title', { defaultValue: 'Vitamins & Supplements Sale' }), subtitle: t('home.banner2_desc', { defaultValue: 'Up to 30% off premium health supplements' }), cta: t('home.view_deals', { defaultValue: 'View Deals' }), to: '/products?category=1', bg: 'from-teal-500 to-teal-700', img: '🌿', image: 'https://wallpapercave.com/wp/wp14241262.jpg' },
+    { id: 2, title: t('home.banner2_title', { defaultValue: 'Vitamins & Supplements Sale' }), subtitle: t('home.banner2_desc', { defaultValue: 'Up to 30% off premium health supplements' }), cta: t('home.view_deals', { defaultValue: 'View Deals' }), to: '/products?category=1', bg: 'from-teal-500 to-teal-700', img: '🌿', image: 'https://thumbs.dreamstime.com/z/vitamins-supplements-shelves-different-types-pharmacy-45969522.jpg' },
     { id: 3, title: t('home.banner3_title', { defaultValue: 'Free Delivery Over 500K' }), subtitle: t('home.banner3_desc', { defaultValue: 'Fast, secure pharmaceutical delivery' }), cta: t('home.start_shopping', { defaultValue: 'Start Shopping' }), to: '/products', bg: 'from-purple-600 to-purple-800', img: '🚚', image: 'https://wallpapercave.com/wp/wp13751014.jpg' },
   ]
 
@@ -59,52 +98,60 @@ export default function HomePage() {
   }, [BANNERS.length])
 
   return (
-    <div className="animate-fade-in bg-surface pb-12">
-      {/* Hero Section */}
-      <section className="bg-white pb-6 pt-4">
+    <div className="animate-fade-in bg-white pb-12">
+      {/* Hero Section - Tall Contained Design */}
+      <section className="bg-white pb-12 pt-6">
         <div className="page-container">
-          <div>
-            {/* Main Slider */}
-            <div className="relative group overflow-hidden rounded-2xl shadow-sm h-[200px] md:h-[320px] lg:h-[380px]">
-              <div 
-                className={`w-full h-full ${!BANNERS[activeBanner].image ? `bg-gradient-to-br ${BANNERS[activeBanner].bg}` : 'bg-cover bg-center'} transition-all duration-700 flex items-center px-12 text-white relative`}
-                style={BANNERS[activeBanner].image ? { backgroundImage: `url(${BANNERS[activeBanner].image})` } : {}}
-              >
-                {/* Overlay for image clarity */}
-                {BANNERS[activeBanner].image && <div className="absolute inset-0 bg-brand-900/40 backdrop-blur-[2px]" />}
-                
-                <div className="max-w-md relative z-10">
-                  <span className="inline-block bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest mb-4">{t('home.exclusive_offers')}</span>
-                  <h2 className="text-3xl md:text-5xl font-black mb-4 leading-tight">{BANNERS[activeBanner].title}</h2>
-                  <p className="text-lg text-white/90 mb-8 hidden md:block line-clamp-2">{BANNERS[activeBanner].subtitle}</p>
-                  <Link to={BANNERS[activeBanner].to} className="inline-flex items-center gap-2 bg-white text-brand-600 font-black px-8 py-3.5 rounded-xl hover:bg-brand-50 transition-all shadow-xl shadow-brand-900/10">
-                    {BANNERS[activeBanner].cta} <ArrowRight className="w-5 h-5" />
-                  </Link>
-                </div>
-                {!BANNERS[activeBanner].image && (
-                  <div className="hidden md:flex flex-1 justify-center text-[180px] opacity-20 transform translate-x-12 rotate-12">
-                    {BANNERS[activeBanner].img}
-                  </div>
-                )}
-              </div>
+          {/* Main Slider - Very tall height as requested */}
+          <div className="relative group overflow-hidden rounded-[40px] shadow-2xl h-[450px] tablet:h-[600px] laptop:h-[750px]">
+            <div 
+              className={`w-full h-full ${!BANNERS[activeBanner].image ? `bg-gradient-to-br ${BANNERS[activeBanner].bg}` : 'bg-cover bg-center'} transition-all duration-1000 flex items-center px-8 tablet:px-24 text-white relative`}
+              style={BANNERS[activeBanner].image ? { backgroundImage: `url(${BANNERS[activeBanner].image})` } : {}}
+            >
+              {/* Premium Layered Overlay with Backdrop Blur */}
+              {BANNERS[activeBanner].image && (
+                <div className="absolute inset-0 bg-gradient-to-r from-brand-950/90 via-brand-950/40 to-transparent backdrop-blur-[2px] z-[1]" />
+              )}
               
-              {/* Slider Dots */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5">
-                {BANNERS.map((_, i) => (
-                  <button 
-                    key={i} 
-                    onClick={() => setActiveBanner(i)}
-                    className={`h-2 rounded-full transition-all duration-300 ${i === activeBanner ? 'bg-white w-8' : 'bg-white/40 w-2 hover:bg-white/60'}`}
-                  />
-                ))}
+              <div className="max-w-2xl relative z-10 animate-slide-up">
+                <span className="inline-block bg-white/10 backdrop-blur-xl px-4 py-1.5 tablet:px-6 tablet:py-2 rounded-full text-[11px] tablet:text-[14px] font-black uppercase tracking-[0.2em] tablet:tracking-[0.3em] mb-6 tablet:mb-10 border border-white/20 shadow-xl">
+                  {t('home.exclusive_offers')}
+                </span>
+                <h2 className="text-3xl tablet:text-8xl font-black mb-6 tablet:mb-10 leading-[1.1] tablet:leading-[1] tracking-tighter drop-shadow-2xl">
+                  {BANNERS[activeBanner].title}
+                </h2>
+                <p className="text-lg tablet:text-2xl text-white/90 mb-8 tablet:mb-14 hidden tablet:block line-clamp-3 font-medium max-w-xl leading-relaxed">
+                  {BANNERS[activeBanner].subtitle}
+                </p>
+                <Link to={BANNERS[activeBanner].to} className="inline-flex items-center gap-3 tablet:gap-4 bg-white text-brand-600 font-extrabold px-8 py-4 tablet:px-14 tablet:py-6 rounded-xl tablet:rounded-[24px] hover:bg-brand-50 transition-all shadow-2xl shadow-brand-950/60 hover:-translate-y-2 active:scale-95 text-base tablet:text-xl uppercase tracking-widest">
+                  {BANNERS[activeBanner].cta} <ArrowRight className="w-5 h-5 tablet:w-7 tablet:h-7" />
+                </Link>
               </div>
+
+              {!BANNERS[activeBanner].image && (
+                <div className="hidden tablet:flex absolute right-[10%] top-1/2 -translate-y-1/2 text-[400px] opacity-10 transform rotate-12 select-none pointer-events-none">
+                  {BANNERS[activeBanner].img}
+                </div>
+              )}
+            </div>
+            
+            {/* Extended Slider Controls */}
+            <div className="absolute bottom-8 tablet:bottom-12 left-1/2 -translate-x-1/2 flex gap-3 tablet:gap-4 z-20">
+              {BANNERS.map((_, i) => (
+                <button 
+                  key={i} 
+                  onClick={() => setActiveBanner(i)}
+                  className={`h-1.5 tablet:h-2 rounded-full transition-all duration-700 ${i === activeBanner ? 'bg-white w-12 tablet:w-24' : 'bg-white/30 w-4 tablet:w-8 hover:bg-white/50'}`}
+                  aria-label={`Go to slide ${i + 1}`}
+                />
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       {/* Support Bar */}
-      <section className="bg-white border-b border-surface-border">
+      <section className="bg-white">
         <div className="page-container py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {TRUST_ITEMS.map(({ icon: Icon, label, desc }, i) => (
@@ -147,21 +194,17 @@ export default function HomePage() {
       {/* Flash Sale Section */}
       <section className="page-container mb-12">
         <div className="bg-medical-red rounded-2xl overflow-hidden shadow-xl shadow-medical-red/10">
-          <div className="bg-medical-red px-6 py-4 flex items-center justify-between">
+          <div className="bg-medical-red px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase italic">{t('home.flash_sale')}</h2>
-              <div className="flex items-center gap-2 text-white">
-                <span className="bg-black/20 px-2 py-1 rounded-md font-bold tabular-nums">04</span> :
-                <span className="bg-black/20 px-2 py-1 rounded-md font-bold tabular-nums">24</span> :
-                <span className="bg-black/20 px-2 py-1 rounded-md font-bold tabular-nums">59</span>
-              </div>
+              <FlashSaleCountdown />
             </div>
             <Link to="/products" className="text-white text-xs font-black uppercase hover:underline">{t('home.low_stock')}</Link>
           </div>
           <div className="bg-white p-4">
-            <div className="flex overflow-x-auto gap-4 no-scrollbar pb-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
               {featured.slice(0, 6).map(p => (
-                <div key={p.id} className="min-w-[180px] max-w-[200px]">
+                <div key={p.id} className="flex flex-col h-full">
                   <ProductCard product={p} className="border-none shadow-none hover:shadow-none translate-y-0" />
                   <div className="mt-2 px-3">
                     <div className="h-4 bg-red-100 rounded-full relative overflow-hidden">

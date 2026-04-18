@@ -15,8 +15,8 @@ export const formatDateTime = (date) =>
 
 export const formatRelativeTime = (date) => {
   const diff = dayjs().diff(dayjs(date), 'minute')
-  if (diff < 1)   return 'Just now'
-  if (diff < 60)  return `${diff}m ago`
+  if (diff < 1) return 'Just now'
+  if (diff < 60) return `${diff}m ago`
   if (diff < 1440) return `${Math.floor(diff / 60)}h ago`
   return dayjs(date).format('DD/MM/YYYY')
 }
@@ -85,7 +85,7 @@ export const fileToBase64 = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.readAsDataURL(file)
-    reader.onload  = () => resolve(reader.result)
+    reader.onload = () => resolve(reader.result)
     reader.onerror = reject
   })
 

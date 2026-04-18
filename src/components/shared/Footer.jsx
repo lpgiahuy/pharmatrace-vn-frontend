@@ -49,8 +49,7 @@ export const Footer = () => {
                 { label: 'Sản phẩm cho bé', en: 'Baby Products' }
               ].map(item => (
                 <li key={item.en}>
-                  <Link to="/products" className="hover:text-green-300 transition-all flex items-center gap-2 group">
-                    <span className="w-1.5 h-1.5 bg-white/50 rounded-full group-hover:bg-medical-green group-hover:scale-125 transition-all" /> 
+                  <Link to="/products" className="hover:text-green-300 transition-all flex items-center hover:translate-x-1 duration-300">
                     {i18n.language?.startsWith('en') ? item.en : item.label}
                   </Link>
                 </li>
@@ -74,8 +73,7 @@ export const Footer = () => {
                 { label: 'Tra cứu nguồn gốc', en: 'Product Traceability' }
               ].map(item => (
                 <li key={item.en}>
-                  <Link to={item.label.includes('Tra cứu') ? '/trace' : '#'} className="hover:text-green-300 transition-all flex items-center gap-2 group">
-                    <span className="w-1.5 h-1.5 bg-white/50 rounded-full group-hover:bg-medical-green group-hover:scale-125 transition-all" /> 
+                  <Link to={item.label.includes('Tra cứu') ? '/trace' : '#'} className="hover:text-green-300 transition-all flex items-center hover:translate-x-1 duration-300">
                     {i18n.language?.startsWith('en') ? item.en : item.label}
                   </Link>
                 </li>
@@ -114,7 +112,7 @@ export const Footer = () => {
                   </div>
                   <div>
                       <p className="text-white/70 text-[10px] uppercase font-black tracking-tighter">{t('footer.head_office')}</p>
-                      <p className="text-white font-black text-sm">{i18n.language?.startsWith('en') ? 'District 1, Ho Chi Minh City' : 'Quận 1, TP. Hồ Chí Minh'}</p>
+                      <p className="text-white font-black text-sm">{i18n.language?.startsWith('en') ? 'Ho Chi Minh City' : 'TP. Hồ Chí Minh'}</p>
                   </div>
               </li>
             </ul>

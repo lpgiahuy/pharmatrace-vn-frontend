@@ -80,17 +80,113 @@
     "member": "Thành viên",
     "not_updated": "Chưa cập nhật"
   },
+  "common": {
+    "retry": "Thử lại",
+    "loading": "Đang tải...",
+    "show_more": "Xem thêm",
+    "show_more_count": "Xem thêm ({{count}})",
+    "show_less": "Thu gọn",
+    "clear_all": "Xóa tất cả"
+  },
   "product": {
     "out_of_stock": "Hết hàng",
     "free_fast_delivery": "MIỄN PHÍ GIAO NHANH",
     "brand_label": "NHÃN HÀNG",
     "select_buy": "Chọn mua",
+    "off": "GIẢM",
+    "reviews_count": "{{count}} đánh giá",
+    "sold_count": "Đã bán {{count}}",
+    "packaging_variants": "Quy cách đóng gói",
+    "in_stock_with_count": "Còn hàng ({{count}})",
+    "rx_required": "Thuốc kê đơn",
+    "add_to_cart": "Thêm vào giỏ",
+    "add_wishlist": "Thêm vào yêu thích",
+    "remove_wishlist": "Xóa khỏi yêu thích",
+    "trust": {
+      "authentic": "Chính hãng",
+      "authentic_sub": "Chứng nhận Bộ Y Tế",
+      "fast_delivery": "Giao nhanh",
+      "fast_delivery_sub": "Trong ngày",
+      "easy_returns": "Đổi trả dễ dàng",
+      "easy_returns_sub": "Trong 7 ngày"
+    },
+    "batch": "Số lô",
+    "expires": "Hạn dùng",
+    "description_title": "Mô tả sản phẩm",
+    "tabs": {
+      "ingredients": "Thành phần",
+      "usage": "Chỉ định",
+      "how_to_use": "Cách dùng",
+      "precautions": "Thận trọng",
+      "manufacturing": "Sản xuất",
+      "reviews": "Đánh giá"
+    },
+    "detail_labels": {
+      "hoat_chat": "Hoạt chất",
+      "ta_duoc": "Tá dược",
+      "lieu_dung": "Liều dùng & Cách dùng",
+      "cach_dung": "Cách dùng",
+      "qua_lieu_va_xu_tri": "Quá liều và xử trí",
+      "xu_tri": "Xử trí",
+      "trieu_chung": "Triệu chứng",
+      "quen_lieu": "Quên liều",
+      "huong_dan_su_dung": "Hướng dẫn sử dụng"
+    },
+    "special_groups": {
+      "phu_nu_mang_thai": "Phụ nữ mang thai",
+      "phu_nu_cho_con_bu": "Phụ nữ cho con bú",
+      "tre_em": "Trẻ em",
+      "nguoi_cao_tuoi": "Người cao tuổi",
+      "suy_than": "Suy thận",
+      "suy_gan": "Suy gan"
+    },
+    "manufacturing": {
+      "brand": "Thương hiệu",
+      "manufacturer": "Nhà sản xuất",
+      "origin": "Xuất xứ",
+      "packaging": "Quy cách",
+      "storage": "Bảo quản"
+    },
+    "no_reviews": "Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này.",
+    "active_ingredient": "Hoạt chất",
+    "excipients": "Tá dược",
+    "ingredient_details": "Chi tiết thành phần",
+    "contraindications": "Chống chỉ định",
+    "warnings_precautions": "Cảnh báo & Thận trọng",
+    "side_effects": "Tác dụng phụ",
+    "drug_interactions": "Tương tác thuốc",
+    "interaction_item": "Thuốc/Thực phẩm",
+    "interaction_effect": "Hậu quả",
+    "special_patient_groups": "Nhóm bệnh nhân đặc biệt",
     "unit": {
       "product": "Sản phẩm",
       "box": "Hộp",
       "bottle": "Chai",
       "tablet": "Viên"
     }
+  },
+  "product_list": {
+    "filters": "Bộ lọc",
+    "category": "Danh mục",
+    "all_categories": "Tất cả danh mục",
+    "price_range": "Khoảng giá (VND)",
+    "min_price": "Tối thiểu",
+    "max_price": "Tối đa",
+    "search_placeholder": "Tìm kiếm sản phẩm...",
+    "filters_btn": "Bộ lọc",
+    "results_count": "Tìm thấy {{count}} sản phẩm",
+    "for_query": "cho",
+    "error_loading": "Không thể tải sản phẩm",
+    "error_title": "Rất tiếc! Đã có lỗi xảy ra"
+  },
+  "sort": {
+    "newest": "Mới nhất",
+    "oldest": "Cũ nhất",
+    "price_asc": "Giá: Thấp đến Cao",
+    "price_desc": "Giá: Cao đến Thấp",
+    "name_asc": "Tên A-Z",
+    "best_selling": "Bán chạy nhất",
+    "top_rated": "Đánh giá cao nhất"
   },
   "order_status": {
     "ChoXacNhan": "Chờ xác nhận",

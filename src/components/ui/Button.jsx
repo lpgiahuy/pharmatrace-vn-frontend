@@ -1,4 +1,5 @@
 import { forwardRef } from 'react'
+import PropTypes from 'prop-types'
 import { cn } from '@/utils'
 import { Spinner } from './Spinner'
 
@@ -29,11 +30,15 @@ export const Button = forwardRef(({
   children,
   className,
   fullWidth = false,
+  type = 'button',
   ...props
 }, ref) => (
   <button
     ref={ref}
+    type={type}
     disabled={disabled || loading}
+    aria-busy={loading}
+    aria-disabled={disabled || loading}
     className={cn(
       'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-150 cursor-pointer select-none',
       'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -45,10 +50,25 @@ export const Button = forwardRef(({
     )}
     {...props}
   >
-    {loading ? <Spinner size="sm" className="text-current" /> : leftIcon}
-    {children}
+    {loading ? <Spinner size="sm" className="text-current shrink-0" /> : leftIcon}
+    <span className={cn(loading && 'opacity-0', 'transition-opacity')}>
+      {children}
+    </span>
     {!loading && rightIcon}
   </button>
 ))
 
 Button.displayName = 'Button'
+
+Button.propTypes = {
+  variant: PropTypes.oneOf(['primary', 'secondary', 'ghost', 'danger', 'success', 'outline']),
+  size: PropTypes.oneOf(['xs', 'sm', 'md', 'lg', 'xl']),
+  loading: PropTypes.bool,
+  disabled: PropTypes.bool,
+  leftIcon: PropTypes.node,
+  rightIcon: PropTypes.node,
+  children: PropTypes.node,
+  className: PropTypes.string,
+  fullWidth: PropTypes.bool,
+  type: PropTypes.oneOf(['button', 'submit', 'reset'])
+}

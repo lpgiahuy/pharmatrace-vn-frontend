@@ -80,17 +80,113 @@
     "member": "Member",
     "not_updated": "Not updated"
   },
+  "common": {
+    "retry": "Retry",
+    "loading": "Loading...",
+    "show_more": "Show more",
+    "show_more_count": "Show more ({{count}})",
+    "show_less": "Show less",
+    "clear_all": "Clear all"
+  },
   "product": {
     "out_of_stock": "Out of stock",
     "free_fast_delivery": "FREE FAST DELIVERY",
     "brand_label": "BRAND",
     "select_buy": "Buy",
+    "off": "OFF",
+    "reviews_count": "{{count}} reviews",
+    "sold_count": "Sold {{count}}",
+    "packaging_variants": "Packaging Options",
+    "in_stock_with_count": "In Stock ({{count}})",
+    "rx_required": "Prescription Required",
+    "add_to_cart": "Add to Cart",
+    "add_wishlist": "Add to Wishlist",
+    "remove_wishlist": "Remove from Wishlist",
+    "trust": {
+      "authentic": "Authentic",
+      "authentic_sub": "MOH certified",
+      "fast_delivery": "Fast Delivery",
+      "fast_delivery_sub": "Same-day option",
+      "easy_returns": "Easy Returns",
+      "easy_returns_sub": "7-day policy"
+    },
+    "batch": "Batch",
+    "expires": "Expires",
+    "description_title": "Product Description",
+    "tabs": {
+      "ingredients": "Ingredients",
+      "usage": "Usage & Indications",
+      "how_to_use": "How to Use",
+      "precautions": "Precautions",
+      "manufacturing": "Manufacturing",
+      "reviews": "Reviews"
+    },
+    "detail_labels": {
+      "hoat_chat": "Active Ingredient",
+      "ta_duoc": "Excipients",
+      "lieu_dung": "Dosage & Administration",
+      "cach_dung": "How to Use",
+      "qua_lieu_va_xu_tri": "Overdose & Treatment",
+      "xu_tri": "Treatment",
+      "trieu_chung": "Symptoms",
+      "quen_lieu": "Missed Dose",
+      "huong_dan_su_dung": "Instruction for Use"
+    },
+    "special_groups": {
+      "phu_nu_mang_thai": "Pregnant Women",
+      "phu_nu_cho_con_bu": "Breastfeeding Women",
+      "tre_em": "Children",
+      "nguoi_cao_tuoi": "Elderly",
+      "suy_than": "Renal Impairment",
+      "suy_gan": "Hepatic Impairment"
+    },
+    "manufacturing": {
+      "brand": "Brand",
+      "manufacturer": "Manufacturer",
+      "origin": "Origin",
+      "packaging": "Packaging",
+      "storage": "Storage"
+    },
+    "no_reviews": "No reviews yet. Be the first to review this product.",
+    "active_ingredient": "Active Ingredient",
+    "excipients": "Excipients",
+    "ingredient_details": "Ingredient Details",
+    "contraindications": "Contraindications",
+    "warnings_precautions": "Warnings & Precautions",
+    "side_effects": "Side Effects",
+    "drug_interactions": "Drug Interactions",
+    "interaction_item": "Item",
+    "interaction_effect": "Effect",
+    "special_patient_groups": "Special Patient Groups",
     "unit": {
       "product": "Product",
       "box": "Box",
       "bottle": "Bottle",
       "tablet": "Tablet"
     }
+  },
+  "product_list": {
+    "filters": "Filters",
+    "category": "Category",
+    "all_categories": "All Categories",
+    "price_range": "Price Range (VND)",
+    "min_price": "Min",
+    "max_price": "Max",
+    "search_placeholder": "Search products...",
+    "filters_btn": "Filters",
+    "results_count": "{{count}} products found",
+    "for_query": "for",
+    "error_loading": "Failed to load products",
+    "error_title": "Oops! Something went wrong"
+  },
+  "sort": {
+    "newest": "Newest First",
+    "oldest": "Oldest First",
+    "price_asc": "Price: Low to High",
+    "price_desc": "Price: High to Low",
+    "name_asc": "Name A-Z",
+    "best_selling": "Best Selling",
+    "top_rated": "Top Rated"
   },
   "order_status": {
     "ChoXacNhan": "Pending",

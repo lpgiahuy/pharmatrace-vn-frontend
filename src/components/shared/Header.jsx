@@ -30,50 +30,65 @@ export const Header = () => {
 
   return (
     <header className="sticky top-0 z-40">
-      {/* Top utility bar - Balanced alignment */}
-      <div className="bg-white border-b border-slate-200 py-2 hidden md:block">
-        <div className="page-container flex items-center justify-between text-[12px] font-bold text-slate-600">
-          <div className="flex items-center gap-6">
-            <Link to="/pharmacies" className="flex items-center gap-1.5 hover:text-brand-500 transition-colors uppercase">
-              <MapPin className="w-4 h-4 text-brand-500" /> {t('nav.pharmacies')}
-            </Link>
-            <div className="h-3 w-px bg-slate-200 mx-1"></div>
-            <Link to="/blog" className="flex items-center gap-1.5 hover:text-brand-500 transition-colors uppercase">
-              <Heart className="w-4 h-4 text-medical-red" /> {t('nav.health_corner')}
-            </Link>
+      {/* Top utility bar - Perfectly Distributed Grid */}
+      <div className="bg-white border-b border-slate-100 py-2 hidden md:block">
+        <div className="page-container flex items-center justify-between text-[11px] font-bold text-slate-500">
+          <Link to="/pharmacies" className="flex items-center gap-1.5 hover:text-brand-500 transition-colors uppercase whitespace-nowrap">
+            <MapPin className="w-3.5 h-3.5 text-brand-500" /> {t('nav.pharmacies')}
+          </Link>
+          
+          <div className="h-3 w-px bg-slate-200"></div>
+          
+          <Link to="/blog" className="flex items-center gap-1.5 hover:text-brand-500 transition-colors uppercase whitespace-nowrap">
+            <Heart className="w-3.5 h-3.5 text-medical-red" /> {t('nav.health_corner')}
+          </Link>
+
+          <div className="h-3 w-px bg-slate-200"></div>
+
+          <a href="#" className="flex items-center gap-1.5 hover:text-brand-500 transition-colors uppercase whitespace-nowrap">
+            <Smartphone className="w-3.5 h-3.5" /> {t('nav.download_app')}
+          </a>
+
+          <div className="h-3 w-px bg-slate-200"></div>
+
+          <div className="flex items-center gap-1.5 whitespace-nowrap">
+            <Phone className="w-3.5 h-3.5" /> <span className="uppercase">{t('nav.hotline')}</span> <span className="font-black text-slate-900">1800 6821</span>
           </div>
-          <div className="flex items-center gap-6 text-slate-500">
-            <a href="#" className="flex items-center gap-1.5 hover:text-brand-500 transition-colors uppercase">
-              <Smartphone className="w-4 h-4" /> {t('nav.download_app')}
-            </a>
-            <div className="flex items-center gap-1.5 uppercase">
-              <Phone className="w-4 h-4" /> {t('nav.hotline')} <span className="font-black text-slate-900 ml-0.5">1800 6821</span>
-            </div>
-            <a href="#" className="flex items-center gap-1.5 hover:text-brand-500 transition-colors uppercase">
-              {t('nav.business')} <span className="px-1.5 py-0.5 rounded-sm bg-medical-green text-white text-[9px] font-black">NEW</span>
-            </a>
-            <a href="#" className="flex items-center gap-1.5 hover:text-brand-500 transition-colors uppercase">
-              {t('nav.hot_deals')} <span className="text-orange-500">🔥</span>
-            </a>
-            <Link to="/account/orders" className="flex items-center gap-1.5 hover:text-brand-500 transition-colors uppercase">
-              {t('nav.track_order')} <span className="px-1.5 py-0.5 rounded-sm bg-brand-500 text-white text-[9px] font-black">NEW</span>
-            </Link>
-            
-            {/* Language Switcher */}
-            <div className="flex items-center gap-2 ml-4 border-l border-slate-200 pl-4">
-              <button 
-                onClick={() => i18n.changeLanguage('vi')}
-                className={`text-[10px] font-black px-1.5 py-0.5 rounded transition-all ${i18n.language === 'vi' ? 'bg-brand-500 text-white' : 'text-slate-400 hover:text-brand-500'}`}
-              >
-                VI
-              </button>
-              <button 
-                onClick={() => i18n.changeLanguage('en')}
-                className={`text-[10px] font-black px-1.5 py-0.5 rounded transition-all ${i18n.language?.startsWith('en') ? 'bg-brand-500 text-white' : 'text-slate-400 hover:text-brand-500'}`}
-              >
-                EN
-              </button>
-            </div>
+
+          <div className="h-3 w-px bg-slate-200"></div>
+
+          <a href="#" className="flex items-center gap-1.5 hover:text-brand-500 transition-colors uppercase whitespace-nowrap">
+            {t('nav.business')} <span className="px-1.5 py-0.5 rounded-sm bg-medical-green text-white text-[8px] font-black leading-none">NEW</span>
+          </a>
+
+          <div className="h-3 w-px bg-slate-200"></div>
+
+          <a href="#" className="flex items-center gap-1.5 hover:text-brand-500 transition-colors uppercase whitespace-nowrap">
+            {t('nav.hot_deals')} <span className="text-[10px]">🔥</span>
+          </a>
+
+          <div className="h-3 w-px bg-slate-200"></div>
+
+          <Link to="/account/orders" className="flex items-center gap-1.5 hover:text-brand-500 transition-colors uppercase whitespace-nowrap">
+            {t('nav.track_order')} <span className="px-1.5 py-0.5 rounded-sm bg-brand-500 text-white text-[8px] font-black leading-none">NEW</span>
+          </Link>
+
+          <div className="h-3 w-px bg-slate-200"></div>
+          
+          {/* Language Switcher */}
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => i18n.changeLanguage('vi')}
+              className={`text-[10px] font-black px-1.5 py-0.5 rounded transition-all ${i18n.language === 'vi' ? 'bg-brand-500 text-white shadow-sm' : 'text-slate-400 hover:bg-slate-50'}`}
+            >
+              VI
+            </button>
+            <button 
+              onClick={() => i18n.changeLanguage('en')}
+              className={`text-[10px] font-black px-1.5 py-0.5 rounded transition-all ${i18n.language?.startsWith('en') ? 'bg-brand-500 text-white shadow-sm' : 'text-slate-400 hover:bg-slate-50'}`}
+            >
+              EN
+            </button>
           </div>
         </div>
       </div>
@@ -81,10 +96,11 @@ export const Header = () => {
       {/* Main Header - Brand Blue background */}
       <div className="bg-brand-500 border-b border-brand-600 shadow-md">
         <div className="page-container">
-          <div className="flex items-center gap-6 h-16 md:h-20">
-            {/* Logo - No shadow as requested */}
+          {/* Desktop Layout - Kept for consistency */}
+          <div className="hidden md:flex items-center gap-6 h-20">
+            {/* Logo */}
             <Link to="/" className="flex items-center gap-3 shrink-0" onClick={closeMobileMenu}>
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-white flex items-center justify-center">
+              <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center">
                 <Pill className="w-6 h-6 text-brand-500" />
               </div>
               <div className="hidden lg:block">
@@ -93,13 +109,13 @@ export const Header = () => {
               </div>
             </Link>
 
-            {/* Categories Menu moved here */}
+            {/* Categories Menu */}
             <Link to="/products" className="hidden lg:flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-black text-white bg-white/10 hover:bg-white/20 transition-all border border-white/5 whitespace-nowrap group">
               <Menu className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" /> {t('nav.categories')}
             </Link>
 
             {/* Search */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-2xl hidden md:flex items-center">
+            <form onSubmit={handleSearch} className="flex-1 max-w-2xl flex items-center">
               <div className="relative flex-1 group">
                 <input
                   value={searchVal}
@@ -116,13 +132,6 @@ export const Header = () => {
 
             {/* Actions */}
             <div className="flex items-center gap-1 ml-auto">
-              <button
-                className="md:hidden p-2.5 rounded-xl text-white"
-                onClick={() => setSearchVal('')}
-              >
-                <Search className="w-6 h-6" />
-              </button>
-
               {isAuthenticated ? (
                 <div className="relative group">
                   <button className="flex flex-col items-center gap-1 px-4 py-1 text-white hover:bg-white/10 rounded-xl transition-all">
@@ -177,11 +186,62 @@ export const Header = () => {
                 </div>
                 <span className="text-[11px] font-black uppercase tracking-wide opacity-90 mt-0.5">{t('nav.cart')}</span>
               </button>
-
-              <button onClick={toggleMobileMenu} className="md:hidden p-2 rounded-xl text-white">
-                {mobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
-              </button>
             </div>
+          </div>
+
+          {/* Mobile Tiered Header - Modern & Functional */}
+          <div className="md:hidden flex flex-col py-3.5 gap-3.5">
+            {/* Tier 1: Logo & Icons */}
+            <div className="flex items-center justify-between">
+              <Link to="/" className="flex items-center gap-2.5" onClick={closeMobileMenu}>
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-md">
+                  <Pill className="w-6 h-6 text-brand-500" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xl font-display font-black text-white tracking-tight leading-none">PharmaChain</span>
+                  <span className="text-[9px] text-white/70 font-bold tracking-widest uppercase mt-1">Health & Care</span>
+                </div>
+              </Link>
+
+              <div className="flex items-center gap-1.5">
+                {isAuthenticated ? (
+                  <Link to="/account/profile" className="p-2.5 text-white/90 hover:text-white transition-colors">
+                    <Avatar src={user?.avatar} name={user?.name} className="w-7 h-7 border-2 border-white/20" />
+                  </Link>
+                ) : (
+                  <Link to="/login" className="p-2.5 text-white/90 hover:text-white transition-colors">
+                    <User className="w-7 h-7" />
+                  </Link>
+                )}
+                
+                <button
+                  onClick={() => setCartDrawerOpen(true)}
+                  className="relative p-2.5 text-white/90 hover:text-white transition-colors"
+                >
+                  <ShoppingCart className="w-7 h-7" />
+                  {itemCount > 0 && (
+                    <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] bg-medical-red text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-brand-500 shadow-sm leading-none">
+                      {itemCount > 9 ? '9+' : itemCount}
+                    </span>
+                  )}
+                </button>
+
+                <button onClick={toggleMobileMenu} className="p-2.5 text-white/90 hover:text-white transition-colors">
+                  {mobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Tier 2: Prominent Search */}
+            <form onSubmit={handleSearch} className="relative group overflow-hidden rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 transition-all focus-within:bg-white focus-within:shadow-xl">
+              <input
+                value={searchVal}
+                onChange={e => setSearchVal(e.target.value)}
+                placeholder={t('nav.search_placeholder_mobile', { defaultValue: 'Search medicine, symptoms...' })}
+                className="w-full h-12 pl-12 pr-4 bg-transparent text-white focus:text-slate-800 text-[15px] placeholder:text-white/60 focus:placeholder:text-slate-400 transition-all outline-none font-medium"
+              />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50 group-focus-within:text-brand-500 transition-all" />
+            </form>
           </div>
         </div>
       </div>

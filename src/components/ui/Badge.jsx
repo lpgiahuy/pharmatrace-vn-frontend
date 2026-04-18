@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import PropTypes from 'prop-types'
 import { cn } from '@/utils'
 import { ORDER_STATUS_COLORS } from '@/constants'
 
@@ -14,21 +15,36 @@ const colorMap = {
 }
 
 export const Badge = ({ color = 'gray', children, className, dot = false }) => (
-  <span className={cn(
-    'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border',
-    colorMap[color],
-    className
-  )}>
-    {dot && <span className={cn('w-1.5 h-1.5 rounded-full', {
-      'bg-brand-500': color === 'blue',
-      'bg-green-500': color === 'green',
-      'bg-red-500':   color === 'red',
-      'bg-orange-500':color === 'orange',
-      'bg-slate-400': color === 'gray',
-    })} />}
+  <span 
+    role="status"
+    className={cn(
+      'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border',
+      colorMap[color],
+      className
+    )}
+  >
+    {dot && (
+      <span 
+        className={cn('w-1.5 h-1.5 rounded-full', {
+          'bg-brand-500': color === 'blue',
+          'bg-green-500': color === 'green',
+          'bg-red-500':   color === 'red',
+          'bg-orange-500':color === 'orange',
+          'bg-slate-400': color === 'gray',
+        })} 
+        aria-hidden="true"
+      />
+    )}
     {children}
   </span>
 )
+
+Badge.propTypes = {
+  color: PropTypes.oneOf(['blue', 'green', 'red', 'orange', 'purple', 'cyan', 'gray', 'yellow']),
+  children: PropTypes.node.isRequired,
+  className: PropTypes.string,
+  dot: PropTypes.bool
+}
 
 export const OrderStatusBadge = ({ status }) => {
   const { t } = useTranslation()
@@ -39,6 +55,10 @@ export const OrderStatusBadge = ({ status }) => {
   )
 }
 
+OrderStatusBadge.propTypes = {
+  status: PropTypes.string.isRequired
+}
+
 export const StockBadge = ({ quantity, threshold = 20 }) => {
   const { t } = useTranslation()
   if (quantity === 0)           return <Badge color="red">{t('stock_status.out_of_stock')}</Badge>
@@ -46,7 +66,16 @@ export const StockBadge = ({ quantity, threshold = 20 }) => {
   return <Badge color="green">{t('stock_status.in_stock')}</Badge>
 }
 
+StockBadge.propTypes = {
+  quantity: PropTypes.number.isRequired,
+  threshold: PropTypes.number
+}
+
 export const RoleBadge = ({ role }) => {
   const colors = { admin: 'red', manager: 'purple', warehouse: 'cyan', pharmacist: 'blue', staff: 'gray', customer: 'green' }
   return <Badge color={colors[role] || 'gray'}>{role}</Badge>
+}
+
+RoleBadge.propTypes = {
+  role: PropTypes.string.isRequired
 }

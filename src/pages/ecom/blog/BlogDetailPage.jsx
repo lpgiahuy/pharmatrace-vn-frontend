@@ -4,6 +4,8 @@ import { blogService } from '@/services/analytics.service'
 import { PageLoader } from '@/components/ui/Spinner'
 import { formatDate } from '@/utils'
 import { ChevronLeft } from 'lucide-react'
+import { sanitizeHtml } from '@/utils/security'
+import toast from 'react-hot-toast'
 
 export default function BlogDetailPage() {
   const { slug } = useParams()
@@ -40,7 +42,10 @@ export default function BlogDetailPage() {
         <span>{formatDate(blog.publishedAt || blog.date)}</span>
       </div>
       {blog.coverImage && <img src={blog.coverImage} alt={blog.title} className="w-full rounded-2xl mb-8 aspect-video object-cover shadow-lg border border-surface-border" />}
-      <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed ql-editor px-0" dangerouslySetInnerHTML={{ __html: blog.content }} />
+      <div 
+        className="prose prose-slate max-w-none text-slate-700 leading-relaxed ql-editor px-0" 
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(blog.content) }} 
+      />
     </article>
   )
 }

@@ -1,5 +1,6 @@
 import { Outlet, Link } from 'react-router-dom'
 import { Pill } from 'lucide-react'
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 
 export const AuthLayout = () => (
   <div className="min-h-screen flex">
@@ -33,7 +34,9 @@ export const AuthLayout = () => (
           <Pill className="w-5 h-5 text-brand-500" />
           <span className="text-lg font-display font-bold text-slate-800">PharmaChain</span>
         </Link>
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </div>
     </div>
   </div>

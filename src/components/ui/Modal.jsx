@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useId } from 'react'
+import PropTypes from 'prop-types'
 import { X } from 'lucide-react'
 import { cn } from '@/utils'
 import { Button } from './Button'
@@ -22,6 +23,8 @@ export const Modal = ({
   className,
 }) => {
   const overlayRef = useRef(null)
+  const idPrefix = useId()
+  const titleId = `${idPrefix}-title`
 
   useEffect(() => {
     if (!open) return
@@ -39,20 +42,33 @@ export const Modal = ({
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 transition-all"
       onClick={(e) => { if (e.target === overlayRef.current && closable) onClose?.() }}
+      role="presentation"
     >
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" />
-      <div className={cn(
-        'relative w-full bg-white rounded-2xl shadow-modal animate-slide-up flex flex-col max-h-[90vh]',
-        sizes[size],
-        className
-      )}>
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" 
+        aria-hidden="true" 
+      />
+      <div 
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
+        className={cn(
+          'relative w-full bg-white rounded-2xl shadow-modal animate-slide-up flex flex-col max-h-[90vh]',
+          sizes[size],
+          className
+        )}
+      >
         {(title || closable) && (
           <div className="flex items-center justify-between px-6 py-4 border-b border-surface-border shrink-0">
-            {title && <h2 className="text-lg font-display font-semibold text-slate-900">{title}</h2>}
+            {title && <h2 id={titleId} className="text-lg font-display font-semibold text-slate-900">{title}</h2>}
             {closable && (
-              <button onClick={onClose} className="ml-auto p-1.5 rounded-lg hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-600">
+              <button 
+                onClick={onClose} 
+                aria-label="Close modal"
+                className="ml-auto p-1.5 rounded-lg hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-600"
+              >
                 <X className="w-5 h-5" />
               </button>
             )}
@@ -67,6 +83,17 @@ export const Modal = ({
       </div>
     </div>
   )
+}
+
+Modal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func,
+  title: PropTypes.node,
+  children: PropTypes.node,
+  footer: PropTypes.node,
+  size: PropTypes.oneOf(['sm', 'md', 'lg', 'xl', 'full']),
+  closable: PropTypes.bool,
+  className: PropTypes.string,
 }
 
 export const ConfirmModal = ({ open, onClose, onConfirm, title, message, confirmText = 'Confirm', danger = false, loading = false }) => (
@@ -85,3 +112,14 @@ export const ConfirmModal = ({ open, onClose, onConfirm, title, message, confirm
     <p className="text-slate-600">{message}</p>
   </Modal>
 )
+
+ConfirmModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  title: PropTypes.string,
+  message: PropTypes.string.isRequired,
+  confirmText: PropTypes.string,
+  danger: PropTypes.bool,
+  loading: PropTypes.bool,
+}

@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, memo } from 'react'
+import PropTypes from 'prop-types'
 import { Heart, ShoppingCart, Star, Plus, Truck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { cn, formatCurrency } from '@/utils'
@@ -8,7 +9,7 @@ import { wishlistService } from '@/services/wishlist.service'
 import { useTranslation } from 'react-i18next'
 import { Button } from './Button'
 
-export const ProductCard = ({ product, className }) => {
+export const ProductCard = memo(({ product, className }) => {
   const { t } = useTranslation()
   const addItem = useCartStore(s => s.addItem)
   const user = useAuthStore(s => s.user)
@@ -48,9 +49,18 @@ export const ProductCard = ({ product, className }) => {
     }
   }
 
+  // Format currency without double symbols
+  const formattedPrice = formatCurrency(product.price)
+  
   return (
-    <div className={cn('bg-slate-50/50 rounded-2xl overflow-hidden card-hover border border-slate-100 flex flex-col h-full group pb-3', className)}>
-      <Link to={`/products/${product.id}`} className="relative block overflow-hidden aspect-square bg-white m-2 rounded-xl border border-slate-50">
+    <article 
+      className={cn('bg-slate-50/50 rounded-2xl overflow-hidden card-hover border border-slate-100 flex flex-col h-full group pb-3', className)}
+    >
+      <Link 
+        to={`/products/${product.id}`} 
+        className="relative block overflow-hidden aspect-square bg-white m-2 rounded-xl border border-slate-50"
+        aria-label={`View details for ${product.name}`}
+      >
         <img
           src={product.image}
           alt={product.name}
@@ -58,23 +68,21 @@ export const ProductCard = ({ product, className }) => {
           loading="lazy"
         />
         
-        {/* Badges - Top Layer */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10" aria-label="Product highlights">
           {discount > 0 && (
             <span className="bg-medical-red text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">
               -{discount}%
             </span>
           )}
           {product.isPrescription && (
-            <span className="bg-orange-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm">Rx</span>
+            <span role="img" aria-label="Prescription Required" className="bg-orange-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm">Rx</span>
           )}
         </div>
 
-        {/* Brand Badge (Pharmacity Style) */}
         <div className="absolute top-2 right-2 z-10">
             <div className="bg-brand-500 text-white flex items-center gap-1.5 pl-1 pr-3 py-1 rounded-full shadow-sm">
                 <div className="w-5 h-5 rounded-full bg-medical-green flex items-center justify-center font-black text-[10px] text-white shrink-0">P</div>
-                <span className="text-[11px] font-black leading-none">PharmaChain</span>
+                <span className="text-[11px] font-black leading-none uppercase">PharmaChain</span>
             </div>
         </div>
 
@@ -87,6 +95,8 @@ export const ProductCard = ({ product, className }) => {
         <button 
           onClick={handleToggleFavorite}
           disabled={isToggling}
+          aria-label={isFavorite ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+          aria-pressed={isFavorite}
           className={cn(
             "absolute bottom-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-200 hover:bg-white active:scale-90 disabled:opacity-50",
             isFavorite ? "text-medical-red" : "text-slate-300 opacity-0 group-hover:opacity-100"
@@ -97,59 +107,83 @@ export const ProductCard = ({ product, className }) => {
       </Link>
 
       <div className="px-3 flex flex-col flex-1">
-        {/* Fast Delivery Badge (Now positioned like Pharmacity) */}
         <div className="mb-2">
-            <div className="inline-flex items-center gap-1 bg-medical-orange text-white text-[10px] font-black px-2.5 py-1 rounded-lg shadow-sm">
-                <Truck className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-1 bg-medical-orange text-white text-[9px] sm:text-[10px] font-black px-2 sm:px-2.5 py-1 rounded-lg shadow-sm">
+                <Truck className="w-3 sm:w-3.5 h-3 sm:h-3.5" aria-hidden="true" />
                 <span>{t('product.free_fast_delivery')}</span>
             </div>
         </div>
 
         <Link to={`/products/${product.id}`} className="block mb-2">
-          <h3 className="text-[14px] font-semibold text-slate-700 line-clamp-2 leading-[1.4] min-h-[40px] group-hover:text-brand-500 transition-colors">
+          <h3 className="text-[13px] sm:text-[14px] font-semibold text-slate-700 line-clamp-2 leading-[1.4] min-h-[40px] group-hover:text-brand-500 transition-colors">
             {product.name}
           </h3>
         </Link>
         
-        <div className="mt-auto mb-3">
-          <div className="flex items-baseline gap-1">
-            <span className="text-lg font-black text-slate-900 leading-none">
-              {formatCurrency(product.price).replace(' ₫', '')}
-              <span className="text-base font-black border-b-2 border-slate-900 mx-0.5">đ</span>
-              <span className="text-slate-900 text-lg font-black">/{t(`product.unit.${product.unit?.toLowerCase()}`, { defaultValue: product.unit || t('product.unit.product') })}</span>
+        <div className="mt-auto mb-3" aria-label={`Price: ${product.price} Dong per ${product.unit}`}>
+          <div className="flex flex-wrap items-baseline gap-x-1 font-black text-slate-900 leading-none">
+            <span className="text-base sm:text-lg">
+              {formattedPrice}
+            </span>
+            <span className="text-sm sm:text-base text-slate-500 font-bold">
+              /{t(`product.unit.${product.unit?.toLowerCase()}`, { defaultValue: product.unit || t('product.unit.product') })}
             </span>
           </div>
           {product.originalPrice && product.originalPrice > product.price && (
-            <span className="text-[11px] text-slate-400 line-through font-medium">
+            <span className="text-[10px] sm:text-[11px] text-slate-400 line-through font-medium" aria-label={`Original price: ${product.originalPrice} Dong`}>
               {formatCurrency(product.originalPrice)}
             </span>
           )}
         </div>
 
-        {/* Full-width "Chọn mua" Button */}
         <button
+          type="button"
           disabled={!product.inStock}
+          aria-label={product.inStock ? `${t('product.select_buy')} ${product.name}` : t('product.out_of_stock')}
           onClick={(e) => {
             e.preventDefault();
             addItem(product);
           }}
           className={cn(
-            "w-full h-11 rounded-xl border-2 flex items-center justify-center gap-2 transition-all duration-200 shadow-sm font-bold text-sm",
+            "w-full h-9 sm:h-11 rounded-xl border-2 flex items-center justify-center gap-1 sm:gap-2 transition-all duration-200 shadow-sm font-bold text-xs sm:text-sm",
             product.inStock 
               ? "bg-white border-brand-500 text-brand-600 hover:bg-brand-50 active:scale-[0.98]" 
               : "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
           )}
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-4 sm:w-5 h-4 sm:h-5" aria-hidden="true" />
           <span>{t('product.select_buy')}</span>
         </button>
       </div>
-    </div>
+    </article>
   )
+})
+
+ProductCard.displayName = 'ProductCard'
+
+ProductCard.propTypes = {
+  product: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    name: PropTypes.string.isRequired,
+    image: PropTypes.string,
+    price: PropTypes.number.isRequired,
+    originalPrice: PropTypes.number,
+    unit: PropTypes.string,
+    inStock: PropTypes.bool,
+    isPrescription: PropTypes.bool,
+    isFavorited: PropTypes.bool,
+    rating: PropTypes.number,
+    reviewCount: PropTypes.number,
+    soldCount: PropTypes.number,
+  }).isRequired,
+  className: PropTypes.string,
 }
 
-export const ProductCardSkeleton = () => (
-  <div className="bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden p-2 flex flex-col gap-3">
+export const ProductCardSkeleton = memo(() => (
+  <div 
+    className="bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden p-2 flex flex-col gap-3"
+    aria-hidden="true"
+  >
     <div className="aspect-square bg-white rounded-xl skeleton shadow-sm" />
     <div className="px-1 flex flex-col gap-3">
       <div className="skeleton h-4 w-1/3 rounded-full opacity-60" />
@@ -159,4 +193,6 @@ export const ProductCardSkeleton = () => (
       <div className="skeleton h-11 w-full rounded-xl mt-1" />
     </div>
   </div>
-)
+))
+
+ProductCardSkeleton.displayName = 'ProductCardSkeleton'
