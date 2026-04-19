@@ -17,9 +17,9 @@ export const ProductCard = memo(({ product, className }) => {
   const [isFavorite, setIsFavorite] = useState(product.isFavorited)
   const [isToggling, setIsToggling] = useState(false)
 
-  const discount = product.originalPrice
+  const discount = product.discount || (product.originalPrice
     ? Math.round((1 - product.price / product.originalPrice) * 100)
-    : 0
+    : 0)
 
   const handleToggleFavorite = async (e) => {
     e.preventDefault()
@@ -73,9 +73,6 @@ export const ProductCard = memo(({ product, className }) => {
             <span className="bg-medical-red text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">
               -{discount}%
             </span>
-          )}
-          {product.isPrescription && (
-            <span role="img" aria-label="Prescription Required" className="bg-orange-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm">Rx</span>
           )}
         </div>
 
