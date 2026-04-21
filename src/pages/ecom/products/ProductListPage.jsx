@@ -29,6 +29,7 @@ export default function ProductListPage() {
   const [error, setError]         = useState(null)
   const [showFilters, setShowFilters] = useState(false)
   const [showAllCategories, setShowAllCategories] = useState(false)
+  const [brands, setBrands]       = useState([])
   const categories = useCategoryStore(s => s.categories)
 
   const page     = Number(searchParams.get('page'))     || 1
@@ -90,6 +91,18 @@ export default function ProductListPage() {
   useEffect(() => { fetchProducts() }, [fetchProducts])
   useEffect(() => { setParam('search', debouncedSearch) }, [debouncedSearch, setParam])
 
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const brandsData = await productService.getBrands()
+        setBrands(brandsData)
+      } catch (err) {
+        console.error('[ProductListPage] Failed to fetch brands:', err)
+      }
+    }
+    fetchBrands()
+  }, [])
+
   const displayedProducts = products.slice((page - 1) * 20, page * 20)
 
   const clearFilters = () => setSearchParams({})
@@ -106,6 +119,7 @@ export default function ProductListPage() {
             minPrice={minPrice}
             maxPrice={maxPrice}
             onPriceChange={setParam}
+            brands={brands}
             selectedBrand={brand}
             onBrandChange={val => setParam('brand', val)}
             onClearFilters={clearFilters}

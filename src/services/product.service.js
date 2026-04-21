@@ -115,6 +115,21 @@ export const productService = {
     }
   },
 
+  async getAllAdmin(params = {}) {
+    try {
+      const { data } = await apiClient.get(`/admin/products?${buildQueryString(params)}`)
+      const items = data.data || []
+      
+      return {
+        data: items.map(normalizeProduct),
+        total: items.length,
+      }
+    } catch (error) {
+      console.error('[productService.getAllAdmin]', error.response?.data || error.message)
+      return { data: [], total: 0 }
+    }
+  },
+
   async getById(id) {
     const { data } = await apiClient.get(`/products/${id}`)
     const result = data.data || data
@@ -175,6 +190,16 @@ export const productService = {
       }))
     } catch (error) {
       console.error('[productService.getCategories]', error.response?.data || error.message)
+      return []
+    }
+  },
+
+  async getBrands() {
+    try {
+      const { data } = await apiClient.get('/products/brands')
+      return data.data || []
+    } catch (error) {
+      console.error('[productService.getBrands]', error.response?.data || error.message)
       return []
     }
   },
