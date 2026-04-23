@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { AppRoutes } from '@/routes'
 import { useAuthStore } from '@/store/authStore'
 import { useUIStore } from '@/store/uiStore'
@@ -8,6 +9,12 @@ import { authService } from '@/services/auth.service'
 export default function App() {
   const { isAuthenticated, updateUser, logout } = useAuthStore()
   const { globalLoading } = useUIStore()
+  const { pathname } = useLocation()
+
+  // Scroll to top when pathname changes
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -29,3 +36,4 @@ export default function App() {
     </>
   )
 }
+

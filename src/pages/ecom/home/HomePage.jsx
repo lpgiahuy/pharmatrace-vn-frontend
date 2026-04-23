@@ -50,9 +50,11 @@ const FlashSaleCountdown = () => {
 export default function HomePage() {
   const { t, i18n } = useTranslation()
   const [featured, setFeatured] = useState([])
+  const [flashSaleProducts, setFlashSaleProducts] = useState([])
   const [blogs, setBlogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [blogLoading, setBlogLoading] = useState(true)
+  const [flashSaleLoading, setFlashSaleLoading] = useState(true)
   const [activeBanner, setActiveBanner] = useState(0)
   const [activeParentId, setActiveParentId] = useState(null)
   const categories = useCategoryStore(s => s.categories)
@@ -74,7 +76,7 @@ export default function HomePage() {
   const BANNERS = [
     { id: 1, title: t('home.banner1_title', { defaultValue: 'Trusted Medicines, Delivered Fast' }), subtitle: t('home.banner1_desc', { defaultValue: 'Shop 10,000+ certified pharmaceutical products' }), cta: t('home.shop_now'), to: '/products', bg: 'from-brand-600 to-brand-800', img: '💊', image: 'https://wallpapercave.com/wp/wp15262378.jpg' },
     { id: 2, title: t('home.banner2_title', { defaultValue: 'Vitamins & Supplements Sale' }), subtitle: t('home.banner2_desc', { defaultValue: 'Up to 30% off premium health supplements' }), cta: t('home.view_deals', { defaultValue: 'View Deals' }), to: '/products?category=1', bg: 'from-teal-500 to-teal-700', img: '🌿', image: 'https://thumbs.dreamstime.com/z/vitamins-supplements-shelves-different-types-pharmacy-45969522.jpg' },
-    { id: 3, title: t('home.banner3_title', { defaultValue: 'Free Delivery Over 500K' }), subtitle: t('home.banner3_desc', { defaultValue: 'Fast, secure pharmaceutical delivery' }), cta: t('home.start_shopping', { defaultValue: 'Start Shopping' }), to: '/products', bg: 'from-purple-600 to-purple-800', img: '🚚', image: 'https://wallpapercave.com/wp/wp13751014.jpg' },
+    { id: 3, title: t('home.banner3_title', { defaultValue: 'Free Delivery Over 500K VND' }), subtitle: t('home.banner3_desc', { defaultValue: 'Fast, secure pharmaceutical delivery' }), cta: t('home.start_shopping', { defaultValue: 'Start Shopping' }), to: '/products', bg: 'from-purple-600 to-purple-800', img: '🚚', image: 'https://wallpapercave.com/wp/wp13751014.jpg' },
   ]
 
   const TRUST_ITEMS = [
@@ -101,6 +103,23 @@ export default function HomePage() {
       })
       .finally(() => setLoading(false))
 
+    setFlashSaleLoading(true)
+    productService.getAll({ is_flash_sale: true, limit: 15 })
+      .then(res => {
+        const all = Array.isArray(res.data) ? res.data : []
+        const seen = new Map()
+        all.forEach(p => {
+          const existing = seen.get(p.id)
+          if (!existing || p.price < existing.price) seen.set(p.id, p)
+        })
+        setFlashSaleProducts(Array.from(seen.values()))
+      })
+      .catch(err => {
+        console.error('[HomePage] Failed to load flash sale products:', err)
+        setFlashSaleProducts([])
+      })
+      .finally(() => setFlashSaleLoading(false))
+
     setBlogLoading(true)
     blogService.getAll({ limit: 3 })
       .then(res => setBlogs(res.data || []))
@@ -115,18 +134,18 @@ export default function HomePage() {
 
   return (
     <div className="animate-fade-in bg-white pb-12">
-      {/* Hero Section - Tall Contained Design */}
-      <section className="bg-white pb-12 pt-6">
+      {/* Hero Section - Optimized height to push Trust Bar to the bottom edge */}
+      <section className="bg-white pb-10 pt-4">
         <div className="page-container">
-          {/* Main Slider - Very tall height as requested */}
-          <div className="relative group overflow-hidden rounded-[40px] shadow-2xl h-[450px] tablet:h-[600px] laptop:h-[750px]">
+          {/* Main Slider - Height balanced to show content at the fold */}
+          <div className="relative group overflow-hidden rounded-[40px] shadow-2xl h-[400px] tablet:h-[520px] laptop:h-[620px]">
             <div 
               className={`w-full h-full ${!BANNERS[activeBanner].image ? `bg-gradient-to-br ${BANNERS[activeBanner].bg}` : 'bg-cover bg-center'} transition-all duration-1000 flex items-center px-8 tablet:px-24 text-white relative`}
               style={BANNERS[activeBanner].image ? { backgroundImage: `url(${BANNERS[activeBanner].image})` } : {}}
             >
-              {/* Premium Layered Overlay with Backdrop Blur */}
+              {/* Solid Blue Overlay */}
               {BANNERS[activeBanner].image && (
-                <div className="absolute inset-0 bg-gradient-to-r from-brand-950/90 via-brand-950/40 to-transparent backdrop-blur-[2px] z-[1]" />
+                <div className="absolute inset-0 bg-brand-900/40 backdrop-blur-[1px] z-[1]" />
               )}
               
               <div className="max-w-2xl relative z-10 animate-slide-up">
@@ -166,21 +185,23 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Support Bar */}
-      <section className="bg-white">
-        <div className="page-container py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {TRUST_ITEMS.map(({ icon: Icon, label, desc }, i) => (
-              <div key={label} className="flex items-center gap-4 px-4">
-                <div className="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center shrink-0">
-                  <Icon className="w-6 h-6 text-brand-500" />
+      {/* Support Bar - Below Hero */}
+      <section className="relative z-30 pb-12">
+        <div className="page-container">
+          <div className="bg-white rounded-[32px] shadow-xl shadow-brand-900/10 border border-slate-100 py-8 tablet:py-10 px-4 tablet:px-12">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-2 tablet:gap-4 divide-slate-100 lg:divide-x">
+              {TRUST_ITEMS.map(({ icon: Icon, label, desc }, i) => (
+                <div key={label} className="flex items-center gap-3 tablet:gap-5 px-2 tablet:px-4 first:pl-0">
+                  <div className="w-10 h-10 tablet:w-14 tablet:h-14 rounded-xl tablet:rounded-2xl bg-brand-50 flex items-center justify-center shrink-0 shadow-sm shadow-brand-100/50 group-hover:bg-brand-100 transition-colors">
+                    <Icon className="w-5 h-5 tablet:w-7 tablet:h-7 text-brand-500" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[12px] tablet:text-[14px] font-black text-slate-800 uppercase tracking-tight truncate tablet:whitespace-normal">{label}</p>
+                    <p className="text-[10px] tablet:text-xs text-slate-500 leading-tight mt-0.5 tablet:mt-1 font-medium line-clamp-2">{desc}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[13px] font-black text-slate-800 uppercase tracking-tight">{label}</p>
-                  <p className="text-xs text-slate-500 leading-tight mt-0.5">{desc}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -232,11 +253,13 @@ export default function HomePage() {
               <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase italic">{t('home.flash_sale')}</h2>
               <FlashSaleCountdown />
             </div>
-            <Link to="/products" className="text-white text-xs font-black uppercase hover:underline">{t('home.low_stock')}</Link>
+            <Link to="/products?is_flash_sale=true" className="text-white text-xs font-black uppercase hover:underline">{t('home.low_stock')}</Link>
           </div>
           <div className="bg-white p-4">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
-              {featured.slice(0, 6).map(p => (
+              {flashSaleLoading 
+                ? Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)
+                : flashSaleProducts.slice(0, 6).map(p => (
                 <div key={p.id} className="flex flex-col h-full">
                   <ProductCard product={p} className="border-none shadow-none hover:shadow-none translate-y-0" />
                   <div className="mt-2 px-3">
@@ -247,6 +270,11 @@ export default function HomePage() {
                   </div>
                 </div>
               ))}
+              {!flashSaleLoading && flashSaleProducts.length === 0 && (
+                <div className="col-span-full py-8 text-center text-slate-500 font-medium">
+                  {t('home.no_flash_sale_today', { defaultValue: 'No flash sale products today.' })}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -313,53 +341,56 @@ export default function HomePage() {
 
       {/* Secure Traceability Section */}
       <section className="page-container pb-12">
-        <div className="bg-gradient-to-r from-brand-600 to-brand-800 rounded-3xl overflow-hidden shadow-2xl shadow-brand-900/20 relative group">
+        <div className="bg-gradient-to-r from-brand-600 to-brand-800 rounded-[2rem] overflow-hidden shadow-2xl shadow-brand-900/20 relative group">
+          {/* Decorative background elements */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-400/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
           
-          <div className="relative z-10 flex flex-col lg:flex-row items-center gap-12 p-8 md:p-12">
-            <div className="flex-1 text-white">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/20 text-brand-100 text-[10px] font-bold uppercase tracking-widest mb-6">
-                <ShieldCheck className="w-4 h-4 text-medical-green" /> {t('home.guaranteed_authentic')}
+          <div className="relative z-10 flex flex-col lg:flex-row items-center gap-8 lg:gap-12 p-6 sm:p-10 md:p-16">
+            <div className="flex-1 text-white w-full">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-brand-100 text-[10px] font-bold uppercase tracking-widest mb-4 sm:mb-6">
+                <ShieldCheck className="w-3.5 h-3.5 text-medical-green" /> {t('home.guaranteed_authentic')}
               </div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-6 leading-tight">
+              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black mb-4 sm:mb-6 leading-tight tracking-tight">
                 {t('home.traceability')}<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200">{t('home.absolute_transparency')}</span>
               </h2>
-              <p className="text-lg text-brand-100/90 mb-8 max-w-lg">
+              <p className="text-sm sm:text-lg text-brand-100/80 mb-6 sm:mb-10 max-w-lg leading-relaxed">
                 {t('home.trace_desc')}
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <div className="flex-1 relative group/input">
                     <input 
                         placeholder={t('home.uid_placeholder')}
-                        className="w-full h-14 pl-12 pr-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-brand-300 transition-all font-mono"
+                        className="w-full h-12 sm:h-14 pl-11 sm:pl-12 pr-4 bg-white/10 border border-white/20 rounded-xl sm:rounded-2xl text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-brand-300 transition-all font-mono text-sm"
                     />
-                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50 group-focus-within/input:text-brand-300 transition-colors" />
+                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-white/50 group-focus-within/input:text-brand-300 transition-colors" />
                 </div>
-                <Link to="/trace" className="h-14 px-8 bg-medical-green hover:bg-green-600 text-white font-black rounded-2xl flex items-center justify-center gap-2 transition-all shadow-xl shadow-green-900/20 whitespace-nowrap uppercase">
-                  {t('home.check_now')} <ArrowRight className="w-5 h-5" />
+                <Link to="/trace" className="h-12 sm:h-14 px-8 bg-medical-green hover:bg-green-600 text-white font-black rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 transition-all shadow-xl shadow-green-900/20 whitespace-nowrap uppercase text-sm">
+                  {t('home.check_now')} <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Link>
               </div>
-              <div className="mt-6 flex items-center gap-6 text-[11px] font-bold text-brand-200 uppercase tracking-widest">
-                  <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> {t('home.transparency')}</span>
-                  <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> {t('home.security')}</span>
-                  <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> {t('home.tamper_proof')}</span>
+              
+              {/* Trust Badges - Wrapped for mobile */}
+              <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-[10px] sm:text-[11px] font-bold text-brand-200 uppercase tracking-widest">
+                  <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3" /> {t('home.transparency')}</span>
+                  <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3" /> {t('home.security')}</span>
+                  <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3" /> {t('home.tamper_proof')}</span>
               </div>
             </div>
             
-            <div className="relative shrink-0 w-full sm:w-72 lg:w-80 h-72 lg:h-80 flex items-center justify-center">
-                <div className="absolute inset-0 bg-white/5 rounded-3xl rotate-6 group-hover:rotate-12 transition-transform duration-500 border border-white/10" />
-                <div className="absolute inset-0 bg-white/10 rounded-3xl -rotate-6 group-hover:-rotate-12 transition-transform duration-500 border border-white/10" />
-                <div className="relative z-10 w-full h-full bg-white rounded-3xl p-6 shadow-2xl flex flex-col items-center justify-center">
-                    <div className="w-full aspect-square border-4 border-slate-50 flex items-center justify-center rounded-2xl mb-4 relative overflow-hidden group/qr">
-                        <div className="text-[120px] filter grayscale group-hover:grayscale-0 transition-all duration-500">📱</div>
+            {/* QR Card - Optimized for mobile */}
+            <div className="relative shrink-0 w-full sm:w-72 lg:w-80 h-auto sm:h-80 flex items-center justify-center mt-4 lg:mt-0">
+                <div className="absolute inset-0 bg-white/5 rounded-3xl rotate-3 sm:rotate-6 group-hover:rotate-12 transition-transform duration-500 border border-white/10 hidden sm:block" />
+                <div className="relative z-10 w-full max-w-[280px] sm:w-full bg-white rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col items-center justify-center">
+                    <div className="w-full aspect-square border-4 border-slate-50 flex items-center justify-center rounded-2xl mb-3 sm:mb-4 relative overflow-hidden group/qr">
+                        <div className="text-[80px] sm:text-[120px] filter grayscale group-hover:grayscale-0 transition-all duration-500">📱</div>
                         <div className="absolute inset-0 bg-brand-500/10 flex items-center justify-center opacity-0 group-hover/qr:opacity-100 transition-opacity">
                             <span className="bg-brand-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase">{t('home.scan_qr')}</span>
                         </div>
                     </div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">{t('home.qr_desc')}</p>
+                    <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">{t('home.qr_desc')}</p>
                 </div>
             </div>
           </div>
