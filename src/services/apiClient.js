@@ -105,11 +105,13 @@ apiClient.interceptors.response.use(
       toast.error('You do not have permission to perform this action.')
     }
 
-    if (error.response?.status >= 500) {
+    // Bỏ qua toast lỗi cho các endpoint auth (token hết hạn là chuyện bình thường)
+    const isAuthEndpoint = original?.url?.includes('/auth/')
+    if (error.response?.status >= 500 && !isAuthEndpoint) {
       toast.error('Server error. Please try again later.')
     }
 
-    if (!error.response) {
+    if (!error.response && !isAuthEndpoint) {
       toast.error('Network error. Please check your connection.')
     }
 

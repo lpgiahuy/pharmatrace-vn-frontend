@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, Shield, Truck, HeartPulse, Award, ShieldCheck, Eye } from 'lucide-react'
 import { productService } from '@/services/product.service'
 import { blogService } from '@/services/analytics.service'
@@ -74,9 +74,9 @@ export default function HomePage() {
   }
 
   const BANNERS = [
-    { id: 1, title: t('home.banner1_title', { defaultValue: 'Trusted Medicines, Delivered Fast' }), subtitle: t('home.banner1_desc', { defaultValue: 'Shop 10,000+ certified pharmaceutical products' }), cta: t('home.shop_now'), to: '/products', bg: 'from-brand-600 to-brand-800', img: '💊', image: 'https://wallpapercave.com/wp/wp15262378.jpg' },
-    { id: 2, title: t('home.banner2_title', { defaultValue: 'Vitamins & Supplements Sale' }), subtitle: t('home.banner2_desc', { defaultValue: 'Up to 30% off premium health supplements' }), cta: t('home.view_deals', { defaultValue: 'View Deals' }), to: '/products?category=1', bg: 'from-teal-500 to-teal-700', img: '🌿', image: 'https://thumbs.dreamstime.com/z/vitamins-supplements-shelves-different-types-pharmacy-45969522.jpg' },
-    { id: 3, title: t('home.banner3_title', { defaultValue: 'Free Delivery Over 500K VND' }), subtitle: t('home.banner3_desc', { defaultValue: 'Fast, secure pharmaceutical delivery' }), cta: t('home.start_shopping', { defaultValue: 'Start Shopping' }), to: '/products', bg: 'from-purple-600 to-purple-800', img: '🚚', image: 'https://wallpapercave.com/wp/wp13751014.jpg' },
+    { id: 1, title: t('home.banner1_title', { defaultValue: 'Trusted Medicines, Delivered Fast' }), subtitle: t('home.banner1_desc', { defaultValue: 'Shop 10,000+ certified pharmaceutical products' }), cta: t('home.shop_now'), to: '/products', bg: 'from-brand-600 to-brand-800', img: 'medication', image: 'https://wallpapercave.com/wp/wp15262378.jpg' },
+    { id: 2, title: t('home.banner2_title', { defaultValue: 'Vitamins & Supplements Sale' }), subtitle: t('home.banner2_desc', { defaultValue: 'Up to 30% off premium health supplements' }), cta: t('home.view_deals', { defaultValue: 'View Deals' }), to: '/products?category=1', bg: 'from-teal-500 to-teal-700', img: 'eco', image: 'https://thumbs.dreamstime.com/z/vitamins-supplements-shelves-different-types-pharmacy-45969522.jpg' },
+    { id: 3, title: t('home.banner3_title', { defaultValue: 'Free Delivery Over 500K VND' }), subtitle: t('home.banner3_desc', { defaultValue: 'Fast, secure pharmaceutical delivery' }), cta: t('home.start_shopping', { defaultValue: 'Start Shopping' }), to: '/products', bg: 'from-purple-600 to-purple-800', img: 'local_shipping', image: 'https://wallpapercave.com/wp/wp13751014.jpg' },
   ]
 
   const TRUST_ITEMS = [
@@ -132,6 +132,15 @@ export default function HomePage() {
     return () => clearInterval(t)
   }, [BANNERS.length])
 
+  const navigate = useNavigate()
+  const [traceUid, setTraceUid] = useState('')
+
+  const handleTraceEnter = (e) => {
+    if (e.key === 'Enter' && traceUid.trim()) {
+      navigate('/trace', { state: { uid: traceUid.trim() } })
+    }
+  }
+
   return (
     <div className="animate-fade-in bg-white pb-12">
       {/* Hero Section - Optimized height to push Trust Bar to the bottom edge */}
@@ -165,7 +174,7 @@ export default function HomePage() {
 
               {!BANNERS[activeBanner].image && (
                 <div className="hidden tablet:flex absolute right-[10%] top-1/2 -translate-y-1/2 text-[400px] opacity-10 transform rotate-12 select-none pointer-events-none">
-                  {BANNERS[activeBanner].img}
+                  <span className="material-symbols-outlined text-[400px]">{BANNERS[activeBanner].img}</span>
                 </div>
               )}
             </div>
@@ -362,14 +371,20 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <div className="flex-1 relative group/input">
                     <input 
+                        value={traceUid}
+                        onChange={(e) => setTraceUid(e.target.value)}
+                        onKeyDown={handleTraceEnter}
                         placeholder={t('home.uid_placeholder')}
                         className="w-full h-12 sm:h-14 pl-11 sm:pl-12 pr-4 bg-white/10 border border-white/20 rounded-xl sm:rounded-2xl text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-brand-300 transition-all font-mono text-sm"
                     />
                     <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-white/50 group-focus-within/input:text-brand-300 transition-colors" />
                 </div>
-                <Link to="/trace" className="h-12 sm:h-14 px-8 bg-medical-green hover:bg-green-600 text-white font-black rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 transition-all shadow-xl shadow-green-900/20 whitespace-nowrap uppercase text-sm">
+                <button 
+                  onClick={() => traceUid && navigate('/trace', { state: { uid: traceUid.trim() } })}
+                  className="h-12 sm:h-14 px-8 bg-medical-green hover:bg-green-600 text-white font-black rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 transition-all shadow-xl shadow-green-900/20 whitespace-nowrap uppercase text-sm"
+                >
                   {t('home.check_now')} <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Link>
+                </button>
               </div>
               
               {/* Trust Badges - Wrapped for mobile */}
@@ -385,7 +400,9 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-white/5 rounded-3xl rotate-3 sm:rotate-6 group-hover:rotate-12 transition-transform duration-500 border border-white/10 hidden sm:block" />
                 <div className="relative z-10 w-full max-w-[280px] sm:w-full bg-white rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col items-center justify-center">
                     <div className="w-full aspect-square border-4 border-slate-50 flex items-center justify-center rounded-2xl mb-3 sm:mb-4 relative overflow-hidden group/qr">
-                        <div className="text-[80px] sm:text-[120px] filter grayscale group-hover:grayscale-0 transition-all duration-500">📱</div>
+                        <div className="text-[80px] sm:text-[120px] filter grayscale group-hover:grayscale-0 transition-all duration-500 text-brand-500">
+                          <span className="material-symbols-outlined text-[100px] sm:text-[140px]">qr_code_scanner</span>
+                        </div>
                         <div className="absolute inset-0 bg-brand-500/10 flex items-center justify-center opacity-0 group-hover/qr:opacity-100 transition-opacity">
                             <span className="bg-brand-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase">{t('home.scan_qr')}</span>
                         </div>

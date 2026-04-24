@@ -21,9 +21,9 @@ export const AuthLayout = () => (
         </p>
       </div>
       <div className="flex gap-6 text-sm text-brand-300">
-        <span>🔒 Secure & Encrypted</span>
-        <span>✓ GMP Certified</span>
-        <span>📦 Fast Delivery</span>
+        <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[18px]">lock</span> Secure & Encrypted</span>
+        <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[18px]">verified</span> GMP Certified</span>
+        <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[18px]">local_shipping</span> Fast Delivery</span>
       </div>
     </div>
 

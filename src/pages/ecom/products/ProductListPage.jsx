@@ -15,6 +15,7 @@ import { CategoryIcon } from '@/components/ui/CategoryIcon'
 // Sub-components
 import { ProductFilters } from './components/ProductFilters'
 import { ProductListPageHeader } from './components/ProductListPageHeader'
+import QuickSubCategorySelect from './components/QuickSubCategorySelect'
 
 /**
  * ProductListPage handles global state for filtering, searching, and sorting products.
@@ -39,6 +40,7 @@ export default function ProductListPage() {
   const minPrice = searchParams.get('minPrice')         || ''
   const maxPrice = searchParams.get('maxPrice')         || ''
   const brand    = searchParams.get('brand')            || ''
+  const isFlashSale = searchParams.get('is_flash_sale') === 'true'
 
   const [searchInput, setSearchInput] = useState(search)
   const debouncedSearch = useDebounce(searchInput, 400)
@@ -46,6 +48,11 @@ export default function ProductListPage() {
   const setParam = useCallback((key, val) => {
     setSearchParams(prev => {
       const next = new URLSearchParams(prev)
+      const currentVal = next.get(key) || ''
+      const newVal = String(val || '')
+      
+      if (currentVal === newVal) return prev
+      
       if (val) next.set(key, val); else next.delete(key)
       if (key !== 'page') next.set('page', '1')
       return next
@@ -56,7 +63,7 @@ export default function ProductListPage() {
     setLoading(true)
     setError(null)
     try {
-      const res = await productService.getAll({ category, sort, search, minPrice, maxPrice, brand, limit: 10000 })
+      const res = await productService.getAll({ category, sort, search, minPrice, maxPrice, brand, is_flash_sale: isFlashSale, limit: 10000 })
       const allData = Array.isArray(res?.data) ? res.data : []
 
       // Deduplicate: same drug ID may appear once per packaging variant.
@@ -86,10 +93,15 @@ export default function ProductListPage() {
     } finally {
       setLoading(false)
     }
-  }, [category, sort, search, minPrice, maxPrice, brand, t])
+  }, [category, sort, search, minPrice, maxPrice, brand, isFlashSale, page, t])
 
   useEffect(() => { fetchProducts() }, [fetchProducts])
-  useEffect(() => { setParam('search', debouncedSearch) }, [debouncedSearch, setParam])
+  
+  useEffect(() => { 
+    if (debouncedSearch !== search) {
+      setParam('search', debouncedSearch)
+    }
+  }, [debouncedSearch, search, setParam])
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -113,6 +125,7 @@ export default function ProductListPage() {
         {/* Sidebar Filters */}
         <aside className={`w-full md:w-60 shrink-0 ${showFilters ? 'block' : 'hidden md:block'}`}>
           <ProductFilters 
+            key={category || 'all'}
             categories={categories}
             selectedCategory={category}
             onCategoryChange={val => setParam('category', val)}
@@ -131,55 +144,12 @@ export default function ProductListPage() {
         {/* Main Content */}
         <div className="flex-1 min-w-0">
           {/* Sub-category Quick Select */}
-          {(() => {
-            const activeParent = categories.find(c => c.id == category || c.children?.some(child => child.id == category));
-            if (!activeParent || !activeParent.children?.length) return null;
-            
-            return (
-              <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
-                    {t('product_list.subcategories_of', { name: activeParent.name, defaultValue: `Danh mục ${activeParent.name}` })}
-                  </h3>
-                  {category != activeParent.id && (
-                    <button 
-                      onClick={() => setParam('category', activeParent.id)}
-                      className="text-xs font-bold text-brand-600 hover:text-brand-700 hover:underline"
-                    >
-                      {t('common.view_all_in_parent', { defaultValue: 'Xem tất cả' })}
-                    </button>
-                  )}
-                </div>
-                <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2">
-                  {activeParent.children.map(child => (
-                    <button
-                      key={child.id}
-                      onClick={() => setParam('category', child.id)}
-                      className={cn(
-                        "flex flex-col items-center gap-2 min-w-[100px] p-4 rounded-2xl border transition-all shrink-0",
-                        category == child.id 
-                          ? "bg-brand-50 border-brand-200 shadow-sm shadow-brand-100" 
-                          : "bg-white border-slate-100 hover:border-brand-200 hover:shadow-md"
-                      )}
-                    >
-                      <CategoryIcon 
-                        name={child.iconName} 
-                        className={cn(
-                          "w-12 h-12 bg-transparent",
-                          category == child.id ? "scale-110" : ""
-                        )} 
-                        size={24} 
-                      />
-                      <span className={cn(
-                        "text-[11px] font-bold text-center leading-tight truncate w-full px-1",
-                        category == child.id ? "text-brand-700" : "text-slate-600"
-                      )}>{child.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
+          <QuickSubCategorySelect 
+            categories={categories}
+            category={category}
+            setParam={setParam}
+            t={t}
+          />
 
           <ProductListPageHeader             searchInput={searchInput}
             onSearchChange={setSearchInput}
@@ -189,6 +159,7 @@ export default function ProductListPage() {
             totalResults={total}
             currentSearch={search}
             loading={loading}
+            isFlashSale={isFlashSale}
           />
 
           {/* Error state */}

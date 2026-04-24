@@ -6,7 +6,7 @@ import { Toaster } from 'react-hot-toast'
 import App from './App'
 import { antdTheme } from './config/antdTheme'
 import './index.css'
-import './i18n' // Add this line
+import './i18n'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

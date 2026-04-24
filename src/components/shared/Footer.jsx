@@ -37,7 +37,6 @@ export const Footer = () => {
           <div>
             <h4 className="text-white font-black text-sm uppercase tracking-widest mb-8 relative inline-block">
               {t('footer.products')}
-              <span className="absolute -bottom-2 left-0 w-8 h-1 bg-medical-green rounded-full"></span>
             </h4>
             <ul className="space-y-4 text-[13px] font-bold text-white">
               {[
@@ -61,7 +60,6 @@ export const Footer = () => {
           <div>
             <h4 className="text-white font-black text-sm uppercase tracking-widest mb-8 relative inline-block">
               {t('footer.customer_support')}
-              <span className="absolute -bottom-2 left-0 w-8 h-1 bg-medical-green rounded-full"></span>
             </h4>
             <ul className="space-y-4 text-[13px] font-bold text-white">
               {[
@@ -85,7 +83,6 @@ export const Footer = () => {
           <div>
             <h4 className="text-white font-black text-sm uppercase tracking-widest mb-8 relative inline-block">
               {t('footer.contact')}
-              <span className="absolute -bottom-2 left-0 w-8 h-1 bg-medical-green rounded-full"></span>
             </h4>
             <ul className="space-y-5">
               <li className="flex items-start gap-4">

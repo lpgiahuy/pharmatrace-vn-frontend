@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { useState, useEffect, memo } from 'react'
 import PropTypes from 'prop-types'
 import { X, Search, ChevronDown, ChevronUp, Check } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { useTranslation } from 'react-i18next'
 import { CategoryIcon } from '@/components/ui/CategoryIcon'
 import { cn } from '@/utils'
+import CategoryFilterItem from './CategoryFilterItem'
 
 export const ProductFilters = memo(({ 
   categories, 
@@ -18,30 +19,27 @@ export const ProductFilters = memo(({
   onBrandChange,
   onClearFilters,
   showAllCategories,
-  onToggleShowAllCategories
+  onToggleShowAllCategories,
+  brands = []
 }) => {
   const { t, i18n } = useTranslation()
-  const [localMin, setLocalMin] = React.useState(minPrice || '')
-  const [localMax, setLocalMax] = React.useState(maxPrice || '')
-  const [brandSearch, setBrandSearch] = React.useState('')
-  const [showAllBrands, setShowAllBrands] = React.useState(false)
+  const [localMin, setLocalMin] = useState(minPrice || '')
+  const [localMax, setLocalMax] = useState(maxPrice || '')
+  const [brandSearch, setBrandSearch] = useState('')
+  const [showAllBrands, setShowAllBrands] = useState(false)
 
   // Sync local inputs with props when filters are cleared
-  React.useEffect(() => {
+  useEffect(() => {
     setLocalMin(minPrice || '')
     setLocalMax(maxPrice || '')
   }, [minPrice, maxPrice])
 
-  const BRANDS = [
-    'STELLA', 'DHG Pharma', 'Davipharm', 'Hasan- Demarpharm', 'Domesco', 
-    'Imexpharm', 'Traphaco', 'Nam Ha Pharma', 'OPC', 'Vemedim', 'Pymepharco'
-  ]
 
   const PRICE_PRESETS = [
-    { label: i18n.language === 'vi' ? 'Dưới 100.000 đ' : 'Under 100k', min: '', max: '100000' },
-    { label: i18n.language === 'vi' ? '100.000 đ - 300.000 đ' : '100k - 300k', min: '100000', max: '300000' },
-    { label: i18n.language === 'vi' ? '300.000 đ - 500.000 đ' : '300k - 500k', min: '300000', max: '500000' },
-    { label: i18n.language === 'vi' ? 'Trên 500.000 đ' : 'Above 500k', min: '500000', max: '' },
+    { label: t('product_list.price_under', { price: '100.000 đ' }), min: '', max: '100000' },
+    { label: t('product_list.price_between', { min: '100.000 đ', max: '300.000 đ' }), min: '100000', max: '300000' },
+    { label: t('product_list.price_between', { min: '300.000 đ', max: '500.000 đ' }), min: '300000', max: '500000' },
+    { label: t('product_list.price_above', { price: '500.000 đ' }), min: '500000', max: '' },
   ]
 
   const handleApplyPrice = () => {
@@ -49,7 +47,7 @@ export const ProductFilters = memo(({
     onPriceChange('maxPrice', localMax)
   }
 
-  const filteredBrands = BRANDS.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()))
+  const filteredBrands = brands.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()))
   const displayedBrands = showAllBrands ? filteredBrands : filteredBrands.slice(0, 5)
 
   const hasActiveFilters = selectedCategory || minPrice || maxPrice || selectedBrand
@@ -92,90 +90,14 @@ export const ProductFilters = memo(({
             {t('product_list.all_categories', { defaultValue: 'Tất cả danh mục' })}
           </button>
 
-          {categories.map(cat => {
-            const hasChildren = cat.children && cat.children.length > 0;
-            const isParentActive = selectedCategory == cat.id || cat.children.some(child => selectedCategory == child.id);
-            const [expanded, setExpanded] = React.useState(isParentActive);
-            
-            // Re-sync expansion when selection changes externally
-            React.useEffect(() => {
-              if (isParentActive) setExpanded(true);
-            }, [isParentActive]);
-
-            return (
-              <div key={cat.id} className="space-y-1">
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => onCategoryChange(cat.id)}
-                    className={cn(
-                      "flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border text-[13px] font-medium transition-all group text-left",
-                      selectedCategory == cat.id
-                        ? "bg-brand-50 border-brand-200 text-brand-700 shadow-sm" 
-                        : "bg-surface-soft/50 border-slate-100 text-slate-600 hover:border-brand-200 hover:bg-white"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all",
-                      selectedCategory == cat.id ? "border-brand-500 bg-brand-500" : "border-slate-300 group-hover:border-brand-400"
-                    )}>
-                      {selectedCategory == cat.id ? (
-                        <Check className="w-3 h-3 text-white" />
-                      ) : (
-                        <CategoryIcon 
-                          name={cat.iconName} 
-                          className="w-5 h-5 bg-transparent" 
-                          iconClassName="text-slate-400 group-hover:text-brand-500" 
-                          size={14} 
-                        />
-                      )}
-                    </div>
-                    <span className="truncate">{cat.name}</span>
-                  </button>
-                  
-                  {hasChildren && (
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-                      className={cn(
-                        "w-10 h-11 flex items-center justify-center rounded-xl border border-slate-100 text-slate-400 hover:bg-white hover:text-brand-500 transition-all",
-                        expanded && "bg-white text-brand-500 border-brand-100 shadow-sm"
-                      )}
-                    >
-                      {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </button>
-                  )}
-                </div>
-
-                {/* Sub-categories */}
-                {hasChildren && expanded && (
-                  <div className="pl-6 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                    {cat.children.map(child => {
-                      const isChildActive = selectedCategory == child.id
-                      return (
-                        <button
-                          key={child.id}
-                          onClick={() => onCategoryChange(child.id)}
-                          className={cn(
-                            "w-full flex items-center gap-3 px-4 py-2 rounded-lg border text-[12px] font-medium transition-all group text-left",
-                            isChildActive 
-                              ? "bg-brand-50 border-brand-100 text-brand-600 shadow-sm" 
-                              : "bg-transparent border-transparent text-slate-500 hover:bg-brand-50/50 hover:text-brand-600"
-                          )}
-                        >
-                          <div className={cn(
-                            "w-4 h-4 rounded-sm border flex items-center justify-center transition-all",
-                            isChildActive ? "border-brand-500 bg-brand-500" : "border-slate-200 group-hover:border-brand-300"
-                          )}>
-                            {isChildActive && <Check className="w-2.5 h-2.5 text-white" />}
-                          </div>
-                          {child.name}
-                        </button>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            )
-          })}
+          {categories.map(cat => (
+            <CategoryFilterItem 
+              key={cat.id}
+              cat={cat}
+              selectedCategory={selectedCategory}
+              onCategoryChange={onCategoryChange}
+            />
+          ))}
         </div>
       </div>
 
@@ -216,13 +138,13 @@ export const ProductFilters = memo(({
         {/* Custom Input */}
         <div className="space-y-4">
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            {i18n.language === 'vi' ? 'Hoặc nhập khoảng giá phù hợp với bạn:' : 'Or enter personal range:'}
+            {t('product_list.custom_range_label', { defaultValue: 'Or enter personal range:' })}
           </p>
           <div className="grid grid-cols-2 gap-2">
             <div className="relative">
               <input
                 type="number"
-                placeholder={i18n.language === 'vi' ? 'Tối thiểu' : 'Min'}
+                placeholder={t('product_list.min_price', { defaultValue: 'Min' })}
                 value={localMin}
                 onChange={e => setLocalMin(e.target.value)}
                 className="w-full h-10 px-3 pr-8 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all font-medium"
@@ -232,7 +154,7 @@ export const ProductFilters = memo(({
             <div className="relative">
               <input
                 type="number"
-                placeholder={i18n.language === 'vi' ? 'Tối đa' : 'Max'}
+                placeholder={t('product_list.max_price', { defaultValue: 'Max' })}
                 value={localMax}
                 onChange={e => setLocalMax(e.target.value)}
                 className="w-full h-10 px-3 pr-8 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all font-medium"
@@ -244,7 +166,7 @@ export const ProductFilters = memo(({
             className="w-full h-10 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-black text-xs uppercase tracking-widest shadow-md shadow-brand-500/10"
             onClick={handleApplyPrice}
           >
-            {i18n.language === 'vi' ? 'Áp dụng' : 'Apply'}
+            {t('product_list.apply', { defaultValue: 'Apply' })}
           </Button>
         </div>
       </div>
@@ -258,7 +180,7 @@ export const ProductFilters = memo(({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input 
             type="text"
-            placeholder={i18n.language === 'vi' ? 'Nhập tên thương hiệu' : 'Search Brand'}
+            placeholder={t('product_list.search_brand', { defaultValue: 'Search Brand' })}
             value={brandSearch}
             onChange={e => setBrandSearch(e.target.value)}
             className="w-full h-10 pl-9 pr-4 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all font-medium"
@@ -294,13 +216,14 @@ export const ProductFilters = memo(({
 
         {filteredBrands.length > 5 && (
           <button 
+            type="button"
             onClick={() => setShowAllBrands(!showAllBrands)}
             className="w-full mt-4 flex items-center justify-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-700 transition-colors py-2"
           >
             {showAllBrands ? (
-              <><ChevronUp className="w-3.5 h-3.5" /> {i18n.language === 'vi' ? 'Thu gọn' : 'Show less'}</>
+              <><ChevronUp className="w-3.5 h-3.5" /> {t('common.show_less', { defaultValue: 'Show less' })}</>
             ) : (
-              <><ChevronDown className="w-3.5 h-3.5" /> {i18n.language === 'vi' ? 'Xem thêm' : 'Show more'}</>
+              <><ChevronDown className="w-3.5 h-3.5" /> {t('common.show_more', { defaultValue: 'Show more' })}</>
             )}
           </button>
         )}
@@ -315,14 +238,18 @@ ProductFilters.propTypes = {
   categories: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     name: PropTypes.string.isRequired,
-    icon: PropTypes.node
   })).isRequired,
   selectedCategory: PropTypes.string,
   onCategoryChange: PropTypes.func.isRequired,
   minPrice: PropTypes.string,
   maxPrice: PropTypes.string,
   onPriceChange: PropTypes.func.isRequired,
+  selectedBrand: PropTypes.string,
+  onBrandChange: PropTypes.func.isRequired,
   onClearFilters: PropTypes.func.isRequired,
   showAllCategories: PropTypes.bool.isRequired,
-  onToggleShowAllCategories: PropTypes.func.isRequired
+  onToggleShowAllCategories: PropTypes.func.isRequired,
+  brands: PropTypes.arrayOf(PropTypes.string)
 }
+
+export default ProductFilters;

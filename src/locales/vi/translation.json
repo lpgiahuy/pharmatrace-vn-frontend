@@ -74,9 +74,11 @@
     "current_points": "Điểm hiện tại",
     "next_tier_progress": "Tiến trình hạng {{tier}}",
     "missing_points": "Thiếu {{points}}đ",
+    "bronze": "Đồng",
     "silver": "Bạc",
     "gold": "Vàng",
     "platinum": "Bạch kim",
+    "diamond": "Kim cương",
     "member": "Thành viên",
     "not_updated": "Chưa cập nhật"
   },
@@ -102,6 +104,8 @@
     "add_to_cart": "Thêm vào giỏ",
     "add_wishlist": "Thêm vào yêu thích",
     "remove_wishlist": "Xóa khỏi yêu thích",
+    "discount_amount": "GIẢM {{amount}}",
+    "price_disclaimer": "Giá đã bao gồm thuế. Phí vận chuyển và các chi phí khác (nếu có) sẽ được thể hiện khi đặt hàng.",
     "trust": {
       "authentic": "Chính hãng",
       "authentic_sub": "Chứng nhận Bộ Y Tế",
@@ -170,8 +174,15 @@
     "category": "Danh mục",
     "all_categories": "Tất cả danh mục",
     "price_range": "Khoảng giá (VND)",
+    "price_under": "Dưới {{price}}",
+    "price_between": "{{min}} - {{max}}",
+    "price_above": "Trên {{price}}",
+    "custom_range_label": "Hoặc nhập khoảng giá phù hợp với bạn:",
     "min_price": "Tối thiểu",
     "max_price": "Tối đa",
+    "apply": "Áp dụng",
+    "brand": "Thương hiệu",
+    "search_brand": "Nhập tên thương hiệu",
     "search_placeholder": "Tìm kiếm sản phẩm...",
     "filters_btn": "Bộ lọc",
     "results_count": "Tìm thấy {{count}} sản phẩm",
@@ -219,6 +230,7 @@
     "signup": "Đăng ký",
     "already_have_account": "Đã có tài khoản?",
     "signin_now": "Đăng nhập ngay",
+    "login_required_favorite": "Vui lòng đăng nhập để thêm vào yêu thích!",
     "validation": {
       "invalid_phone": "Số điện thoại không hợp lệ",
       "invalid_email": "Địa chỉ email không hợp lệ",
@@ -226,5 +238,18 @@
       "pw_match": "Mật khẩu không khớp",
       "name_min": "Tên phải có ít nhất 2 ký tự"
     }
+  },
+  "admin": {
+    "dashboard": "Bảng điều khiển",
+    "products": "Sản phẩm",
+    "all_products": "Tất cả sản phẩm",
+    "categories": "Danh mục",
+    "orders_rma": "Đơn hàng & RMA",
+    "orders": "Đơn hàng",
+    "rma": "Yêu cầu RMA",
+    "vouchers": "Mã giảm giá",
+    "blog_news": "Blog & Tin tức",
+    "staff_rbac": "Nhân viên & Phân quyền",
+    "sidebar_title": "Admin Portal"
   }
 }

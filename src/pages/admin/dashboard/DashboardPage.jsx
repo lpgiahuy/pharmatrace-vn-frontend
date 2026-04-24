@@ -48,10 +48,10 @@ export default function DashboardPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard loading={loading} title="Total Revenue"   value={stats?.revenue?.value}   change={stats?.revenue?.change}   trend={stats?.revenue?.trend}   icon={DollarSign}    color="blue"   prefix="₫" />
-        <StatCard loading={loading} title="Total Orders"    value={stats?.orders?.value}    change={stats?.orders?.change}    trend={stats?.orders?.trend}    icon={ShoppingBag}   color="green"  />
-        <StatCard loading={loading} title="Total Customers" value={stats?.customers?.value} change={stats?.customers?.change} trend={stats?.customers?.trend} icon={Users}         color="purple" />
-        <StatCard loading={loading} title="Low Stock Items" value={stats?.lowStock?.value}  change={stats?.lowStock?.change}  trend={stats?.lowStock?.trend}  icon={AlertTriangle} color="orange" />
+        <StatCard loading={loading} title="Total Revenue"   value={stats?.revenue?.value || 0}   change={Number(stats?.revenue?.change || 0)}   trend={stats?.revenue?.trend}   icon={DollarSign}    color="blue"   prefix="₫" />
+        <StatCard loading={loading} title="Total Orders"    value={stats?.orders?.value || 0}    change={Number(stats?.orders?.change || 0)}    trend={stats?.orders?.trend}    icon={ShoppingBag}   color="green"  />
+        <StatCard loading={loading} title="Total Customers" value={stats?.customers?.value || 0} change={Number(stats?.customers?.change || 0)} trend={stats?.customers?.trend} icon={Users}         color="purple" />
+        <StatCard loading={loading} title="Low Stock Items" value={stats?.lowStock?.value || 0}  change={Number(stats?.lowStock?.change || 0)}  trend={stats?.lowStock?.trend}  icon={AlertTriangle} color="orange" />
       </div>
 
       {/* Charts */}

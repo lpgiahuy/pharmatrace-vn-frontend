@@ -13,7 +13,8 @@ export const ProductListPageHeader = memo(({
   onToggleFilters,
   totalResults,
   currentSearch,
-  loading
+  loading,
+  isFlashSale
 }) => {
   const { t } = useTranslation()
 
@@ -58,6 +59,11 @@ export const ProductListPageHeader = memo(({
             ? t('common.loading', { defaultValue: 'Loading…' }) 
             : t('product_list.results_count', { count: totalResults, defaultValue: `${totalResults.toLocaleString()} products found` })
           }
+          {isFlashSale && (
+            <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-medical-red/10 text-medical-red border border-medical-red/20 uppercase tracking-wider">
+              🔥 {t('home.flash_sale', { defaultValue: 'Flash Sale' })}
+            </span>
+          )}
           {currentSearch && (
             <span className="ml-1">
               {t('product_list.for_query', { defaultValue: 'for' })} "<strong>{currentSearch}</strong>"
@@ -79,5 +85,6 @@ ProductListPageHeader.propTypes = {
   onToggleFilters: PropTypes.func.isRequired,
   totalResults: PropTypes.number.isRequired,
   currentSearch: PropTypes.string,
-  loading: PropTypes.bool.isRequired
+  loading: PropTypes.bool.isRequired,
+  isFlashSale: PropTypes.bool
 }

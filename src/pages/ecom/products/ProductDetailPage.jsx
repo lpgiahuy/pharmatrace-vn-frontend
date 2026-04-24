@@ -88,8 +88,8 @@ export default function ProductDetailPage() {
         setProduct(res)
         setIsFavorite(res.isFavorited)
         // Auto-select the base variant or the first one
-        if (res.packagingVariants?.length > 0) {
-          const base = res.packagingVariants.find(v => v.isBase) || res.packagingVariants[0]
+        if (res.variants?.length > 0) {
+          const base = res.variants.find(v => v.isBase) || res.variants[0]
           setSelectedVariant(base)
         }
       })
@@ -124,11 +124,12 @@ export default function ProductDetailPage() {
 
   // Active price: use selected variant price if available, otherwise product base price
   const activePrice = selectedVariant?.price ?? product.price
-  const discount = product.originalPrice ? Math.round((1 - activePrice / product.originalPrice) * 100) : 0
+  const activeOriginalPrice = selectedVariant?.originalPrice ?? product.originalPrice
+  const discount = selectedVariant?.discount || (activeOriginalPrice ? Math.round((1 - activePrice / activeOriginalPrice) * 100) : 0)
 
   // Build cart item using the active variant
   const cartItem = selectedVariant
-    ? { ...product, price: selectedVariant.price, unit: selectedVariant.label, variantId: selectedVariant.id }
+    ? { ...product, price: selectedVariant.price, unit: selectedVariant.unit, variantId: selectedVariant.id }
     : product
 
   return (
@@ -145,14 +146,9 @@ export default function ProductDetailPage() {
       <div className="grid md:grid-cols-2 gap-10 mb-12">
         {/* Image */}
         <div className="space-y-3">
-          <div className="aspect-square rounded-2xl bg-slate-50 border border-surface-border overflow-hidden flex items-center justify-center p-8">
+          <div className="aspect-[1.25/1] rounded-2xl bg-slate-50 border border-surface-border overflow-hidden flex items-center justify-center p-6">
             <img src={product.image} alt={product.name} className="max-w-full max-h-full object-contain" />
           </div>
-          {discount > 0 && (
-            <div className="flex gap-2">
-              <span className="badge-red px-3 py-1 rounded-full bg-red-500 text-white text-xs font-bold">-{discount}% {t('product.off', { defaultValue: 'OFF' })}</span>
-            </div>
-          )}
         </div>
 
         {/* Info */}
@@ -176,32 +172,32 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Unit / Packaging Switcher */}
-          {product.packagingVariants?.length > 1 && (
+          {product.variants?.length > 1 && (
             <div className="mb-6">
               <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">
                 {t('product.packaging_variants', { defaultValue: 'Packaging Options' })}
               </p>
               <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Select packaging variant">
-                {product.packagingVariants.map(v => (
+                {product.variants.map(v => (
                   <button
-                    key={v.id ?? v.label}
+                    key={v.id ?? v.unit}
                     onClick={() => setSelectedVariant(v)}
-                    aria-checked={selectedVariant?.label === v.label}
+                    aria-checked={selectedVariant?.unit === v.unit}
                     role="radio"
                     className={cn(
                       'flex flex-col items-start px-4 py-2.5 rounded-xl border-2 transition-all duration-200 text-left min-w-[90px]',
-                      selectedVariant?.label === v.label
+                      selectedVariant?.unit === v.unit
                         ? 'border-brand-500 bg-brand-50 shadow-md shadow-brand-100'
                         : 'border-slate-200 bg-white hover:border-brand-200 hover:bg-slate-50'
                     )}
                   >
                     <span className={cn(
                       'text-xs font-black uppercase tracking-tight leading-none',
-                      selectedVariant?.label === v.label ? 'text-brand-600' : 'text-slate-500'
-                    )}>{v.label}</span>
+                      selectedVariant?.unit === v.unit ? 'text-brand-600' : 'text-slate-500'
+                    )}>{v.unit}</span>
                     <span className={cn(
                       'text-sm font-black mt-1 leading-none',
-                      selectedVariant?.label === v.label ? 'text-brand-700' : 'text-slate-700'
+                      selectedVariant?.unit === v.unit ? 'text-brand-700' : 'text-slate-700'
                     )}>{formatCurrency(v.price)}</span>
                   </button>
                 ))}
@@ -209,16 +205,35 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          <div className="flex items-end gap-3 mb-6" aria-label="Pricing">
-            <span className="text-3xl font-display font-bold text-brand-600">{formatCurrency(activePrice)}</span>
-            {product.originalPrice && activePrice < product.originalPrice && (
-              <span className="text-lg text-slate-400 line-through" aria-label="Original price">{formatCurrency(product.originalPrice)}</span>
+          {/* Price & Discount Box */}
+          <div className="bg-slate-50/80 p-6 rounded-2xl border border-slate-100 mb-6 shadow-sm">
+            {activeOriginalPrice && activePrice < activeOriginalPrice && (
+              <div className="inline-flex items-center bg-medical-red text-white text-[10px] font-black px-2 py-1 rounded mb-3 shadow-sm uppercase tracking-tight">
+                {t('product.discount_amount', { 
+                  amount: formatCurrency(activeOriginalPrice - activePrice), 
+                  defaultValue: `GIẢM ${formatCurrency(activeOriginalPrice - activePrice)}` 
+                })}
+              </div>
             )}
-            {selectedVariant && (
-              <span className="ml-1 px-2.5 py-1 bg-brand-50 text-brand-600 text-xs font-black rounded-lg uppercase tracking-wide">
-                / {selectedVariant.label}
+            
+            <div className="flex items-baseline gap-3">
+              <span className="text-3xl md:text-4xl font-display font-black text-brand-600 tracking-tight">
+                {formatCurrency(activePrice)}
+                <span className="text-lg md:text-xl font-bold text-slate-400 ml-1.5 uppercase">
+                  /{selectedVariant?.unit || product.unit}
+                </span>
               </span>
-            )}
+              
+              {activeOriginalPrice && activePrice < activeOriginalPrice && (
+                <span className="text-lg md:text-xl text-slate-300 line-through font-medium decor-slate-200">
+                  {formatCurrency(activeOriginalPrice)}
+                </span>
+              )}
+            </div>
+
+            <p className="text-[10px] sm:text-[11px] text-slate-400 mt-4 leading-relaxed italic border-t border-slate-200/60 pt-3">
+              * {t('product.price_disclaimer', { defaultValue: 'Giá đã bao gồm thuế. Phí vận chuyển và các chi phí khác (nếu có) sẽ được thể hiện khi đặt hàng.' })}
+            </p>
           </div>
 
           {/* Tags */}
@@ -228,7 +243,6 @@ export default function ProductDetailPage() {
             ) : (
               <Badge color="red">{t('product.out_of_stock', { defaultValue: 'Out of Stock' })}</Badge>
             )}
-            {product.isPrescription && <Badge color="orange">{t('product.rx_required', { defaultValue: 'Prescription Required' })}</Badge>}
             {product.tags?.map(tag => <Badge key={tag} color="blue">{tag}</Badge>)}
           </div>
 

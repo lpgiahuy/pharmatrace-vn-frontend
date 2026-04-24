@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { User, Mail, Phone, MapPin, Edit3, Save, X, ChevronRight, Award, Trophy, Star, Pill } from 'lucide-react'
+import { User, Mail, Phone, MapPin, Edit3, Save, X, ChevronRight, Award, Trophy, Star, Pill, Gem } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { authService } from '@/services/auth.service'
 import { useTranslation } from 'react-i18next'
@@ -47,24 +47,32 @@ export default function ProfilePage() {
 
   const getTierColor = (tier) => {
     switch (tier?.toLowerCase()) {
+      case 'đồng':
+      case 'bronze': return 'from-[#CD7F32] via-[#E6BE8A] to-[#8B4513] text-orange-950 border-[#A0522D]'
       case 'bạc':
-      case 'silver': return 'from-slate-300 to-slate-500 text-slate-900 border-slate-200'
+      case 'silver': return 'from-slate-300 via-slate-100 to-slate-500 text-slate-900 border-slate-200'
       case 'vàng':
-      case 'gold': return 'from-amber-300 to-amber-600 text-amber-950 border-amber-200'
+      case 'gold': return 'from-amber-300 via-yellow-100 to-amber-600 text-amber-950 border-amber-200'
       case 'bạch kim':
-      case 'platinum': return 'from-indigo-300 to-indigo-600 text-indigo-950 border-indigo-200'
+      case 'platinum': return 'from-indigo-300 via-indigo-100 to-indigo-600 text-indigo-950 border-indigo-200'
+      case 'kim cương':
+      case 'diamond': return 'from-cyan-400 via-white to-blue-500 text-blue-950 border-cyan-100 shadow-xl shadow-cyan-100/50'
       default: return 'from-orange-300 to-orange-600 text-orange-950 border-orange-200'
     }
   }
 
   const getTierIcon = (tier) => {
     switch (tier?.toLowerCase()) {
+      case 'đồng':
+      case 'bronze': return <Award className="w-8 h-8" />
       case 'bạc':
       case 'silver': return <Award className="w-8 h-8" />
       case 'vàng':
       case 'gold': return <Trophy className="w-8 h-8" />
       case 'bạch kim':
       case 'platinum': return <Star className="w-8 h-8" />
+      case 'kim cương':
+      case 'diamond': return <Gem className="w-8 h-8" />
       default: return <Award className="w-8 h-8" />
     }
   }
@@ -72,9 +80,11 @@ export default function ProfilePage() {
   const translateTier = (tier) => {
     if (!tier) return t('account.member')
     const lower = tier.toLowerCase()
+    if (lower === 'đồng' || lower === 'bronze') return t('account.bronze')
     if (lower === 'bạc' || lower === 'silver') return t('account.silver')
     if (lower === 'vàng' || lower === 'gold') return t('account.gold')
     if (lower === 'bạch kim' || lower === 'platinum') return t('account.platinum')
+    if (lower === 'kim cương' || lower === 'diamond') return t('account.diamond')
     return tier
   }
 

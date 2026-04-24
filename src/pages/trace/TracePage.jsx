@@ -6,12 +6,14 @@ import {
   SafetyOutlined, EnvironmentOutlined, ExperimentOutlined,
   GlobalOutlined, AuditOutlined, StopOutlined,
 } from '@ant-design/icons'
+import { Link, useLocation } from 'react-router-dom'
 import {
   Shield, ShieldAlert, ShieldX, ShieldCheck,
   Package, Factory, Truck, Store, FlaskConical,
   MapPin, Clock, Eye, AlertTriangle, QrCode,
   ChevronRight, RotateCcw, Trash2, History,
   ScanLine, CheckCircle2, XCircle, Info,
+  ArrowLeft,
 } from 'lucide-react'
 import { traceService, DEMO_CODES } from '@/services/trace.service'
 import { formatDate, formatDateTime, cn } from '@/utils'
@@ -107,12 +109,33 @@ export default function TracePage() {
   const [activeSection, setActiveSection] = useState('overview')
   const inputRef  = useRef(null)
   const scannerEl = useRef(null)
+  const resultsRef = useRef(null)
   const html5Qr   = useRef(null)
+
+  const location = useLocation()
 
   useEffect(() => {
     setScanHistory(getScanHistory())
+    
+    // Check for UID in navigation state (passed from HomePage)
+    const stateUid = location.state?.uid
+    if (stateUid) {
+      setInputCode(stateUid)
+      handleTrace(stateUid)
+      // Clear state after reading to avoid re-triggering on refresh if undesired
+      window.history.replaceState({}, document.title)
+    }
+
     return () => stopCamera()
-  }, [])
+  }, [location.state])
+
+  useEffect(() => {
+    if (result && resultsRef.current) {
+      setTimeout(() => {
+        resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+    }
+  }, [result])
 
   // ── Camera QR Scanner ─────────────────────────────────────────────────────
   const startCamera = async () => {
@@ -159,10 +182,14 @@ export default function TracePage() {
       pushScanHistory({ code: trimmed, status: data.status, product: data.product?.name, scannedAt: new Date().toISOString() })
       setScanHistory(getScanHistory())
     } catch (err) {
-      const msg = err.message
-      if (msg === 'CODE_NOT_FOUND') setError({ type: 'not_found', code: trimmed })
-      else if (msg === 'INVALID_CODE') setError({ type: 'invalid', code: trimmed })
-      else setError({ type: 'network', msg: err.message })
+      console.error('[Trace Error]', err)
+      if (err.response?.status === 404 || err.message === 'CODE_NOT_FOUND') {
+        setError({ type: 'not_found', code: trimmed })
+      } else if (err.message === 'INVALID_CODE') {
+        setError({ type: 'invalid', code: trimmed })
+      } else {
+        setError({ type: 'network', msg: err.message })
+      }
     } finally {
       setLoading(false)
     }
@@ -195,119 +222,134 @@ export default function TracePage() {
         {/* Radial glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative page-container py-14 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-500/15 border border-brand-500/30 text-brand-300 text-xs font-semibold uppercase tracking-widest mb-6">
-            <ScanLine className="w-3.5 h-3.5" />
-            Pharmaceutical Traceability
-          </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-4 text-white leading-tight">
-            Verify Your<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-cyan-400">Medicine's Journey</span>
-          </h1>
-          <p className="text-slate-400 text-lg max-w-xl mx-auto mb-10">
-            Scan or enter a QR code to trace your product's complete supply chain — from factory to your hands.
-          </p>
-
-          {/* ── Search box ────────────────────────────────────────────── */}
-          <div className="max-w-xl mx-auto">
-            <div className="relative flex gap-2 p-1.5 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl">
-              <div className="relative flex-1">
-                <QrCode className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
-                <input
-                  ref={inputRef}
-                  value={inputCode}
-                  onChange={e => setInputCode(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleTrace()}
-                  onFocus={() => scanHistory.length && setShowHistory(true)}
-                  onBlur={() => setTimeout(() => setShowHistory(false), 200)}
-                  placeholder="QR code or UID (e.g. QR-BATCH-0001)"
-                  className="w-full pl-11 pr-4 py-3.5 bg-transparent text-white placeholder:text-slate-500 text-sm rounded-xl focus:outline-none"
-                  autoComplete="off"
-                  spellCheck={false}
-                />
-                {inputCode && (
-                  <button onClick={() => setInputCode('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
-                    <XCircle className="w-4 h-4" />
-                  </button>
-                )}
-
-                {/* History dropdown */}
-                {showHistory && scanHistory.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-white/10 rounded-xl overflow-hidden z-50 shadow-modal">
-                    <div className="flex items-center justify-between px-3 py-2 border-b border-white/5">
-                      <span className="text-xs text-slate-500 flex items-center gap-1"><History className="w-3 h-3" /> Recent Scans</span>
-                      <button onClick={clearHistory} className="text-xs text-slate-500 hover:text-red-400 flex items-center gap-1"><Trash2 className="w-3 h-3" /> Clear</button>
-                    </div>
-                    {scanHistory.map((h, i) => (
-                      <button key={i} onMouseDown={() => handleHistorySelect(h.code)} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 transition-colors text-left">
-                        <div className={cn('w-2 h-2 rounded-full shrink-0', {
-                          'bg-emerald-400': h.status === 'authentic',
-                          'bg-amber-400':   h.status === 'warning',
-                          'bg-red-400':     h.status === 'recalled' || h.status === 'fake',
-                        })} />
-                        <span className="text-sm font-mono text-slate-300">{h.code}</span>
-                        <span className="text-xs text-slate-500 ml-auto">{h.product || '—'}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <button
-                onClick={scanning ? stopCamera : startCamera}
-                className={cn(
-                  'shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5',
-                  scanning
-                    ? 'bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30'
-                    : 'bg-white/8 text-slate-300 border border-white/10 hover:bg-white/15'
-                )}
-                title={scanning ? 'Stop camera' : 'Scan with camera'}
-              >
-                <QrcodeOutlined />
-                <span className="hidden sm:inline">{scanning ? 'Stop' : 'Scan'}</span>
-              </button>
-
-              <button
-                onClick={() => handleTrace()}
-                disabled={loading || !inputCode.trim()}
-                className="shrink-0 px-5 py-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-sm font-semibold transition-all flex items-center gap-2"
-              >
-                {loading ? <Spinner size="sm" className="text-white" /> : <SearchOutlined />}
-                <span className="hidden sm:inline">Trace</span>
-              </button>
+        <div className="relative page-container py-10">
+          <div className="flex justify-between items-center mb-8">
+            <Link 
+              to="/" 
+              className="group flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all text-xs font-medium"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+              Back to Home
+            </Link>
+            
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-500/15 border border-brand-500/30 text-brand-300 text-xs font-semibold uppercase tracking-widest">
+              <ScanLine className="w-3.5 h-3.5" />
+              Pharmaceutical Traceability
             </div>
+            
+            <div className="w-20 hidden sm:block" /> {/* Spacer */}
+          </div>
+          
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-4 text-white leading-tight">
+              Verify Your<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-cyan-400">Medicine's Journey</span>
+            </h1>
+            <p className="text-slate-400 text-lg max-w-xl mx-auto mb-10">
+              Scan or enter a QR code to trace your product's complete supply chain — from factory to your hands.
+            </p>
 
-            {/* Camera viewer */}
-            {scanning && (
-              <div className="mt-4 rounded-2xl overflow-hidden border border-brand-500/40 bg-black relative">
-                <div id="qr-reader" ref={scannerEl} className="w-full" />
-                <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 border-2 border-brand-400 rounded-xl">
-                    <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-brand-400 rounded-tl-lg" />
-                    <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-brand-400 rounded-tr-lg" />
-                    <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-brand-400 rounded-bl-lg" />
-                    <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-brand-400 rounded-br-lg" />
-                    <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-brand-400/60 animate-[scan_2s_ease-in-out_infinite]" />
-                  </div>
+            {/* ── Search box ────────────────────────────────────────────── */}
+            <div className="max-w-xl mx-auto">
+              <div className="relative flex gap-2 p-1.5 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl">
+                <div className="relative flex-1">
+                  <QrCode className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                  <input
+                    ref={inputRef}
+                    value={inputCode}
+                    onChange={e => setInputCode(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleTrace()}
+                    onFocus={() => scanHistory.length && setShowHistory(true)}
+                    onBlur={() => setTimeout(() => setShowHistory(false), 200)}
+                    placeholder="QR code or UID (e.g. QR-BATCH-0001)"
+                    className="w-full pl-11 pr-4 py-3.5 bg-transparent text-white placeholder:text-slate-500 text-sm rounded-xl focus:outline-none"
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                  {inputCode && (
+                    <button onClick={() => setInputCode('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+                      <XCircle className="w-4 h-4" />
+                    </button>
+                  )}
+
+                  {/* History dropdown */}
+                  {showHistory && scanHistory.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-white/10 rounded-xl overflow-hidden z-50 shadow-modal">
+                      <div className="flex items-center justify-between px-3 py-2 border-b border-white/5">
+                        <span className="text-xs text-slate-500 flex items-center gap-1"><History className="w-3 h-3" /> Recent Scans</span>
+                        <button onClick={clearHistory} className="text-xs text-slate-500 hover:text-red-400 flex items-center gap-1"><Trash2 className="w-3 h-3" /> Clear</button>
+                      </div>
+                      {scanHistory.map((h, i) => (
+                        <button key={i} onMouseDown={() => handleHistorySelect(h.code)} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 transition-colors text-left">
+                          <div className={cn('w-2 h-2 rounded-full shrink-0', {
+                            'bg-emerald-400': h.status === 'authentic',
+                            'bg-amber-400':   h.status === 'warning',
+                            'bg-red-400':     h.status === 'recalled' || h.status === 'fake',
+                          })} />
+                          <span className="text-sm font-mono text-slate-300">{h.code}</span>
+                          <span className="text-xs text-slate-500 ml-auto">{h.product || '—'}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <p className="text-center text-xs text-slate-400 py-2">Align QR code within the frame</p>
-              </div>
-            )}
 
-            {/* Demo codes */}
-            <div className="mt-5">
-              <p className="text-xs text-slate-600 mb-2">Try a demo code:</p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {DEMO_CODES.map(d => (
-                  <button
-                    key={d.code}
-                    onClick={() => { setInputCode(d.code); handleTrace(d.code) }}
-                    className="px-3 py-1.5 rounded-full text-xs bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white transition-all font-mono"
-                  >
-                    {d.label}
-                  </button>
-                ))}
+                <button
+                  onClick={scanning ? stopCamera : startCamera}
+                  className={cn(
+                    'shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5',
+                    scanning
+                      ? 'bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30'
+                      : 'bg-white/8 text-slate-300 border border-white/10 hover:bg-white/15'
+                  )}
+                  title={scanning ? 'Stop camera' : 'Scan with camera'}
+                >
+                  <QrcodeOutlined />
+                  <span className="hidden sm:inline">{scanning ? 'Stop' : 'Scan'}</span>
+                </button>
+
+                <button
+                  onClick={() => handleTrace()}
+                  disabled={loading || !inputCode.trim()}
+                  className="shrink-0 px-5 py-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-sm font-semibold transition-all flex items-center gap-2"
+                >
+                  {loading ? <Spinner size="sm" className="text-white" /> : <SearchOutlined />}
+                  <span className="hidden sm:inline">Trace</span>
+                </button>
               </div>
+
+              {/* Demo codes */}
+              <div className="mt-5">
+                <p className="text-xs text-slate-600 mb-2">Try a demo code:</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {DEMO_CODES.map(d => (
+                    <button
+                      key={d.code}
+                      onClick={() => { setInputCode(d.code); handleTrace(d.code) }}
+                      className="px-3 py-1.5 rounded-full text-xs bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white transition-all font-mono flex items-center gap-1.5"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">{d.icon}</span>
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Camera viewer */}
+              {scanning && (
+                <div className="mt-4 rounded-2xl overflow-hidden border border-brand-500/40 bg-black relative">
+                  <div id="qr-reader" ref={scannerEl} className="w-full" />
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 border-2 border-brand-400 rounded-xl">
+                      <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-brand-400 rounded-tl-lg" />
+                      <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-brand-400 rounded-tr-lg" />
+                      <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-brand-400 rounded-bl-lg" />
+                      <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-brand-400 rounded-br-lg" />
+                      <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-brand-400/60 animate-[scan_2s_ease-in-out_infinite]" />
+                    </div>
+                  </div>
+                  <p className="text-center text-xs text-slate-400 py-2">Align QR code within the frame</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -334,7 +376,7 @@ export default function TracePage() {
 
         {/* Result */}
         {!loading && result && cfg && (
-          <div className="mt-8 space-y-5 animate-fade-in">
+          <div ref={resultsRef} className="mt-8 space-y-5 animate-fade-in scroll-mt-10">
 
             {/* ── Status banner ─────────────────────────────────────── */}
             <StatusBanner result={result} cfg={cfg} onReset={handleReset} reported={reported} onReport={() => setReported(true)} />
@@ -385,7 +427,7 @@ export default function TracePage() {
 function StatusBanner({ result, cfg, onReset, reported, onReport }) {
   const { Icon } = cfg
   return (
-    <div className={cn('rounded-2xl border p-5 flex flex-col sm:flex-row gap-5 items-start sm:items-center', cfg.bg.replace('bg-', 'bg-'), cfg.border, cfg.glowClass)}>
+    <div className={cn('rounded-2xl border p-5 flex flex-col sm:flex-row gap-5 items-start sm:items-center', cfg.bg, cfg.border, cfg.glowClass)}>
       <div className={cn('w-14 h-14 rounded-2xl flex items-center justify-center shrink-0', cfg.iconBg)}>
         <Icon className={cn('w-7 h-7', cfg.color)} />
       </div>
@@ -432,8 +474,8 @@ function RecallAlert({ recall }) {
         <Descriptions.Item label="Affected Units">{recall.affectedUnits?.toLocaleString()}</Descriptions.Item>
         <Descriptions.Item label="Recovered">    {recall.recoveredUnits?.toLocaleString()}</Descriptions.Item>
       </Descriptions>
-      <div className="bg-red-100 rounded-xl px-4 py-3 text-sm font-semibold text-red-800">
-        ⚠️ {recall.instruction}
+      <div className="bg-red-100 rounded-xl px-4 py-3 text-sm font-semibold text-red-800 flex items-center gap-2">
+        <span className="material-symbols-outlined text-[18px]">warning</span> {recall.instruction}
       </div>
     </div>
   )
@@ -537,7 +579,6 @@ function SupplyChainSection({ result }) {
   const timelineItems = distribution.map((step, i) => {
     const cfg = CHAIN_ICONS[step.type] || CHAIN_ICONS.warehouse_receipt
     const { Icon } = cfg
-    const isLast = i === distribution.length - 1
     const isRecall = step.type === 'recall_initiated'
     return {
       dot: (
@@ -613,12 +654,6 @@ function VerificationSection({ result, cfg }) {
           <Descriptions.Item label="First Scanned">{verification?.firstScanDate ? formatDateTime(verification.firstScanDate) : '—'}</Descriptions.Item>
           <Descriptions.Item label="Last Scanned">{verification?.lastScanDate ? formatDateTime(verification.lastScanDate) : '—'}</Descriptions.Item>
         </Descriptions>
-        {verification?.blockchainHash && (
-          <div className="mt-3 p-3 bg-slate-50 rounded-xl">
-            <p className="text-xs text-slate-500 mb-1 font-semibold">Mã băm bảo mật (Secure Hash)</p>
-            <p className="text-xs font-mono text-slate-700 break-all">{verification.blockchainHash}</p>
-          </div>
-        )}
       </InfoCard>
 
       {/* Scan count indicator */}
@@ -660,10 +695,10 @@ function VerificationSection({ result, cfg }) {
 function ComplianceSection({ result }) {
   const { compliance, manufacturing } = result
   const items = [
-    { label: 'MOH Approved',          value: compliance?.mohApproved,        icon: '🏛️' },
-    { label: 'GDP Compliant',          value: compliance?.gdpCompliant,       icon: '📋' },
-    { label: 'Cold Chain Maintained', value: compliance?.coldChainMaintained, icon: '❄️' },
-    { label: 'GMP Certified',         value: manufacturing?.gmpCertified,    icon: '🏭' },
+    { label: 'MOH Approved',          value: compliance?.mohApproved,        icon: 'account_balance' },
+    { label: 'GDP Compliant',          value: compliance?.gdpCompliant,       icon: 'assignment' },
+    { label: 'Cold Chain Maintained', value: compliance?.coldChainMaintained, icon: 'ac_unit' },
+    { label: 'GMP Certified',         value: manufacturing?.gmpCertified,    icon: 'factory' },
   ]
   return (
     <div className="space-y-4">
@@ -677,7 +712,7 @@ function ComplianceSection({ result }) {
               'flex items-center gap-3 p-4 rounded-xl border',
               value ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
             )}>
-              <span className="text-2xl">{icon}</span>
+              <span className="material-symbols-outlined text-[24px]">{icon}</span>
               <div>
                 <p className="font-semibold text-sm text-slate-800">{label}</p>
                 <p className={cn('text-xs font-bold', value ? 'text-green-600' : 'text-red-600')}>
@@ -688,8 +723,8 @@ function ComplianceSection({ result }) {
           ))}
         </div>
         {compliance?.temperatureLog && (
-          <div className={cn('mt-4 p-3 rounded-xl text-sm', compliance.coldChainMaintained ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700')}>
-            🌡️ {compliance.temperatureLog}
+          <div className={cn('mt-4 p-3 rounded-xl text-sm flex items-center gap-2', compliance.coldChainMaintained ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700')}>
+            <span className="material-symbols-outlined text-[18px]">thermostat</span> {compliance.temperatureLog}
           </div>
         )}
       </div>
@@ -700,14 +735,16 @@ function ComplianceSection({ result }) {
 // ─── ErrorPanel ───────────────────────────────────────────────────────────────
 function ErrorPanel({ error, onRetry }) {
   const configs = {
-    not_found: { icon: '🔍', title: 'Code Not Found',     color: 'border-amber-300 bg-amber-50', textColor: 'text-amber-800', msg: `"${error.code}" was not found in our registry. The product may not be registered with PharmaChain.` },
-    invalid:   { icon: '❌', title: 'Invalid Code Format', color: 'border-red-300 bg-red-50',    textColor: 'text-red-800',   msg: 'This does not appear to be a valid PharmaChain QR or UID code. Please check the code and try again.' },
-    network:   { icon: '📡', title: 'Connection Error',   color: 'border-slate-300 bg-slate-50', textColor: 'text-slate-800', msg: 'Unable to reach the verification server. Please check your connection and try again.' },
+    not_found: { icon: 'search', title: 'Code Not Found',     color: 'border-amber-300 bg-amber-50', textColor: 'text-amber-800', msg: `"${error.code}" was not found in our registry. The product may not be registered with PharmaChain.` },
+    invalid:   { icon: 'error', title: 'Invalid Code Format', color: 'border-red-300 bg-red-50',    textColor: 'text-red-800',   msg: 'This does not appear to be a valid PharmaChain QR or UID code. Please check the code and try again.' },
+    network:   { icon: 'sensors', title: 'Connection Error',   color: 'border-slate-300 bg-slate-50', textColor: 'text-slate-800', msg: 'Unable to reach the verification server. Please check your connection and try again.' },
   }
   const cfg = configs[error.type] || configs.network
   return (
     <div className={cn('mt-10 rounded-2xl border-2 p-8 text-center max-w-lg mx-auto', cfg.color)}>
-      <div className="text-5xl mb-4">{cfg.icon}</div>
+      <div className="mb-4">
+        <span className="material-symbols-outlined text-[64px]">{cfg.icon}</span>
+      </div>
       <h2 className={cn('text-xl font-display font-bold mb-2', cfg.textColor)}>{cfg.title}</h2>
       <p className="text-slate-600 text-sm mb-6">{cfg.msg}</p>
       <button onClick={onRetry} className="btn-secondary">
@@ -719,13 +756,12 @@ function ErrorPanel({ error, onRetry }) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function InfoCard({ title, Icon, iconColor, iconBg, children, antIcon }) {
-  const El = antIcon ? Icon : Icon
   return (
     <div className="card p-5">
       <h3 className="font-display font-semibold text-slate-900 mb-4 flex items-center gap-2">
         <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center', iconBg)}>
           {antIcon
-            ? <El className={cn('text-base', iconColor)} />
+            ? <Icon className={cn('text-base', iconColor)} />
             : <Icon className={cn('w-4 h-4', iconColor)} />
           }
         </div>

@@ -65,7 +65,7 @@ export const Header = () => {
           <div className="h-3 w-px bg-slate-200"></div>
 
           <a href="#" className="flex items-center gap-1.5 hover:text-brand-500 transition-colors uppercase whitespace-nowrap">
-            {t('nav.hot_deals')} <span className="text-[10px]">🔥</span>
+            {t('nav.hot_deals')} <span className="material-symbols-outlined text-[14px] text-orange-500">local_fire_department</span>
           </a>
 
           <div className="h-3 w-px bg-slate-200"></div>
@@ -157,12 +157,12 @@ export const Header = () => {
                     </Link>
                     {(user?.role === 'admin' || user?.role === 'manager') && (
                       <Link to="/admin" className="flex items-center gap-3 px-5 py-2.5 text-sm text-brand-600 font-black bg-brand-50/50 hover:bg-brand-50 transition-colors">
-                        🛡️ {t('nav.admin_portal')}
+                        <span className="material-symbols-outlined text-[18px]">admin_panel_settings</span> {t('nav.admin_portal')}
                       </Link>
                     )}
                     <div className="mx-3 my-2 border-t border-slate-100"></div>
                     <button onClick={logout} className="w-full text-left flex items-center gap-3 px-5 py-2.5 text-sm text-red-500 hover:bg-red-50 font-black transition-colors rounded-b-xl">
-                      🚪 {t('nav.logout')}
+                      <span className="material-symbols-outlined text-[18px]">logout</span> {t('nav.logout')}
                     </button>
                   </div>
                 </div>
