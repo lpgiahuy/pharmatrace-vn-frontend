@@ -201,7 +201,7 @@
   },
   "order_status": {
     "ChoXacNhan": "Pending Confirmation",
-    "DaĐongGoi": "Order Prepared",
+    "DaDongGoi": "Order Prepared",
     "DangGiao": "In Transit",
     "HoanThanh": "Delivered",
     "DaHuy": "Cancelled",

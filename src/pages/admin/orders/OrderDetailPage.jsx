@@ -23,14 +23,30 @@ export default function AdminOrderDetailPage() {
     orderService.getAdminById(id).then(setOrder).finally(() => setLoading(false))
   }, [id])
 
-  const handleStatusUpdate = async (newStatus) => {
+  const handleShip = async () => {
     setUpdating(true)
     try {
-      await orderService.updateStatus(id, newStatus)
-      setOrder(o => ({ ...o, status: newStatus }))
-      toast.success('Order status updated')
-    } catch { toast.error('Failed to update status') }
-    finally { setUpdating(false) }
+      await orderService.shipOrder(id)
+      setOrder(o => ({ ...o, status: ORDER_STATUS.DangGiao }))
+      toast.success('Order is now in transit')
+    } catch (e) { 
+      toast.error(e.response?.data?.message || 'Failed to start shipping') 
+    } finally { 
+      setUpdating(false) 
+    }
+  }
+
+  const handleComplete = async () => {
+    setUpdating(true)
+    try {
+      const result = await orderService.completeOrder(id)
+      setOrder(o => ({ ...o, status: ORDER_STATUS.HoanThanh, paymentStatus: 'DaThanhToan' }))
+      toast.success('Order completed successfully!')
+    } catch (e) { 
+      toast.error(e.response?.data?.message || 'Failed to complete order') 
+    } finally { 
+      setUpdating(false) 
+    }
   }
 
   const handleFulfill = async (vals) => {
@@ -38,10 +54,9 @@ export default function AdminOrderDetailPage() {
     setFulfilling(true)
     try {
       await orderService.fulfillOrder(id, vals.uids)
-      toast.success('Order fulfilled successfully!')
+      toast.success('Order packed successfully!')
       setFulfillOpen(false)
-      // Refetch or update status locally
-      setOrder(o => ({ ...o, status: ORDER_STATUS.DangGiao || 'DangGiao' }))
+      setOrder(o => ({ ...o, status: ORDER_STATUS.DaDongGoi }))
     } catch (e) { toast.error(e.response?.data?.message || 'Failed to fulfill order') }
     finally { setFulfilling(false) }
   }
@@ -56,7 +71,7 @@ export default function AdminOrderDetailPage() {
           <AButton icon={<ArrowLeftOutlined />} onClick={() => navigate('/admin/orders')}>Back</AButton>
           <h1 className="text-xl font-display font-bold text-slate-900">Order <span className="font-mono">{order.id}</span></h1>
         </div>
-        {(order.status === 'ChoXacNhan' || order.status === 'DaĐongGoi') && (
+        {(order.status === 'ChoXacNhan' || order.status === 'DaDongGoi') && (
           <AButton type="primary" icon={<ScanOutlined />} onClick={() => setFulfillOpen(true)}>
             Fulfill & Pack Order
           </AButton>
@@ -70,14 +85,16 @@ export default function AdminOrderDetailPage() {
             <div className="mt-1"><OrderStatusBadge status={order.status} /></div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-600">Update status:</span>
-            <Select
-              value={order.status}
-              onChange={handleStatusUpdate}
-              loading={updating}
-              style={{ width: 160 }}
-              options={Object.values(ORDER_STATUS).map(s => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1) }))}
-            />
+            {order.status === ORDER_STATUS.DaDongGoi && (
+              <AButton type="primary" className="bg-blue-600" loading={updating} onClick={handleShip}>
+                Start Shipping
+              </AButton>
+            )}
+            {order.status === ORDER_STATUS.DangGiao && (
+              <AButton type="primary" className="bg-green-600" loading={updating} onClick={handleComplete}>
+                Mark as Completed
+              </AButton>
+            )}
           </div>
         </div>
 

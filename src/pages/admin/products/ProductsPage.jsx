@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Table, Button as AButton, Input, Space, Popconfirm, Tag, Grid } from 'antd'
+import { Table, Button as AButton, Input, Space, Popconfirm, Tag, Grid, message, Select } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons'
 import { productService } from '@/services/product.service'
 import { formatCurrency } from '@/utils'
 import { StockBadge } from '@/components/ui/Badge'
-import toast from 'react-hot-toast'
 
 const { useBreakpoint } = Grid
 
@@ -14,6 +13,7 @@ export default function AdminProductsPage() {
   const [total, setTotal]     = useState(0)
   const [loading, setLoading] = useState(true)
   const [search, setSearch]   = useState('')
+  const [sort, setSort]       = useState('newest')
   const [page, setPage]       = useState(1)
   const navigate = useNavigate()
   const screens = useBreakpoint()
@@ -22,43 +22,73 @@ export default function AdminProductsPage() {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await productService.getAllAdmin({ search })
+      const res = await productService.getAllAdmin({ search, sort })
       setData(res.data); setTotal(res.total)
     } finally { setLoading(false) }
   }
+  const loadData = fetchData
 
-  useEffect(() => { fetchData() }, [search])
+  useEffect(() => { fetchData() }, [search, sort])
 
   const handleDelete = async (id) => {
     try {
-      await productService.delete(id)
-      toast.success('Product deleted')
-      fetchData()
-    } catch { toast.error('Delete failed') }
+      await productService.deleteProduct(id)
+      message.success('Permanently deleted product')
+      loadData()
+    } catch (err) {
+      message.error(err.response?.data?.message || 'Delete failed. If this product has stock/orders, try hiding it instead.')
+    }
+  }
+
+  const handleToggleStatus = async (id) => {
+    try {
+      await productService.toggleProductStatus(id)
+      message.success('Status updated')
+      loadData()
+    } catch (err) {
+      message.error('Failed to update status')
+    }
   }
 
   const columns = [
     { title: 'Product', dataIndex: 'name', key: 'name',
       render: (name, row) => (
-        <div className="flex items-center gap-2 sm:gap-3">
-          <img src={row.image} alt={name} className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-contain bg-slate-50 border border-slate-100 p-0.5" />
-          <div className="max-w-[120px] sm:max-w-none">
-            <p className="font-medium text-[13px] sm:text-sm text-slate-800 truncate">{name}</p>
-            <p className="text-[10px] sm:text-xs text-slate-400">{row.brand}</p>
+        <div className="flex items-center gap-3">
+          <img src={row.image} alt={name} className="w-8 h-8 rounded-md object-contain bg-slate-50 border border-slate-100 p-0.5 flex-shrink-0" />
+          <div className="min-w-0">
+            <p className="font-semibold text-[13px] sm:text-[14px] leading-tight text-slate-800 line-clamp-2 mb-0.5">{name}</p>
+            <p className="text-[10px] sm:text-[11px] text-slate-400 truncate">{row.brand}</p>
           </div>
         </div>
       ),
     },
-    { title: 'Category', dataIndex: 'category',   key: 'category', responsive: ['md'], render: v => <Tag>{v}</Tag> },
-    { title: 'Price',    dataIndex: 'price',       key: 'price',    render: v => <span className="text-[13px] sm:text-sm whitespace-nowrap">{formatCurrency(v)}</span> },
-    { title: 'Stock',    dataIndex: 'inStock',     key: 'stock',    responsive: ['sm'], render: (_, row) => <StockBadge quantity={row.inStock ? 100 : 0} /> },
-    { title: 'Batch',    dataIndex: 'batchNumber', key: 'batch',    responsive: ['lg'], render: v => <span className="font-mono text-xs">{v}</span> },
+    { title: 'Category', dataIndex: 'category',   key: 'category', responsive: ['lg'], width: 130, align: 'center', render: v => <Tag className="text-[11px] px-2 py-0.5">{v}</Tag> },
+    { title: 'Price',    dataIndex: 'price',       key: 'price',    width: 100, align: 'right', render: v => <span className="text-[13px] font-bold text-slate-700 whitespace-nowrap">{formatCurrency(v)}</span> },
+    { title: 'Stock',    dataIndex: 'totalStock',  key: 'stock',    responsive: ['sm'], width: 120, align: 'center', render: (v) => <StockBadge quantity={v} /> },
+    { title: 'Batch',    dataIndex: 'batchNumber', key: 'batch',    responsive: ['xl'], width: 90, align: 'center', render: v => <span className="font-mono text-[11px]">{v}</span> },
+    { title: 'Status',   dataIndex: 'isActive',    key: 'status',   responsive: ['sm'], width: 80, align: 'center', 
+      render: (v, row) => (
+        <Tag 
+          color={v ? "success" : "default"} 
+          className="text-[11px] px-2 py-0.5 cursor-pointer hover:opacity-80"
+          onClick={() => handleToggleStatus(row.id)}
+        >
+          {v ? 'Active' : 'Hidden'}
+        </Tag>
+      )
+    },
     {
-      title: 'Actions', key: 'actions', width: 100,
+      title: 'Actions', key: 'actions', width: 80, align: 'center',
       render: (_, row) => (
-        <Space size="small">
+        <Space size={4}>
           <AButton size="small" icon={<EditOutlined />} onClick={() => navigate(`/admin/products/${row.id}/edit`)} />
-          <Popconfirm title="Delete?" onConfirm={() => handleDelete(row.id)} okText="Yes" okButtonProps={{ danger: true }}>
+          <Popconfirm 
+            title="Permanently Delete?" 
+            description="This action cannot be undone. All data for this product will be lost."
+            onConfirm={() => handleDelete(row.id)} 
+            okText="Delete" 
+            okButtonProps={{ danger: true }}
+          >
             <AButton size="small" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
@@ -79,14 +109,29 @@ export default function AdminProductsPage() {
       </div>
 
       <div className="card p-4">
-        <Input
-          placeholder="Search products…"
-          prefix={<SearchOutlined />}
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1) }}
-          className="w-full sm:max-w-[320px] mb-4"
-          allowClear
-        />
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <Input
+            placeholder="Search products…"
+            prefix={<SearchOutlined />}
+            value={search}
+            onChange={e => { setSearch(e.target.value); setPage(1) }}
+            className="w-full sm:max-w-[320px]"
+            allowClear
+          />
+          <Select 
+            value={sort} 
+            onChange={v => { setSort(v); setPage(1) }}
+            className="w-full sm:w-[180px]"
+            options={[
+              { label: 'Newest First', value: 'newest' },
+              { label: 'Oldest First', value: 'oldest' },
+              { label: 'Price: Low to High', value: 'price_asc' },
+              { label: 'Price: High to Low', value: 'price_desc' },
+              { label: 'Name: A-Z', value: 'name_asc' },
+              { label: 'Name: Z-A', value: 'name_desc' },
+            ]}
+          />
+        </div>
         <Table
           dataSource={data}
           columns={columns}
@@ -100,8 +145,8 @@ export default function AdminProductsPage() {
             showTotal: (t) => screens.md ? `${t} total` : null,
             size: isMobile ? 'small' : 'default'
           }}
-          size={isMobile ? 'small' : 'middle'}
-          scroll={{ x: isMobile ? 500 : 700 }}
+          size="middle"
+          scroll={{ x: false }}
         />
       </div>
     </div>

@@ -61,9 +61,9 @@ OrderStatusBadge.propTypes = {
 
 export const StockBadge = ({ quantity, threshold = 20 }) => {
   const { t } = useTranslation()
-  if (quantity === 0)           return <Badge color="red">{t('stock_status.out_of_stock')}</Badge>
-  if (quantity <= threshold)    return <Badge color="orange">{t('stock_status.low_stock')}</Badge>
-  return <Badge color="green">{t('stock_status.in_stock')}</Badge>
+  if (quantity === 0 || quantity === null || quantity === undefined) return <Badge color="red" className="text-[11px] px-2 py-0.5">{t('stock_status.out_of_stock')}</Badge>
+  if (quantity <= threshold)    return <Badge color="orange" className="text-[11px] px-2 py-0.5">{t('product.in_stock_with_count', { count: quantity })}</Badge>
+  return <Badge color="green" className="text-[11px] px-2 py-0.5">{t('product.in_stock_with_count', { count: quantity })}</Badge>
 }
 
 StockBadge.propTypes = {

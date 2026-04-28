@@ -81,13 +81,18 @@ export const orderService = {
     return data.data || data
   },
 
-  async updateStatus(id, status) {
-    const { data } = await apiClient.patch(`/admin/orders/${id}/status`, { status })
+  async fulfillOrder(id, uids) {
+    const { data } = await apiClient.post(`/admin/orders/${id}/fulfill`, { mang_uid: uids })
     return data.data || data
   },
 
-  async fulfillOrder(id, uids) {
-    const { data } = await apiClient.post(`/admin/orders/${id}/fulfill`, { mang_uid: uids })
+  async shipOrder(id) {
+    const { data } = await apiClient.patch(`/admin/orders/${id}/ship`)
+    return data.data || data
+  },
+
+  async completeOrder(id) {
+    const { data } = await apiClient.patch(`/admin/orders/${id}/complete`)
     return data.data || data
   },
 
