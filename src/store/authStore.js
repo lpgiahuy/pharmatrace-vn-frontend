@@ -77,6 +77,7 @@ export const useAuthStore = create(
         localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
         localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
         localStorage.removeItem('pharma_token_expiry')
+        localStorage.removeItem('pharma-cart') // [NEW] Clear cart on logout
         window.location.reload()
       },
 
