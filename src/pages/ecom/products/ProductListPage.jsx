@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, memo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AlertCircle, RefreshCcw } from 'lucide-react'
+import { Helmet } from 'react-helmet-async'
 import { productService } from '@/services/product.service'
 import { ProductCard, ProductCardSkeleton } from '@/components/ui/ProductCard'
 import { Pagination } from '@/components/ui/Pagination'
@@ -121,6 +122,14 @@ export default function ProductListPage() {
 
   return (
     <div className="page-container py-8 animate-fade-in min-h-[70vh]">
+      <Helmet>
+        <title>{category ? `${category} | PharmaChain` : 'Our Medicines & Products | PharmaChain'}</title>
+        <meta name="description" content={category ? `Shop for ${category} products at PharmaChain. Quality guaranteed, fast delivery.` : 'Discover a wide range of authentic medicines, healthcare products, and pharmacy supplies at PharmaChain.'} />
+        <meta property="og:title" content={category ? `${category} | PharmaChain` : 'Our Medicines & Products | PharmaChain'} />
+        <meta property="og:description" content="Authentic medicines and healthcare products with fast delivery." />
+        <meta name="keywords" content="pharmacy, medicine, healthcare, medicine list, pharmaceutical products, PharmaChain" />
+      </Helmet>
+
       <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar Filters */}
         <aside className={`w-full md:w-60 shrink-0 ${showFilters ? 'block' : 'hidden md:block'}`}>
