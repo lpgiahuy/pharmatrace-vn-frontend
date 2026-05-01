@@ -76,7 +76,11 @@ export const orderService = {
       dia_chi_giao_hang:      payload.dia_chi_giao_hang || payload.address,
       phuong_thuc_thanh_toan: payload.phuong_thuc_thanh_toan || payload.paymentMethod,
       ghi_chu:                payload.ghi_chu || payload.note || '',
-      voucher_id:             payload.voucher_id || payload.voucherId || undefined,
+      ma_giam_gia:            payload.ma_giam_gia || payload.voucherCode,
+      voucher_id:             payload.voucher_id || payload.voucherId,
+      diem_su_dung:           payload.diem_su_dung || payload.points || 0,
+      lat:                    payload.lat || null,
+      lng:                    payload.lng || null
     })
     return data.data || data
   },
