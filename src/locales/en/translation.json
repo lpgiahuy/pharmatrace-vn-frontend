@@ -183,6 +183,8 @@
     "apply": "Apply",
     "brand": "Brand",
     "search_brand": "Search Brand...",
+    "availability": "Availability",
+    "in_stock_only": "Show in-stock only",
     "search_placeholder": "Search catalog...",
     "filters_btn": "Refine Results",
     "results_count": "Showing {{count}} results",
