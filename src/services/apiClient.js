@@ -8,6 +8,7 @@ const apiClient = axios.create({
   baseURL: env.API_BASE_URL,
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true, // Required for the browser to send/receive cookies
 })
 
 let isRefreshing = false

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, memo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AlertCircle, RefreshCcw } from 'lucide-react'
+import { Helmet } from 'react-helmet-async'
 import { productService } from '@/services/product.service'
 import { ProductCard, ProductCardSkeleton } from '@/components/ui/ProductCard'
 import { Pagination } from '@/components/ui/Pagination'
@@ -41,6 +42,7 @@ export default function ProductListPage() {
   const maxPrice = searchParams.get('maxPrice')         || ''
   const brand    = searchParams.get('brand')            || ''
   const isFlashSale = searchParams.get('is_flash_sale') === 'true'
+  const inStock     = searchParams.get('in_stock')       === 'true'
 
   const [searchInput, setSearchInput] = useState(search)
   const debouncedSearch = useDebounce(searchInput, 400)
@@ -63,7 +65,12 @@ export default function ProductListPage() {
     setLoading(true)
     setError(null)
     try {
-      const res = await productService.getAll({ category, sort, search, minPrice, maxPrice, brand, is_flash_sale: isFlashSale, limit: 10000 })
+      const res = await productService.getAll({ 
+        category, sort, search, minPrice, maxPrice, brand, 
+        is_flash_sale: isFlashSale, 
+        in_stock: inStock,
+        limit: 10000 
+      })
       const allData = Array.isArray(res?.data) ? res.data : []
 
       // Deduplicate: same drug ID may appear once per packaging variant.
@@ -93,7 +100,7 @@ export default function ProductListPage() {
     } finally {
       setLoading(false)
     }
-  }, [category, sort, search, minPrice, maxPrice, brand, isFlashSale, page, t])
+  }, [category, sort, search, minPrice, maxPrice, brand, isFlashSale, inStock, page, t])
 
   useEffect(() => { fetchProducts() }, [fetchProducts])
   
@@ -121,6 +128,14 @@ export default function ProductListPage() {
 
   return (
     <div className="page-container py-8 animate-fade-in min-h-[70vh]">
+      <Helmet>
+        <title>{category ? `${category} | PharmaChain` : 'Our Medicines & Products | PharmaChain'}</title>
+        <meta name="description" content={category ? `Shop for ${category} products at PharmaChain. Quality guaranteed, fast delivery.` : 'Discover a wide range of authentic medicines, healthcare products, and pharmacy supplies at PharmaChain.'} />
+        <meta property="og:title" content={category ? `${category} | PharmaChain` : 'Our Medicines & Products | PharmaChain'} />
+        <meta property="og:description" content="Authentic medicines and healthcare products with fast delivery." />
+        <meta name="keywords" content="pharmacy, medicine, healthcare, medicine list, pharmaceutical products, PharmaChain" />
+      </Helmet>
+
       <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar Filters */}
         <aside className={`w-full md:w-60 shrink-0 ${showFilters ? 'block' : 'hidden md:block'}`}>
@@ -138,6 +153,8 @@ export default function ProductListPage() {
             onClearFilters={clearFilters}
             showAllCategories={showAllCategories}
             onToggleShowAllCategories={() => setShowAllCategories(!showAllCategories)}
+            inStock={inStock}
+            onInStockChange={val => setParam('in_stock', val ? 'true' : '')}
           />
         </aside>
 
@@ -160,6 +177,8 @@ export default function ProductListPage() {
             currentSearch={search}
             loading={loading}
             isFlashSale={isFlashSale}
+            inStock={inStock}
+            onInStockChange={val => setParam('in_stock', val ? 'true' : '')}
           />
 
           {/* Error state */}

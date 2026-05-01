@@ -76,18 +76,27 @@ export const orderService = {
       dia_chi_giao_hang:      payload.dia_chi_giao_hang || payload.address,
       phuong_thuc_thanh_toan: payload.phuong_thuc_thanh_toan || payload.paymentMethod,
       ghi_chu:                payload.ghi_chu || payload.note || '',
-      voucher_id:             payload.voucher_id || payload.voucherId || undefined,
+      ma_giam_gia:            payload.ma_giam_gia || payload.voucherCode,
+      voucher_id:             payload.voucher_id || payload.voucherId,
+      diem_su_dung:           payload.diem_su_dung || payload.points || 0,
+      lat:                    payload.lat || null,
+      lng:                    payload.lng || null
     })
-    return data.data || data
-  },
-
-  async updateStatus(id, status) {
-    const { data } = await apiClient.patch(`/admin/orders/${id}/status`, { status })
     return data.data || data
   },
 
   async fulfillOrder(id, uids) {
     const { data } = await apiClient.post(`/admin/orders/${id}/fulfill`, { mang_uid: uids })
+    return data.data || data
+  },
+
+  async shipOrder(id) {
+    const { data } = await apiClient.patch(`/admin/orders/${id}/ship`)
+    return data.data || data
+  },
+
+  async completeOrder(id) {
+    const { data } = await apiClient.patch(`/admin/orders/${id}/complete`)
     return data.data || data
   },
 

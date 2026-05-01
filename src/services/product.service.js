@@ -56,6 +56,7 @@ const normalizeProduct = (p) => {
     batchNumber:    p.so_lo           || p.batchNumber  || 'N/A',
     expiryDate:     p.ngay_het_han    || p.expiryDate   || null,
     chi_tiet_thuoc: chi_tiet,
+    isActive:       p.trang_thai      ?? true,
     specifications,
     // Packaging variants for unit switcher on detail page
     packagingVariants: (p.quy_cach_dong_goi && Array.isArray(p.quy_cach_dong_goi) && p.quy_cach_dong_goi.length > 0)
@@ -146,7 +147,17 @@ export const productService = {
     return data.data || data
   },
 
-  async delete(id) {
+  async toggleProductStatus(id) {
+    try {
+      const { data } = await apiClient.patch(`/admin/products/${id}/status`)
+      return data.success
+    } catch (error) {
+      console.error('[ProductService toggleStatus]', error)
+      throw error
+    }
+  },
+
+  async deleteProduct(id) {
     const { data } = await apiClient.delete(`/admin/products/${id}`)
     return data.data || data
   },

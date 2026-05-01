@@ -12,7 +12,7 @@ const getInitialState = () => {
         user: state.user || null,
         accessToken: state.accessToken || null,
         refreshToken: state.refreshToken || null,
-        isAuthenticated: !!state.accessToken, // Derived from existence of token
+        isAuthenticated: !!state.user, 
       }
     }
   } catch (error) {
@@ -60,7 +60,7 @@ export const useAuthStore = create(
             user: result.user,
             accessToken,
             refreshToken,
-            isAuthenticated: true,
+            isAuthenticated: !!result.user, // When using cookies, we rely on user profile presence
             isLoading: false,
           })
           return result

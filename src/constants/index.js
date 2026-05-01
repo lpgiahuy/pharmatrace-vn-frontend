@@ -9,7 +9,7 @@ export const ROLES = {
 
 export const ORDER_STATUS = {
   ChoXacNhan: 'ChoXacNhan',
-  DaĐongGoi:  'DaĐongGoi',
+  DaDongGoi:   'DaDongGoi',
   DangGiao:   'DangGiao',
   HoanThanh:  'HoanThanh',
   DaHuy:      'DaHuy',
@@ -18,7 +18,7 @@ export const ORDER_STATUS = {
 
 export const ORDER_STATUS_LABELS = {
   ChoXacNhan: 'Chờ xác nhận',
-  DaĐongGoi:  'Đã đóng gói',
+  DaDongGoi:   'Đã đóng gói',
   DangGiao:   'Đang giao',
   HoanThanh:  'Hoàn thành',
   DaHuy:      'Đã hủy',
@@ -27,7 +27,7 @@ export const ORDER_STATUS_LABELS = {
 
 export const ORDER_STATUS_COLORS = {
   ChoXacNhan: 'orange',
-  DaĐongGoi:  'purple',
+  DaDongGoi:   'purple',
   DangGiao:   'blue',
   HoanThanh:  'green',
   DaHuy:      'red',

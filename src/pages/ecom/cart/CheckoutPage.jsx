@@ -38,6 +38,7 @@ export default function CheckoutPage() {
         paymentMethod: payMethod.toUpperCase(),
         note: formData.note,
         voucherId: voucher?.id,
+        voucherCode: voucher?.code,
       })
       clearCart()
       toast.success('Đặt hàng thành công!')

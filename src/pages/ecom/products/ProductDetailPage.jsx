@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { ShoppingCart, Heart, Star, Shield, Truck, RotateCcw, Plus, Minus, ChevronRight } from 'lucide-react'
 import { productService } from '@/services/product.service'
 import { wishlistService } from '@/services/wishlist.service'
@@ -134,6 +135,15 @@ export default function ProductDetailPage() {
 
   return (
     <div className="page-container py-8 animate-fade-in">
+      <Helmet>
+        <title>{`${product.name} | PharmaChain`}</title>
+        <meta name="description" content={product.description || `${product.name} - ${product.brand}. Quality healthcare products at PharmaChain.`} />
+        <meta property="og:title" content={`${product.name} | PharmaChain`} />
+        <meta property="og:description" content={product.description || `${product.name} - ${product.brand}. Quality healthcare products at PharmaChain.`} />
+        <meta property="og:image" content={product.image} />
+        <meta name="keywords" content={`${product.name}, ${product.brand}, pharmacy, medicine, healthcare, PharmaChain`} />
+      </Helmet>
+
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-slate-500 mb-6" aria-label="Breadcrumb">
         <Link to="/" className="hover:text-brand-600">{t('nav.home', { defaultValue: 'Home' })}</Link>

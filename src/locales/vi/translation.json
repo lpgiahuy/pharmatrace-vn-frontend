@@ -183,6 +183,8 @@
     "apply": "Áp dụng",
     "brand": "Thương hiệu",
     "search_brand": "Nhập tên thương hiệu",
+    "availability": "Tình trạng hàng",
+    "in_stock_only": "Chỉ xem sản phẩm còn hàng",
     "search_placeholder": "Tìm kiếm sản phẩm...",
     "filters_btn": "Bộ lọc",
     "results_count": "Tìm thấy {{count}} sản phẩm",
@@ -201,7 +203,7 @@
   },
   "order_status": {
     "ChoXacNhan": "Chờ xác nhận",
-    "DaĐongGoi": "Đã đóng gói",
+    "DaDongGoi": "Đã đóng gói",
     "DangGiao": "Đang giao",
     "HoanThanh": "Hoàn thành",
     "DaHuy": "Đã hủy",
