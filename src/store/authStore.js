@@ -3,38 +3,13 @@ import { persist } from 'zustand/middleware'
 import { authService } from '@/services/auth.service'
 import { STORAGE_KEYS } from '@/constants'
 
-const getInitialState = () => {
-  try {
-    const saved = localStorage.getItem('pharma-auth')
-    if (saved) {
-      const { state } = JSON.parse(saved)
-      return {
-        user: state.user || null,
-        accessToken: state.accessToken || null,
-        refreshToken: state.refreshToken || null,
-        isAuthenticated: !!state.user, 
-      }
-    }
-  } catch (error) {
-    console.error('Error hydrating auth state:', error)
-  }
-  return {
-    user: null,
-    accessToken: null,
-    refreshToken: null,
-    isAuthenticated: false,
-  }
-}
-
-const preloadedState = getInitialState()
-
 export const useAuthStore = create(
   persist(
     (set, get) => ({
-      user: preloadedState.user,
-      accessToken: preloadedState.accessToken,
-      refreshToken: preloadedState.refreshToken,
-      isAuthenticated: preloadedState.isAuthenticated,
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      isAuthenticated: false,
       isLoading: false,
       error: null,
 

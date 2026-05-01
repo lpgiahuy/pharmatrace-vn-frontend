@@ -21,7 +21,19 @@ const processQueue = (error, token = null) => {
 
 apiClient.interceptors.request.use(
   async (config) => {
-    const accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+    let accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+    
+    // Fallback: Try to get token from persisted auth state if direct key is missing
+    if (!accessToken) {
+      try {
+        const saved = localStorage.getItem('pharma-auth')
+        if (saved) {
+          const { state } = JSON.parse(saved)
+          accessToken = state?.accessToken
+        }
+      } catch (e) {}
+    }
+
     if (!accessToken) return config
 
     const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
