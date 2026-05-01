@@ -33,7 +33,7 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "license": "Operation License",
-    "copyright": "© 2026 PharmaChain. Developed by Le Pham Gia Huy."
+    "copyright": "© 2026 PharmaTrace VN. Developed by Le Pham Gia Huy."
   },
   "home": {
     "exclusive_offers": "Exclusive Offers",
@@ -67,7 +67,7 @@
     "address": "Primary Address",
     "save_info": "Save Changes",
     "verified": "Verified Account",
-    "card_placeholder": "PharmaChain Card",
+    "card_placeholder": "PharmaTrace VN Card",
     "member_rewards": "Member Rewards",
     "card_holder": "Member Name",
     "tier": "Membership Level",
@@ -216,7 +216,7 @@
   },
   "auth": {
     "welcome_back": "Welcome back",
-    "signin_desc": "Sign in to access your PharmaChain account",
+    "signin_desc": "Sign in to access your PharmaTrace VN account",
     "customer": "Customer Account",
     "admin_staff": "Administration / Staff",
     "phone": "Mobile Number",
@@ -228,7 +228,7 @@
     "no_account": "Don't have an account?",
     "create_one": "Register Now",
     "create_account": "Create New Account",
-    "join_us": "Join PharmaChain for better health management",
+    "join_us": "Join PharmaTrace VN for better health management",
     "signup": "Create Account",
     "already_have_account": "Already have an account?",
     "signin_now": "Sign in here",

@@ -48,7 +48,7 @@ export const AdminSidebar = ({ collapsed, onCollapse, isMobile }) => {
           <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center shrink-0">
             <PillIcon className="w-4 h-4 text-white" />
           </div>
-          {!collapsed && <span className="font-display font-bold text-brand-600 text-base">PharmaChain</span>}
+          {!collapsed && <span className="font-display font-bold text-brand-600 text-base">PharmaTrace VN</span>}
         </div>
         {!collapsed && (
           <div className="px-4 py-2 mt-2">

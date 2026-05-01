@@ -79,7 +79,7 @@ export const ProductCard = memo(({ product, className }) => {
         <div className="absolute top-2 right-2 z-10">
             <div className="bg-brand-500 text-white flex items-center gap-1.5 pl-1 pr-3 py-1 rounded-full shadow-sm">
                 <div className="w-5 h-5 rounded-full bg-medical-green flex items-center justify-center font-black text-[10px] text-white shrink-0">P</div>
-                <span className="text-[11px] font-black leading-none uppercase">PharmaChain</span>
+                <span className="text-[11px] font-black leading-none uppercase">PharmaTrace VN</span>
             </div>
         </div>
 

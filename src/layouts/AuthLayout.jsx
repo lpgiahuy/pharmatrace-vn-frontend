@@ -10,7 +10,7 @@ export const AuthLayout = () => (
         <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur">
           <Pill className="w-5 h-5 text-white" />
         </div>
-        <span className="text-xl font-display font-bold">PharmaChain</span>
+        <span className="text-xl font-display font-bold">PharmaTrace VN</span>
       </Link>
       <div>
         <h1 className="text-4xl font-display font-bold mb-4 leading-tight">
@@ -32,7 +32,7 @@ export const AuthLayout = () => (
       <div className="w-full max-w-md">
         <Link to="/" className="flex items-center gap-2 mb-8 lg:hidden">
           <Pill className="w-5 h-5 text-brand-500" />
-          <span className="text-lg font-display font-bold text-slate-800">PharmaChain</span>
+          <span className="text-lg font-display font-bold text-slate-800">PharmaTrace VN</span>
         </Link>
         <ErrorBoundary>
           <Outlet />

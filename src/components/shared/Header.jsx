@@ -105,7 +105,7 @@ export const Header = () => {
                 <Pill className="w-6 h-6 text-brand-500" />
               </div>
               <div className="hidden lg:block">
-                <span className="text-xl md:text-2xl font-display font-black text-white block leading-none tracking-tight">PharmaChain</span>
+                <span className="text-xl md:text-2xl font-display font-black text-white block leading-none tracking-tight">PharmaTrace VN</span>
                 <span className="text-[10px] text-white/70 font-bold tracking-[0.2em] uppercase mt-1 block">Health & Care</span>
               </div>
             </Link>
@@ -199,7 +199,7 @@ export const Header = () => {
                   <Pill className="w-6 h-6 text-brand-500" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xl font-display font-black text-white tracking-tight leading-none">PharmaChain</span>
+                  <span className="text-xl font-display font-black text-white tracking-tight leading-none">PharmaTrace VN</span>
                   <span className="text-[9px] text-white/70 font-bold tracking-widest uppercase mt-1">Health & Care</span>
                 </div>
               </Link>

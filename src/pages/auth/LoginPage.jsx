@@ -91,7 +91,7 @@ export default function LoginPage() {
           <Input
             label={t('auth.email')}
             type="email"
-            placeholder="admin@pharmachain.vn"
+            placeholder="admin@pharmatrace.vn"
             error={errors.email?.message}
             required
             {...register('email')}

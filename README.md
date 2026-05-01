@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="./src/assets/logo.png" alt="PharmaChain Logo" width="120" style="border-radius: 20px;" />
-  <h1>PharmaChain Frontend</h1>
+  <img src="./src/assets/logo.png" alt="PharmaTrace VN Logo" width="120" style="border-radius: 20px;" />
+  <h1>PharmaTrace VN Frontend</h1>
   <p><strong>A Modern, Production-Ready E-Commerce & Supply Chain Platform for Pharmaceuticals</strong></p>
   
   [![React](https://img.shields.io/badge/React-18.x-blue.svg?style=flat&logo=react)](https://reactjs.org/)
@@ -34,7 +34,7 @@
 ---
 
 ## 🎯 Overview
-**PharmaChain Frontend** is a multi-portal application designed to handle end-to-end pharmaceutical supply chain operations. It provides a seamless e-commerce experience for customers while offering robust administrative and warehouse management tools for internal staff.
+**PharmaTrace VN Frontend** is a multi-portal application designed to handle end-to-end pharmaceutical supply chain operations. It provides a seamless e-commerce experience for customers while offering robust administrative and warehouse management tools for internal staff.
 
 Built with performance and scalability in mind, it utilizes React 18, Vite, and a hybrid styling approach (Tailwind CSS for customer-facing UI, Ant Design for complex admin dashboards).
 
@@ -123,7 +123,7 @@ src/
 1. **Clone the repository** (if you haven't already):
    ```bash
    git clone <repository-url>
-   cd pharma-chain-frontend
+   cd pharmatrace-vn-frontend
    ```
 
 2. **Install all dependencies:**
@@ -152,7 +152,7 @@ Adjust the `.env` file based on your environment:
 
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api   # Point to your Node.js Backend
-VITE_APP_NAME="PharmaChain"                   # App Name displayed in UI/Title
+VITE_APP_NAME="PharmaTrace VN"                   # App Name displayed in UI/Title
 VITE_USE_MOCK=true                            # Set to 'false' to connect to real Backend
 VITE_REFRESH_TOKEN_THRESHOLD=300000           # Auto-refresh JWT 5 mins before expiration
 ```
@@ -165,15 +165,15 @@ Use the following test accounts to explore different portals when logging in:
 
 | Role      | Portal Access | Email                        | Password     |
 |-----------|---------------|------------------------------|--------------|
-| **Admin** | ERP & WMS     | `admin@pharmachain.vn`       | `password123`|
-| **Staff** | WMS Only      | `warehouse@pharmachain.vn`   | `password123`|
+| **Admin** | ERP & WMS     | `admin@pharmatrace.vn`       | `password123`|
+| **Staff** | WMS Only      | `warehouse@pharmatrace.vn`   | `password123`|
 | **User**  | E-Commerce    | `customer@test.com`          | `password123`|
 
 ---
 
 ## 🔌 Connecting to Backend
 
-To integrate with the real `pharmachain_backend` API:
+To integrate with the real `pharmatrace_vn_backend` API:
 
 1. Update your `.env` file:
    ```env

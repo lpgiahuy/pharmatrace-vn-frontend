@@ -18,7 +18,7 @@ export const cloudinaryService = {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    formData.append('folder', 'PharmaChain'); // Optional: organize in folders
+    formData.append('folder', 'PharmaTrace VN'); // Optional: organize in folders
 
     try {
       const response = await fetch(
