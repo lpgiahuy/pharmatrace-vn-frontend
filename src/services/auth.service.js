@@ -13,27 +13,34 @@ export const authService = {
         email:    credentials.email,
         password: credentials.password,
       })
-      // Backend returns { success, data: { token, user } }
+      
+      // Backend returns { success: true, data: { nhan_vien } } 
+      // The JWT token is now handled via HTTP-Only cookies
       const result = data.data || data
+      const adminUser = result.nhan_vien || result.user
+      
       return {
-        accessToken:  result.token,
+        accessToken:  result.token || null,
         refreshToken: result.refreshToken || null,
         expiresAt:    result.expiresAt || (Date.now() + 3600000),
-        user:         { ...result.user, role: result.user?.role || 'admin' },
+        user:         adminUser ? { ...adminUser, role: adminUser.vai_tro || 'admin' } : null,
       }
     }
 
-    // Customer login
+    // Customer login — backend returns { success: true, data: { user } }
     const { data } = await apiClient.post('/auth/login', {
       so_dien_thoai: credentials.phone,
       mat_khau:      credentials.password,
     })
+    
     const result = data.data || data
+    const customerUser = result.user
+    
     return {
-      accessToken:  result.token,
+      accessToken:  result.token || null,
       refreshToken: result.refreshToken || null,
       expiresAt:    result.expiresAt || (Date.now() + 3600000),
-      user:         { ...result.user, role: result.user?.role || 'customer' },
+      user:         customerUser ? { ...customerUser, role: customerUser.role || 'customer' } : null,
     }
   },
 
@@ -45,7 +52,12 @@ export const authService = {
       mat_khau:      payload.password,
       dia_chi:       payload.address || undefined,
     })
-    return data.data || data
+    
+    const result = data.data || data
+    return {
+      accessToken: result.token || null,
+      user:        result.user || null
+    }
   },
 
   async logout() {
