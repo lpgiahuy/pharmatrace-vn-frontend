@@ -20,6 +20,8 @@ export const ProductFilters = memo(({
   onClearFilters,
   showAllCategories,
   onToggleShowAllCategories,
+  inStock,
+  onInStockChange,
   brands = []
 }) => {
   const { t, i18n } = useTranslation()
@@ -50,7 +52,7 @@ export const ProductFilters = memo(({
   const filteredBrands = brands.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()))
   const displayedBrands = showAllBrands ? filteredBrands : filteredBrands.slice(0, 5)
 
-  const hasActiveFilters = selectedCategory || minPrice || maxPrice || selectedBrand
+  const hasActiveFilters = selectedCategory || minPrice || maxPrice || selectedBrand || inStock
 
   return (
     <div className="card p-4 space-y-6">
@@ -99,6 +101,28 @@ export const ProductFilters = memo(({
             />
           ))}
         </div>
+      </div>
+
+      {/* Availability */}
+      <div className="pt-2 border-t border-slate-100">
+        <h4 className="text-sm font-bold text-slate-800 mb-4">{t('product_list.availability', { defaultValue: 'Tình trạng hàng' })}</h4>
+        <button
+          onClick={() => onInStockChange(!inStock)}
+          className={cn(
+            "w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-[13px] font-medium transition-all group",
+            inStock 
+              ? "bg-brand-50 border-brand-200 text-brand-700 shadow-sm" 
+              : "bg-surface-soft/50 border-slate-100 text-slate-600 hover:border-brand-200 hover:bg-white"
+          )}
+        >
+          <div className={cn(
+            "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all",
+            inStock ? "border-brand-500 bg-brand-500" : "border-slate-300 group-hover:border-brand-400"
+          )}>
+            {inStock && <Check className="w-3 h-3 text-white" />}
+          </div>
+          {t('product_list.in_stock_only', { defaultValue: 'Chỉ xem còn hàng' })}
+        </button>
       </div>
 
       {/* Price Range */}
@@ -249,6 +273,8 @@ ProductFilters.propTypes = {
   onClearFilters: PropTypes.func.isRequired,
   showAllCategories: PropTypes.bool.isRequired,
   onToggleShowAllCategories: PropTypes.func.isRequired,
+  inStock: PropTypes.bool,
+  onInStockChange: PropTypes.func,
   brands: PropTypes.arrayOf(PropTypes.string)
 }
 

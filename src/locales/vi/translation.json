@@ -183,6 +183,8 @@
     "apply": "Áp dụng",
     "brand": "Thương hiệu",
     "search_brand": "Nhập tên thương hiệu",
+    "availability": "Tình trạng hàng",
+    "in_stock_only": "Chỉ xem sản phẩm còn hàng",
     "search_placeholder": "Tìm kiếm sản phẩm...",
     "filters_btn": "Bộ lọc",
     "results_count": "Tìm thấy {{count}} sản phẩm",

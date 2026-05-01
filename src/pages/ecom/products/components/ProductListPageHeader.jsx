@@ -1,9 +1,10 @@
 import React, { memo } from 'react'
 import PropTypes from 'prop-types'
-import { SlidersHorizontal } from 'lucide-react'
+import { SlidersHorizontal, Check } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { SORT_OPTIONS } from '@/constants'
 import { useTranslation } from 'react-i18next'
+import { cn } from '@/utils'
 
 export const ProductListPageHeader = memo(({ 
   searchInput, 
@@ -14,7 +15,9 @@ export const ProductListPageHeader = memo(({
   totalResults,
   currentSearch,
   loading,
-  isFlashSale
+  isFlashSale,
+  inStock,
+  onInStockChange
 }) => {
   const { t } = useTranslation()
 
@@ -41,6 +44,27 @@ export const ProductListPageHeader = memo(({
               </option>
             ))}
           </select>
+          
+          <button
+            type="button"
+            onClick={() => onInStockChange(!inStock)}
+            className={cn(
+              "inline-flex items-center gap-2 px-4 py-2 border rounded-lg text-sm font-semibold transition-all shadow-sm",
+              inStock 
+                ? "bg-brand-50 border-brand-200 text-brand-700 ring-1 ring-brand-200" 
+                : "bg-white border-slate-200 text-slate-600 hover:border-brand-200 hover:bg-slate-50"
+            )}
+            aria-pressed={inStock}
+          >
+            <div className={cn(
+              "w-4 h-4 rounded border flex items-center justify-center transition-all",
+              inStock ? "bg-brand-600 border-brand-600" : "bg-white border-slate-300"
+            )}>
+              {inStock && <Check className="w-3 h-3 text-white" />}
+            </div>
+            <span className="hidden xs:inline">{t('product_list.in_stock_only', { defaultValue: 'In Stock' })}</span>
+          </button>
+
           <button
             type="button"
             onClick={onToggleFilters}
@@ -86,5 +110,7 @@ ProductListPageHeader.propTypes = {
   totalResults: PropTypes.number.isRequired,
   currentSearch: PropTypes.string,
   loading: PropTypes.bool.isRequired,
-  isFlashSale: PropTypes.bool
+  isFlashSale: PropTypes.bool,
+  inStock: PropTypes.bool,
+  onInStockChange: PropTypes.func
 }

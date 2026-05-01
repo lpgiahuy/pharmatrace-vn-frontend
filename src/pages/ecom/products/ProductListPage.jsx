@@ -42,6 +42,7 @@ export default function ProductListPage() {
   const maxPrice = searchParams.get('maxPrice')         || ''
   const brand    = searchParams.get('brand')            || ''
   const isFlashSale = searchParams.get('is_flash_sale') === 'true'
+  const inStock     = searchParams.get('in_stock')       === 'true'
 
   const [searchInput, setSearchInput] = useState(search)
   const debouncedSearch = useDebounce(searchInput, 400)
@@ -64,7 +65,12 @@ export default function ProductListPage() {
     setLoading(true)
     setError(null)
     try {
-      const res = await productService.getAll({ category, sort, search, minPrice, maxPrice, brand, is_flash_sale: isFlashSale, limit: 10000 })
+      const res = await productService.getAll({ 
+        category, sort, search, minPrice, maxPrice, brand, 
+        is_flash_sale: isFlashSale, 
+        in_stock: inStock,
+        limit: 10000 
+      })
       const allData = Array.isArray(res?.data) ? res.data : []
 
       // Deduplicate: same drug ID may appear once per packaging variant.
@@ -94,7 +100,7 @@ export default function ProductListPage() {
     } finally {
       setLoading(false)
     }
-  }, [category, sort, search, minPrice, maxPrice, brand, isFlashSale, page, t])
+  }, [category, sort, search, minPrice, maxPrice, brand, isFlashSale, inStock, page, t])
 
   useEffect(() => { fetchProducts() }, [fetchProducts])
   
@@ -147,6 +153,8 @@ export default function ProductListPage() {
             onClearFilters={clearFilters}
             showAllCategories={showAllCategories}
             onToggleShowAllCategories={() => setShowAllCategories(!showAllCategories)}
+            inStock={inStock}
+            onInStockChange={val => setParam('in_stock', val ? 'true' : '')}
           />
         </aside>
 
@@ -169,6 +177,8 @@ export default function ProductListPage() {
             currentSearch={search}
             loading={loading}
             isFlashSale={isFlashSale}
+            inStock={inStock}
+            onInStockChange={val => setParam('in_stock', val ? 'true' : '')}
           />
 
           {/* Error state */}
