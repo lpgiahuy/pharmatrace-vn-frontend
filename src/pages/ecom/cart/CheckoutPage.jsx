@@ -20,12 +20,16 @@ const PAYMENT_OPTIONS = [
 export default function CheckoutPage() {
   const navigate = useNavigate()
   const { items, getTotal, getSubtotal, getDiscount, shippingFee, voucher, clearCart, fetchCart } = useCartStore()
-  const { user } = useAuthStore()
+  const { user, isAuthenticated } = useAuthStore()
   const [payMethod, setPayMethod] = useState('cod')
 
   useEffect(() => {
     fetchCart()
-  }, [])
+    if (!isAuthenticated) {
+      toast.error('Vui lòng đăng nhập để thanh toán')
+      navigate('/login', { state: { from: { pathname: '/checkout' } } })
+    }
+  }, [isAuthenticated, navigate, fetchCart])
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     defaultValues: { name: user?.name || '', phone: user?.phone || '', address: '', district: '', city: 'Ho Chi Minh City', note: '' },
   })
