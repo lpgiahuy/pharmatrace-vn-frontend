@@ -8,6 +8,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { useCategoryStore } from '@/store/categoryStore'
 import { useTranslation } from 'react-i18next'
 import { CategoryIcon } from '@/components/ui/CategoryIcon'
+const Logo = 'https://res.cloudinary.com/dc64co0el/image/upload/v1777731026/Logo_ck5ouv.svg'
 
 export const Header = () => {
   const { t, i18n } = useTranslation()
@@ -101,9 +102,7 @@ export const Header = () => {
           <div className="hidden md:flex items-center gap-6 h-20">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 shrink-0" onClick={closeMobileMenu}>
-              <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center">
-                <Pill className="w-6 h-6 text-brand-500" />
-              </div>
+              <img src={Logo} alt="Logo" className="h-12 w-auto object-contain" />
               <div className="hidden lg:block">
                 <span className="text-xl md:text-2xl font-display font-black text-white block leading-none tracking-tight">PharmaTrace VN</span>
                 <span className="text-[10px] text-white/70 font-bold tracking-[0.2em] uppercase mt-1 block">Health & Care</span>
@@ -195,9 +194,7 @@ export const Header = () => {
             {/* Tier 1: Logo & Icons */}
             <div className="flex items-center justify-between">
               <Link to="/" className="flex items-center gap-2.5" onClick={closeMobileMenu}>
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-md">
-                  <Pill className="w-6 h-6 text-brand-500" />
-                </div>
+                <img src={Logo} alt="Logo" className="h-11 w-auto object-contain" />
                 <div className="flex flex-col">
                   <span className="text-xl font-display font-black text-white tracking-tight leading-none">PharmaTrace VN</span>
                   <span className="text-[9px] text-white/70 font-bold tracking-widest uppercase mt-1">Health & Care</span>

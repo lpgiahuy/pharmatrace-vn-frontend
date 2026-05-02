@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { AppRoutes } from '@/routes'
 import { useAuthStore } from '@/store/authStore'
 import { useUIStore } from '@/store/uiStore'
+import { useCartStore } from '@/store/cartStore'
 import { Spinner } from '@/components/ui/Spinner'
 import { authService } from '@/services/auth.service'
 
@@ -21,13 +22,14 @@ export default function App() {
     authService.getProfile()
       .then(user => { if (user) updateUser(user) })
       .catch((err) => {
-        // Only force logout if the token is definitely invalid (401)
-        // If the endpoint is missing (404), keep using the state from localStorage
         if (err.response?.status === 401) {
           logout()
         }
       })
-  }, [])
+    
+    // Sync cart from server
+    useCartStore.getState().fetchCart()
+  }, [isAuthenticated])
 
   return (
     <>

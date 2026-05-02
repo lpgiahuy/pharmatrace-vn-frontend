@@ -5,6 +5,7 @@ import {
   DeleteOutlined, AlertOutlined, QrcodeOutlined
 } from '@ant-design/icons'
 import { Pill } from 'lucide-react'
+const Logo = 'https://res.cloudinary.com/dc64co0el/image/upload/v1777731026/Logo_ck5ouv.svg'
 
 const { Sider } = Layout
 
@@ -31,9 +32,7 @@ export const WarehouseSidebar = ({ collapsed, onCollapse }) => {
       theme="light"
     >
       <div className={`flex items-center gap-2.5 px-4 h-16 border-b border-slate-100 ${collapsed ? 'justify-center' : ''}`}>
-        <div className="w-8 h-8 rounded-lg bg-medical-teal flex items-center justify-center shrink-0 bg-teal-500">
-          <Pill className="w-4 h-4 text-white" />
-        </div>
+        <img src={Logo} alt="Logo" className={`${collapsed ? 'h-8' : 'h-10'} w-auto object-contain`} />
         {!collapsed && <span className="font-display font-bold text-teal-600 text-base">Warehouse</span>}
       </div>
       {!collapsed && (

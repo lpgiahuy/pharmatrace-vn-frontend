@@ -6,6 +6,7 @@ import {
   SwapOutlined, AlertOutlined
 } from '@ant-design/icons'
 import { Pill as PillIcon } from 'lucide-react'
+const Logo = 'https://res.cloudinary.com/dc64co0el/image/upload/v1777731026/Logo_ck5ouv.svg'
 
 import { useTranslation } from 'react-i18next'
 
@@ -45,9 +46,7 @@ export const AdminSidebar = ({ collapsed, onCollapse, isMobile }) => {
     return (
       <>
         <div className={`flex items-center gap-2.5 px-4 h-16 border-b border-slate-100 ${collapsed ? 'justify-center' : ''}`}>
-          <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center shrink-0">
-            <PillIcon className="w-4 h-4 text-white" />
-          </div>
+          <img src={Logo} alt="Logo" className={`${collapsed ? 'h-8' : 'h-10'} w-auto object-contain`} />
           {!collapsed && <span className="font-display font-bold text-brand-600 text-base">PharmaTrace VN</span>}
         </div>
         {!collapsed && (

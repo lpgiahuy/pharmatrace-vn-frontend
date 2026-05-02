@@ -81,12 +81,22 @@ export const useCartStore = create(
         if (!accessToken) return
         try {
           const { data } = await apiClient.get('/cart')
-          const serverItems = data.data || data
-          if (Array.isArray(serverItems)) {
-            set({ items: serverItems })
-          }
-        } catch {
-          // Silently fall back to local cart
+          const result = data.data || data
+          const items = Array.isArray(result) ? result : (result.items || [])
+          
+          const mappedItems = items.map(item => ({
+            id: item.duoc_pham_id,
+            name: item.ten_thuoc,
+            price: parseFloat(item.gia_ban),
+            quantity: item.so_luong,
+            image: item.hinh_anh_url,
+            unitId: item.quy_cach_id,
+            unitName: item.ten_don_vi
+          }))
+          
+          set({ items: mappedItems })
+        } catch (err) {
+          console.error('Failed to fetch cart:', err)
         }
       },
 
