@@ -162,7 +162,7 @@ export default function StaffPage() {
               <Input placeholder="E.g. Nguyen Van A" />
             </Form.Item>
             <Form.Item label="Email Address" name="email" rules={[{ required: true, type: 'email', message: 'Valid email required' }]}>
-              <Input placeholder="name@pharmachain.com" />
+              <Input placeholder="name@pharmatrace.vn" />
             </Form.Item>
           </div>
 

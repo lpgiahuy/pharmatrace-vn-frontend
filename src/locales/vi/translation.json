@@ -33,7 +33,7 @@
     "privacy": "Bảo mật",
     "terms": "Điều khoản",
     "license": "Giấy phép",
-    "copyright": "© 2026 PharmaChain. Thiết kế bởi Le Pham Gia Huy."
+    "copyright": "© 2026 PharmaTrace VN. Thiết kế bởi Le Pham Gia Huy."
   },
   "home": {
     "exclusive_offers": "Ưu đãi độc quyền",
@@ -47,7 +47,7 @@
     "health_handbook": "Cẩm nang sức khỏe",
     "view_all_posts": "XEM TẤT CẢ BÀI VIẾT",
     "traceability": "Truy xuất nguồn gốc",
-    "trace_desc": "Sử dụng hệ thống thông minh của PharmaChain để minh bạch hóa hành trình của viên thuốc từ nhà máy đến tay người tiêu dùng.",
+    "trace_desc": "Sử dụng hệ thống thông minh của PharmaTrace VN để minh bạch hóa hành trình của viên thuốc từ nhà máy đến tay người tiêu dùng.",
     "check_now": "KIỂM TRA NGAY",
     "scan_qr": "Quét mã QR trên bao bì",
     "qr_desc": "Quét mã QR trên bao bì để xem hành trình thuốc",
@@ -67,7 +67,7 @@
     "address": "Địa chỉ mặc định",
     "save_info": "Lưu thông tin",
     "verified": "Xác thực tài khoản",
-    "card_placeholder": "PharmaChain Card",
+    "card_placeholder": "PharmaTrace VN Card",
     "member_rewards": "Member Rewards",
     "card_holder": "Chủ thẻ",
     "tier": "Hạng thẻ",
@@ -216,7 +216,7 @@
   },
   "auth": {
     "welcome_back": "Chào mừng trở lại",
-    "signin_desc": "Đăng nhập vào tài khoản PharmaChain của bạn",
+    "signin_desc": "Đăng nhập vào tài khoản PharmaTrace VN của bạn",
     "customer": "Khách hàng",
     "admin_staff": "Quản trị / Nhân viên",
     "phone": "Số điện thoại",
@@ -228,7 +228,7 @@
     "no_account": "Chưa có tài khoản?",
     "create_one": "Tạo ngay",
     "create_account": "Tạo tài khoản",
-    "join_us": "Tham gia PharmaChain vì cuộc sống khỏe mạnh",
+    "join_us": "Tham gia PharmaTrace VN vì cuộc sống khỏe mạnh",
     "signup": "Đăng ký",
     "already_have_account": "Đã có tài khoản?",
     "signin_now": "Đăng nhập ngay",

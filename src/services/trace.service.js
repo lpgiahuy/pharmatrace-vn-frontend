@@ -33,12 +33,12 @@ const normalizeTraceData = (data) => {
       name: box_info.ten_thuoc || 'Unknown Product',
       image: 'https://placehold.co/400x400/e6f2ff/0b7de8?text=Medicine',
       category: 'Pharmaceutical',
-      brand: 'PharmaChain Verified',
+      brand: 'PharmaTrace VN Verified',
     },
     manufacturing: {
       batchNumber: box_info.so_lo,
       expiryDate: box_info.han_su_dung,
-      manufacturer: 'PharmaChain Certified Partner',
+      manufacturer: 'PharmaTrace VN Certified Partner',
       productionDate: new Date(new Date(box_info.han_su_dung) - 730 * 24 * 60 * 60 * 1000).toISOString(), // Estimated 2 years before expiry
       gmpCertified: true,
       certificationBody: 'WHO-GMP',

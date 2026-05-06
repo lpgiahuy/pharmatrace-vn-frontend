@@ -16,7 +16,7 @@ export const Footer = () => {
                 <Pill className="w-6 h-6 text-brand-500" />
               </div>
               <div>
-                <span className="text-white font-display font-black text-2xl block leading-none">PharmaChain</span>
+                <span className="text-white font-display font-black text-2xl block leading-none">PharmaTrace VN</span>
                 <span className="text-[10px] text-white font-black tracking-widest uppercase">Health & Care</span>
               </div>
             </div>
@@ -100,7 +100,7 @@ export const Footer = () => {
                   </div>
                   <div>
                       <p className="text-white/70 text-[10px] uppercase font-black tracking-tighter">{t('footer.email_support')}</p>
-                      <p className="text-white font-black text-sm">support@pharmachain.vn</p>
+                      <p className="text-white font-black text-sm">support@pharmatrace.vn</p>
                   </div>
               </li>
               <li className="flex items-start gap-4">

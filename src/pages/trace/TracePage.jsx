@@ -735,8 +735,8 @@ function ComplianceSection({ result }) {
 // ─── ErrorPanel ───────────────────────────────────────────────────────────────
 function ErrorPanel({ error, onRetry }) {
   const configs = {
-    not_found: { icon: 'search', title: 'Code Not Found',     color: 'border-amber-300 bg-amber-50', textColor: 'text-amber-800', msg: `"${error.code}" was not found in our registry. The product may not be registered with PharmaChain.` },
-    invalid:   { icon: 'error', title: 'Invalid Code Format', color: 'border-red-300 bg-red-50',    textColor: 'text-red-800',   msg: 'This does not appear to be a valid PharmaChain QR or UID code. Please check the code and try again.' },
+    not_found: { icon: 'search', title: 'Code Not Found',     color: 'border-amber-300 bg-amber-50', textColor: 'text-amber-800', msg: `"${error.code}" was not found in our registry. The product may not be registered with PharmaTrace VN.` },
+    invalid:   { icon: 'error', title: 'Invalid Code Format', color: 'border-red-300 bg-red-50',    textColor: 'text-red-800',   msg: 'This does not appear to be a valid PharmaTrace VN QR or UID code. Please check the code and try again.' },
     network:   { icon: 'sensors', title: 'Connection Error',   color: 'border-slate-300 bg-slate-50', textColor: 'text-slate-800', msg: 'Unable to reach the verification server. Please check your connection and try again.' },
   }
   const cfg = configs[error.type] || configs.network

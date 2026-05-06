@@ -3,38 +3,13 @@ import { persist } from 'zustand/middleware'
 import { authService } from '@/services/auth.service'
 import { STORAGE_KEYS } from '@/constants'
 
-const getInitialState = () => {
-  try {
-    const saved = localStorage.getItem('pharma-auth')
-    if (saved) {
-      const { state } = JSON.parse(saved)
-      return {
-        user: state.user || null,
-        accessToken: state.accessToken || null,
-        refreshToken: state.refreshToken || null,
-        isAuthenticated: !!state.user, 
-      }
-    }
-  } catch (error) {
-    console.error('Error hydrating auth state:', error)
-  }
-  return {
-    user: null,
-    accessToken: null,
-    refreshToken: null,
-    isAuthenticated: false,
-  }
-}
-
-const preloadedState = getInitialState()
-
 export const useAuthStore = create(
   persist(
     (set, get) => ({
-      user: preloadedState.user,
-      accessToken: preloadedState.accessToken,
-      refreshToken: preloadedState.refreshToken,
-      isAuthenticated: preloadedState.isAuthenticated,
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      isAuthenticated: false,
       isLoading: false,
       error: null,
 
@@ -77,7 +52,12 @@ export const useAuthStore = create(
         localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN)
         localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
         localStorage.removeItem('pharma_token_expiry')
-        localStorage.removeItem('pharma-cart') // [NEW] Clear cart on logout
+        
+        // Clear cart state and persistence
+        const { useCartStore } = await import('./cartStore')
+        useCartStore.getState().clearCart()
+        localStorage.removeItem('pharma-cart')
+        
         window.location.reload()
       },
 
