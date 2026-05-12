@@ -48,12 +48,11 @@ export default function BlogFormPage() {
   const onFinish = async (vals) => {
     setLoading(true)
     try {
+      // DB schema: tieu_de, anh_bia, noi_dung, nhan_vien_dang_id — no category/excerpt columns
       const payload = {
-        title: vals.title,
-        coverImage: vals.coverImage,
-        content: vals.content,
-        category: vals.category,
-        excerpt: vals.excerpt
+        tieu_de:    vals.title,
+        anh_bia:    vals.coverImage || '',
+        noi_dung:   vals.content,
       }
 
       if (isEdit) await blogService.update(id, payload)
