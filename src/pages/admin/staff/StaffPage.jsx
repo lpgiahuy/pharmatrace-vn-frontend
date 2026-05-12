@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Table, Button as AButton, Modal, Form, Input, Select, Switch, Popconfirm, Tag, InputNumber } from 'antd'
+import { Table, Button as AButton, Modal, Form, Input, Select, Switch, Popconfirm, Tag } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
-import { userService } from '@/services/user.service'
+import { userService, unitService } from '@/services/user.service'
 import { Avatar } from '@/components/ui/Avatar'
 import { formatDate } from '@/utils'
 import toast from 'react-hot-toast'
@@ -20,13 +20,17 @@ export default function StaffPage() {
   const [open, setOpen]       = useState(false)
   const [editing, setEditing] = useState(null)
   const [saving, setSaving]   = useState(false)
+  const [units, setUnits]     = useState([])
   const [form] = Form.useForm()
 
   const fetchData = () => {
     setLoading(true)
     userService.getAll().then(r => setData(r.data)).finally(() => setLoading(false))
   }
-  useEffect(fetchData, [])
+  useEffect(() => {
+    fetchData()
+    unitService.getAll().then(setUnits).catch(() => {})
+  }, [])
 
   const openModal = (user = null) => {
     setEditing(user)
@@ -176,8 +180,14 @@ export default function StaffPage() {
             <Form.Item label="System Role" name="vai_tro" rules={[{ required: true }]}>
               <Select options={ROLES.map(r => ({ value: r, label: r }))} />
             </Form.Item>
-            <Form.Item label="Assigned Unit ID" name="don_vi_id" rules={[{ required: true }]}>
-              <InputNumber style={{ width: '100%' }} placeholder="E.g. 1 (Factory ID)" />
+            <Form.Item label="Assigned Unit" name="don_vi_id" rules={[{ required: true, message: 'Select a unit' }]}>
+              <Select placeholder="Select unit" showSearch optionFilterProp="children">
+                {units.map(u => (
+                  <Select.Option key={u.id} value={u.id}>
+                    {u.name} <span className="text-slate-400 text-xs">({u.type})</span>
+                  </Select.Option>
+                ))}
+              </Select>
             </Form.Item>
           </div>
 

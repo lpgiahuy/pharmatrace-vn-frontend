@@ -162,6 +162,10 @@
     "interaction_item": "Interacting Substance",
     "interaction_effect": "Potential Effect",
     "special_patient_groups": "Special Patient Considerations",
+    "nearest_pharmacy": "Nearest Pharmacy",
+    "find_near_you": "Find Near You",
+    "enable_location": "Enable location to find the nearest pharmacy with this product in stock.",
+    "finding_pharmacy": "Finding nearest pharmacy...",
     "unit": {
       "product": "Product",
       "box": "Box",
@@ -252,6 +256,8 @@
     "vouchers": "Vouchers",
     "blog_news": "Blog & News",
     "staff_rbac": "Staff & RBAC",
+    "customers": "Customers",
+    "prescriptions": "Prescriptions",
     "sidebar_title": "Admin Portal"
   }
 }

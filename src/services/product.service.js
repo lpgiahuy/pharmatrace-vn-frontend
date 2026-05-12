@@ -244,5 +244,20 @@ export const productService = {
     const { data } = await apiClient.post('/reviews/add', { ...payload, productId })
     return data.data || data
   },
+
+  async getNearestPharmacy(productId, lat, lng) {
+    try {
+      if (!lat || !lng) {
+        console.warn('[productService.getNearestPharmacy] Missing coordinates')
+        return null
+      }
+      const { data } = await apiClient.get(`/products/${productId}/nearest-pharmacies?lat=${lat}&lng=${lng}`)
+      return data.data || null
+    } catch (error) {
+      console.warn('[productService.getNearestPharmacy]', error.response?.data?.message || error.message)
+      return null
+    }
+  },
+
   normalizeProduct
 }
