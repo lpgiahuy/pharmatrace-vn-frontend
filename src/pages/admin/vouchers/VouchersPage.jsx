@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Table, Button as AButton, Modal, Form, Input, InputNumber, Select, Switch, Tag, Popconfirm, DatePicker } from 'antd'
+import { Table, Button as AButton, Modal, Form, Input, InputNumber, Select, Tag, Popconfirm, DatePicker } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { voucherService } from '@/services/analytics.service'
 import { formatCurrency, formatDate } from '@/utils'
+import dayjs from 'dayjs'
 import toast from 'react-hot-toast'
 
 export default function VouchersPage() {
@@ -19,7 +20,7 @@ export default function VouchersPage() {
   }
   useEffect(fetchData, [])
 
-  const openModal = (v = null) => { 
+  const openModal = (v = null) => {
     setEditing(v)
     if (v) {
       form.setFieldsValue({
@@ -28,29 +29,27 @@ export default function VouchersPage() {
         gia_tri: v.value,
         don_hang_toi_thieu: v.minOrder,
         so_luong_gioi_han: v.usageLimit,
-        ngay_bat_dau: v.startDate,
-        ngay_ket_thuc: v.endDate,
-        trang_thai: v.status === 'active'
+        ngay_bat_dau: v.startDate ? dayjs(v.startDate) : null,
+        ngay_ket_thuc: v.endDate ? dayjs(v.endDate) : null,
       })
     } else {
       form.resetFields()
-      form.setFieldsValue({ loai_giam_gia: 'PhanTram', trang_thai: true })
+      form.setFieldsValue({ loai_giam_gia: 'PhanTram' })
     }
-    setOpen(true) 
+    setOpen(true)
   }
 
   const handleSave = async (vals) => {
     setSaving(true)
     try {
       const payload = {
-        ma_code: vals.ma_code.toUpperCase(),
-        loai_giam_gia: vals.loai_giam_gia,
-        gia_tri: vals.gia_tri,
+        ma_code:            vals.ma_code.toUpperCase(),
+        loai_giam_gia:      vals.loai_giam_gia,
+        gia_tri:            vals.gia_tri,
         don_hang_toi_thieu: vals.don_hang_toi_thieu || 0,
-        ngay_bat_dau: vals.ngay_bat_dau,
-        ngay_ket_thuc: vals.ngay_ket_thuc,
-        so_luong_gioi_han: vals.so_luong_gioi_han,
-        trang_thai: vals.trang_thai ? 'active' : 'inactive'
+        ngay_bat_dau:       vals.ngay_bat_dau?.toISOString(),
+        ngay_ket_thuc:      vals.ngay_ket_thuc?.toISOString(),
+        so_luong_gioi_han:  vals.so_luong_gioi_han || null,
       }
 
       if (editing) await voucherService.update(editing.id, payload)
@@ -160,10 +159,14 @@ export default function VouchersPage() {
           <Form.Item label="Discount Code" name="ma_code" rules={[{ required: true, message: 'Enter a code' }]}>
             <Input placeholder="E.g. PHARMA50" style={{ textTransform: 'uppercase' }} />
           </Form.Item>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <Form.Item label="Type" name="loai_giam_gia" rules={[{ required: true }]}>
-              <Select options={[{ value: 'PhanTram', label: 'Percentage (%)' }, { value: 'TienMat', label: 'Cash Value (₫)' }]} />
+              <Select options={[
+                { value: 'PhanTram', label: 'Percentage (%)' },
+                { value: 'TienMat',  label: 'Cash Value (₫)' },
+                { value: 'FreeShip', label: 'Free Shipping' },
+              ]} />
             </Form.Item>
             <Form.Item label="Value" name="gia_tri" rules={[{ required: true }]}>
               <InputNumber min={0} style={{ width: '100%' }} />
@@ -180,17 +183,13 @@ export default function VouchersPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Form.Item label="Start Date" name="ngay_bat_dau">
-              <Input type="date" />
+            <Form.Item label="Start Date" name="ngay_bat_dau" rules={[{ required: true, message: 'Start date required' }]}>
+              <DatePicker showTime style={{ width: '100%' }} />
             </Form.Item>
-            <Form.Item label="End Date" name="ngay_ket_thuc">
-              <Input type="date" />
+            <Form.Item label="End Date" name="ngay_ket_thuc" rules={[{ required: true, message: 'End date required' }]}>
+              <DatePicker showTime style={{ width: '100%' }} />
             </Form.Item>
           </div>
-
-          <Form.Item label="Active Status" name="trang_thai" valuePropName="checked">
-            <Switch />
-          </Form.Item>
         </Form>
       </Modal>
     </div>

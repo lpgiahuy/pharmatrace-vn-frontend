@@ -162,6 +162,10 @@
     "interaction_item": "Thuốc/Thực phẩm",
     "interaction_effect": "Hậu quả",
     "special_patient_groups": "Nhóm bệnh nhân đặc biệt",
+    "nearest_pharmacy": "Nhà thuốc gần nhất",
+    "find_near_you": "Tìm gần bạn",
+    "enable_location": "Bật định vị để tìm nhà thuốc gần nhất có sản phẩm này.",
+    "finding_pharmacy": "Đang tìm nhà thuốc gần nhất...",
     "unit": {
       "product": "Sản phẩm",
       "box": "Hộp",
@@ -252,6 +256,8 @@
     "vouchers": "Mã giảm giá",
     "blog_news": "Blog & Tin tức",
     "staff_rbac": "Nhân viên & Phân quyền",
+    "customers": "Khách hàng",
+    "prescriptions": "Toa thuốc",
     "sidebar_title": "Admin Portal"
   }
 }
